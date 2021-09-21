@@ -1,24 +1,30 @@
 <template>
 	<div id="app">
 		<h1>vue-color-input demo</h1>
-		<input v-model="color">
+		<input v-model="color" spellcheck="false">
 		<color-input v-model="color"
 		ref="colorInput"
 		@pickStart="logEvent('pickStart')"
-		@pickEnd="logEvent('pickEnd')" />
+		@pickEnd="logEvent('pickEnd')"
+		@huePickStart="logEvent('huePickStart $event: ' + $event)"
+		@huePickEnd="logEvent('huePickEnd $event: ' + $event)"
+		@alphaPickStart="logEvent('alphaPickStart $event: ' + $event)"
+		@alphaPickEnd="logEvent('alphaPickStart $event: ' + $event)" />
 		<div class="detailsSection">
 			<div class="detailsBlock">
 				<h2>Style it</h2>
 				<textarea
 				@focus="textareaFocusHandler"
-				@click.stop
+				@mousedown.stop
 				@input="updateStyles"
 				v-model="styles"
 				spellcheck="false">
 				</textarea>
 				<button
 				@mousedown.prevent
-				@click.stop="resetDemoStyles">Reset</button>
+				@click="resetDemoStyles"
+				@mousedown.stop
+				style="display:block">Reset</button>
 				<p>
 					By default the component renders a 40x40 square inline-block.<br>
 					The 'input' itself has class <span class="code">.color-input-box</span>,<br>
@@ -97,6 +103,9 @@
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@200&display=swap');
 	@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@300&display=swap');
+	body {
+		background: #fbfbfb;
+	}
 	#app {
 		font-family: 'Montserrat', sans-serif;
 		font-size: 16px;
@@ -113,6 +122,7 @@
 		outline: none;
 		border-width: 0 0 1px 0;
 		padding: 2px;
+		background: inherit;
 	}
 	.detailsSection {
 		display: flex;
