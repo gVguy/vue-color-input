@@ -11,7 +11,7 @@
 			@huePickStart="$emit('huePickStart', $event)"
 			@huePickEnd="$emit('huePickEnd', $event)"
 			@alphaPickStart="$emit('alphaPickStart', $event)"
-			@alphaPickEnd="$emit('alphaPickStart', $event)" />
+			@alphaPickEnd="$emit('alphaPickEnd', $event)" />
 		</transition>
 	</div>
 </template>
@@ -45,29 +45,13 @@
 		data() {
 			return {
 				active: false,
+				output: null,
 			}
 		},
 		computed: {
 			color() {
 				return tinycolor(this.modelValue);
 			},
-			// hsl: {
-			// 	get() {
-			// 		return this.color.toHsl();
-			// 	},
-			// 	set(hsl) {
-			// 		const color = tinycolor(hsl);
-			// 		let output;
-			// 		let format = this.color.getFormat();
-			// 		if (hsl.a < 1 && format === 'hex') format = 'hex8';
-			// 		if (typeof this.modelValue !== 'object') {
-			// 			output = color.toString(format);
-			// 		} else {
-			// 			output = color['to' + format.charAt(0).toUpperCase() + format.slice(1)]();
-			// 		}
-			// 		this.$emit('update:modelValue', output);
-			// 	}
-			// },
 			boxStyles() {
 				return {
 					background: this.color.toRgbString()
@@ -87,38 +71,37 @@
 				this.active = false;
 				this.$emit('pickEnd');
 			},
-			emitUpdate(hsl) {
-				const color = tinycolor(hsl);
-				let output;
+			emitUpdate(hsv) {
+				const color = tinycolor(hsv);
 				let format = this.color.getFormat();
-				if (hsl.a < 1 && format === 'hex') format = 'hex8';
+				if (hsv.a < 1 && format === 'hex') format = 'hex8';
 				if (typeof this.modelValue !== 'object') {
-					output = color.toString(format);
+					this.output = color.toString(format);
 				} else {
-					output = color['to' + format.charAt(0).toUpperCase() + format.slice(1)]();
+					this.output = color['to' + format.charAt(0).toUpperCase() + format.slice(1)]();
 				}
-				this.$emit('update:modelValue', output);
+				this.$emit('update:modelValue', this.output);
 			}
-			// emitUpdate(color) {
-			// 	let output;
-			// 	const format = this.color.getFormat();
-			// 	if (typeof this.modelValue === 'string') {
-			// 		output = color.toString(format);
-			// 	} else {
-			// 		output = color['to' + format.charAt(0).toUpperCase() + format.slice(1)]();
-			// 	}
-			// 	this.$emit('update:modelValue', output);
-			// }
 		},
 		created() {
 			if (!this.color.isValid()) {
 				console.warn('[vue-color-input]: invalid color -> ' + this.color.getOriginalInput());
 			}
 		},
-		beforeMount() {
-		},
-		mounted() {
-			console.log(this.color);
+		watch: {
+			modelValue() {
+				let input = typeof this.modelValue === 'object' ? JSON.stringify(this.modelValue) : this.modelValue;
+				let output = typeof this.output === 'object' ? JSON.stringify(this.output) : this.output;
+				if (input === output) {
+					// modelValue and output in sync
+					// use existing color data
+					console.log('old model value');
+				} else {
+					// modelValue last updated from elsewhere
+					// update color data
+					console.log('new model value');
+				}
+			}
 		}
 	});
 </script>
@@ -159,14 +142,4 @@
 	.color-input-picker-leave-active {
 		transition: .3s;
 	}
-
-/*	.hue-area {
-		width: 100%;
-		height: 100%;
-		position: relative;
-	}
-	.hue-area canvas {
-		width: 100%;
-		height: 100%;
-	}*/
 </style>

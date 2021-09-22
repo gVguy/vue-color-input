@@ -6,10 +6,10 @@
 		ref="colorInput"
 		@pickStart="logEvent('pickStart')"
 		@pickEnd="logEvent('pickEnd')"
-		@huePickStart="logEvent('huePickStart $event: ' + $event)"
-		@huePickEnd="logEvent('huePickEnd $event: ' + $event)"
-		@alphaPickStart="logEvent('alphaPickStart $event: ' + $event)"
-		@alphaPickEnd="logEvent('alphaPickStart $event: ' + $event)" />
+		@huePickStart="logEvent('huePickStart ' + $event)"
+		@huePickEnd="logEvent('huePickEnd ' + $event)"
+		@alphaPickStart="logEvent('alphaPickStart ' + $event)"
+		@alphaPickEnd="logEvent('alphaPickEnd ' + $event)" />
 		<div class="detailsSection">
 			<div class="detailsBlock">
 				<h2>Style it</h2>
@@ -17,6 +17,7 @@
 				@focus="textareaFocusHandler"
 				@mousedown.stop
 				@input="updateStyles"
+				@keydown.tab.prevent="textareaTabHandler"
 				v-model="styles"
 				spellcheck="false">
 				</textarea>
@@ -78,7 +79,11 @@
 			textareaFocusHandler() {
 				if (this.$refs.colorInput.active) return;
 				this.$refs.colorInput.$refs.colorInputBox.click();
-				// this.$refs.colorInput.click();
+			},
+			textareaTabHandler(e) {
+				const textarea = e.target;
+				const start = textarea.selectionStart;
+				textarea.setRangeText('  ', start, start, 'end');
 			},
 			updateStyles() {
 				this.styleSheet.innerText = this.styles;
