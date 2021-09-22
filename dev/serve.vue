@@ -61,7 +61,6 @@
   top: -20px;
   left: 115%;
   width: 250px;
-  height: 140px;
 }`;
 
 	export default defineComponent({
@@ -128,6 +127,7 @@
 		border-width: 0 0 1px 0;
 		padding: 2px;
 		background: inherit;
+		width: 230px;
 	}
 	.detailsSection {
 		display: flex;

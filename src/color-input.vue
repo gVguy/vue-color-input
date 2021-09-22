@@ -46,6 +46,7 @@
 			return {
 				active: false,
 				output: null,
+				originalColor: tinycolor(this.modelValue),
 			}
 		},
 		computed: {
@@ -72,14 +73,20 @@
 				this.$emit('pickEnd');
 			},
 			emitUpdate(hsv) {
+				console.log(hsv);
 				const color = tinycolor(hsv);
-				let format = this.color.getFormat();
-				if (hsv.a < 1 && format === 'hex') format = 'hex8';
+				let format = this.originalColor.getFormat();
+				if (hsv.a < 1 && ['hex','name', false].includes(format)) {
+					// original format lacks alpha channel or invalid color
+					// output rgb instead
+					format = 'rgb';
+				}
 				if (typeof this.modelValue !== 'object') {
 					this.output = color.toString(format);
 				} else {
 					this.output = color['to' + format.charAt(0).toUpperCase() + format.slice(1)]();
 				}
+				console.log(color);
 				this.$emit('update:modelValue', this.output);
 			}
 		},
@@ -92,14 +99,11 @@
 			modelValue() {
 				let input = typeof this.modelValue === 'object' ? JSON.stringify(this.modelValue) : this.modelValue;
 				let output = typeof this.output === 'object' ? JSON.stringify(this.output) : this.output;
-				if (input === output) {
-					// modelValue and output in sync
-					// use existing color data
-					console.log('old model value');
-				} else {
-					// modelValue last updated from elsewhere
+				if (input !== output) {
+					// modelValue updated from elsewhere
 					// update color data
 					console.log('new model value');
+					this.originalColor = this.color;
 				}
 			}
 		}
@@ -116,7 +120,7 @@
 		border-radius: 5px;
    	box-sizing: border-box;
 		border: 2px transparent solid;
-		transition: .2s;
+		transition: all .2s, background 0s;
 	}
 	.color-input-box.active {
 		border-color: #0f0f0f;
@@ -129,7 +133,6 @@
 		margin-top: 10px;
 		cursor: auto;
 		width: 250px;
-		height: 100px;
 		background-color: #fbfbfb;
 		box-shadow: 0px 5px 10px rgba(15,15,15,.4);
 	}
