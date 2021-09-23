@@ -9,7 +9,9 @@
 		@huePickStart="logEvent('huePickStart ' + $event)"
 		@huePickEnd="logEvent('huePickEnd ' + $event)"
 		@alphaPickStart="logEvent('alphaPickStart ' + $event)"
-		@alphaPickEnd="logEvent('alphaPickEnd ' + $event)" />
+		@alphaPickEnd="logEvent('alphaPickEnd ' + $event)"
+		@saturationPickStart="logEvent('saturationPickStart ' + JSON.stringify($event))"
+		@saturationPickEnd="logEvent('saturationPickEnd ' + JSON.stringify($event))" />
 		<div class="detailsSection">
 			<div class="detailsBlock">
 				<h2>Style it</h2>

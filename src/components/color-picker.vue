@@ -87,8 +87,7 @@ export default {
 		},
 		saturationPointerStyles() {
 			const translateX = this.saturationTranslateX - this.saturationPointerWidth * .5;
-			const translateY = this.saturationTranslateY - this.saturationPointerHeight * .5;
-			// console.log(translateX, translateY);
+			const translateY = this.saturationTranslateY + this.saturationPointerHeight * .5;
 			return {
 				transform: 'translate(' + translateX + 'px, ' + translateY + 'px)'
 			}
@@ -108,7 +107,7 @@ export default {
 		},
 		huePickMove(e) {
 			if (e.pageX >= this.hueCanvasRect.x && e.pageX <= this.hueCanvasRect.right) {
-				this.h = (e.pageX - this.hueCanvasRect.x) * 360 / this.hueCanvasRect.width;
+				this.h = Number(((e.pageX - this.hueCanvasRect.x) * 360 / this.hueCanvasRect.width).toFixed(3));
 			} else if (e.pageX < this.hueCanvasRect.x) this.h = 0;
 			else this.h = 360;
 		},
@@ -142,15 +141,13 @@ export default {
 		},
 		saturationPickMove(e) {
 			if (e.pageX >= this.saturationCanvasRect.x && e.pageX <= this.saturationCanvasRect.right) {
-				this.s = Number(((e.pageX - this.saturationCanvasRect.x) * 100 / this.saturationCanvasRect.width).toFixed(3));
+				this.s = Number(((e.pageX - this.saturationCanvasRect.x) / this.saturationCanvasRect.width).toFixed(3));
 			} else if (e.pageX < this.saturationCanvasRect.x) this.s = 0;
-			else this.s = 100;
+			else this.s = 1;
 			if (e.pageY >= this.saturationCanvasRect.y && e.pageY <= this.saturationCanvasRect.bottom) {
-				this.v = Number((100 - (e.pageY - this.saturationCanvasRect.y) * 100 / this.saturationCanvasRect.height).toFixed(3));
-				console.log(this.v);
-			} else if (e.pageY < this.saturationCanvasRect.y) this.v = 100;
+				this.v = Number((1 - ((e.pageY - this.saturationCanvasRect.y) / this.saturationCanvasRect.height)).toFixed(3));
+			} else if (e.pageY < this.saturationCanvasRect.y) this.v = 1;
 			else this.v = 0;
-			// console.log(e.pageX, this.saturationCanvasRect.x, this.saturationCanvasRect.right, e.pageY, this.saturationCanvasRect.y, this.saturationCanvasRect.bottom)
 		},
 		getCanvasRects() {
 			this.hueCanvasRect = this.$refs.hueCanvas.getBoundingClientRect();
@@ -168,11 +165,11 @@ export default {
 		},
 		s() {
 			this.emitUpdate();
-			this.saturationTranslateX = this.s * this.saturationCanvasRect.width * 0.01;
+			this.saturationTranslateX = this.s * this.saturationCanvasRect.width;
 		},
 		v() {
 			this.emitUpdate();
-			this.saturationTranslateY = this.saturationCanvasRect.height - this.v * this.saturationCanvasRect.height * 0.01;
+			this.saturationTranslateY = -this.v * this.saturationCanvasRect.height;
 		},
 		a() {
 			this.emitUpdate();
@@ -182,11 +179,12 @@ export default {
 	mounted() {
 		console.log('color picker mounted');
 
+		// get canvas rects and set initial values
 		this.getCanvasRects();
 		this.hueTranslateX = this.h * this.hueCanvasRect.width / 360;
 		this.alphaTranslateX = this.a * this.alphaCanvasRect.width;
-		this.saturationTranslateX = this.s * this.saturationCanvasRect.width * 0.01;
-		this.saturationTranslateY = this.saturationCanvasRect.height - this.v * this.saturationCanvasRect.height * 0.01;
+		this.saturationTranslateX = this.s * this.saturationCanvasRect.width;
+		this.saturationTranslateY = -this.v * this.saturationCanvasRect.height;
 		this.sliderPointerWidth = this.$refs.huePointer.offsetWidth;
 		this.saturationPointerWidth = this.$refs.saturationPointer.offsetWidth;
 		this.saturationPointerHeight = this.$refs.saturationPointer.offsetHeight;
@@ -279,13 +277,14 @@ export default {
 	.saturation-area {
 		width: 100%;
 		height: 125px;
+		position: relative;
 	}
 	.saturation-pointer {
 		@extend .slider-pointer;
 		width: 20px;
 		height: 20px;
 		position: absolute;
-		top: 0;
+		bottom: 0;
 		left: 0;
 	}
 

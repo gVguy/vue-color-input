@@ -3,15 +3,19 @@
 	:style="boxStyles"
 	@click.stop="pickStart"
 	ref="colorInputBox">
-		<transition name="color-input-picker">
+		<transition name="color-input-picker" @after-enter="afterEnterHandler">
 			<color-picker
-			class="color-input-picker user" v-if="active"
+			class="color-input-picker user"
 			:color="this.color"
+			v-if="active"
 			@updateColor="emitUpdate"
 			@huePickStart="$emit('huePickStart', $event)"
 			@huePickEnd="$emit('huePickEnd', $event)"
 			@alphaPickStart="$emit('alphaPickStart', $event)"
-			@alphaPickEnd="$emit('alphaPickEnd', $event)" />
+			@alphaPickEnd="$emit('alphaPickEnd', $event)"
+			@saturationPickStart="$emit('saturationPickStart', $event)"
+			@saturationPickEnd="$emit('saturationPickEnd', $event)"
+			ref="colorPicker" />
 		</transition>
 	</div>
 </template>
@@ -40,6 +44,8 @@
 			'huePickEnd',
 			'alphaPickStart',
 			'alphaPickEnd',
+			'saturationPickStart',
+			'saturationPickEnd',
   		],
   		components: { ColorPicker },
 		data() {
@@ -60,6 +66,9 @@
 			}
 		},
 		methods: {
+			afterEnterHandler(e) {
+				this.$refs.colorPicker.getCanvasRects();
+			},
 			pickStart(e) {
 				if (this.active) return;
 				this.active = true;
@@ -73,7 +82,6 @@
 				this.$emit('pickEnd');
 			},
 			emitUpdate(hsv) {
-				console.log(hsv);
 				const color = tinycolor(hsv);
 				let format = this.originalColor.getFormat();
 				if (hsv.a < 1 && ['hex','name', false].includes(format)) {
@@ -86,7 +94,6 @@
 				} else {
 					this.output = color['to' + format.charAt(0).toUpperCase() + format.slice(1)]();
 				}
-				console.log(color);
 				this.$emit('update:modelValue', this.output);
 			}
 		},
