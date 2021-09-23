@@ -60,9 +60,12 @@
   border-color: #0f0f0f;
 }
 .color-input-picker.user {
-  top: -20px;
-  left: 115%;
-  width: 250px;
+}
+.color-input-picker.user .slider {
+}
+.color-input-picker.user .slider-pointer {
+}
+.color-input-picker.user .saturation-pointer {
 }`;
 
 	export default defineComponent({
@@ -151,7 +154,7 @@
 		width: 100%;
 		max-width: 100%;
 		padding: 10px;
-		height: 310px;
+		height: 350px;
 		border-radius: 3px;
 		font-size: 16px;
 		box-sizing: border-box;
@@ -163,5 +166,16 @@
 	.event-log {
 		height: 95px;
 		overflow: auto;
+		position: relative;
+	}
+	.event-log::after {
+		display: block;
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(0deg, rgb(250,250,250) 0%, rgba(250,250,250,0) 70%);
 	}
 </style>

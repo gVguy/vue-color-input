@@ -84,7 +84,7 @@
 			emitUpdate(hsv) {
 				const color = tinycolor(hsv);
 				let format = this.originalColor.getFormat();
-				if (hsv.a < 1 && ['hex','name', false].includes(format)) {
+				if (hsv.a < 1 && ['hex','name'].includes(format) || format === false) {
 					// original format lacks alpha channel or invalid color
 					// output rgb instead
 					format = 'rgb';
@@ -130,13 +130,12 @@
 		transition: all .2s, background 0s;
 	}
 	.color-input-box.active {
-		border-color: #0f0f0f;
+		border-color: #fbfbfb;
 	}
 	.color-input-picker {
 		position: absolute;
 		z-index: 9999;
 		top: 100%;
-		left: -2px;
 		margin-top: 10px;
 		cursor: auto;
 		width: 250px;

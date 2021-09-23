@@ -241,6 +241,7 @@ export default {
 		position: relative;
 	}
 	.slider {
+		display: block;
 		height: 6px;
 		top: 50%;
 		position: absolute;
