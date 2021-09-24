@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div ref="pickerRoot" :style="pickerPosition">
 		<div class="saturation-area" :style="pureHueBackground" @mousedown.prevent="saturationPickStart">
 			<canvas class="slider-canvas" ref="saturationCanvas"></canvas>
 			<div class="saturation-pointer" ref="saturationPointer" :style="[saturationPointerStyles, hexBackground]"></div>
@@ -27,7 +27,7 @@
 
 export default {
 	name: 'ColorPicker',
-	props: ['color', 'rgbString'],
+	props: ['color', 'position', 'boxSize'],
 	emits: [
 		'updateColor',
 		'huePickStart',
@@ -47,6 +47,16 @@ export default {
 			sliderPointerWidth: 0,
 			saturationPointerWidth: 0,
 			saturationPointerHeight: 0,
+			pickerPositionA: {
+				anchor: 'top',
+				offset: 0
+			},
+			pickerPositionB: {
+				anchor: 'left',
+				offset: 0
+			},
+			pickerWidth: 0,
+			pickerHeight: 0
 		}
 	},
 	computed: {
@@ -91,6 +101,44 @@ export default {
 			return {
 				transform: 'translate(' + translateX + 'px, ' + translateY + 'px)'
 			}
+		},
+		pickerPosition() {
+			const pickerPosition = {};
+			const invertMap = { top: 'bottom', bottom: 'top', left: 'right', right: 'left' };
+
+			let offset;
+
+			if (['top','bottom'].includes(this.position[0])) {
+				pickerPosition.marginLeft = 0;
+				pickerPosition.marginRight = 0;
+				offset = this.boxSize.height;
+			} else {
+				pickerPosition.marginTop = 0;
+				pickerPosition.marginBottom = 0;
+				offset = this.boxSize.width;
+			}
+			let anchor = invertMap[this.position[0]];
+			pickerPosition[anchor] = offset + 'px';
+
+			if (this.position[1] === 'center') {
+				// second position argument is 'center'
+				if (['left','right'].includes(anchor)) {
+					// centering on x-aixs
+					anchor = 'top';
+					offset = this.pickerHeight - this.boxSize.height;
+				} else {
+					// centering on y-aixs
+					anchor = 'left';
+					offset = this.pickerWidth - this.boxSize.width;
+				}
+				offset *= 0.5;
+			} else {
+				anchor = this.position[1];
+				offset = 0;
+			}
+			pickerPosition[anchor] = -offset + 'px';
+
+			return pickerPosition;
 		}
 	},
 	methods: {
@@ -178,6 +226,12 @@ export default {
 	},
 	mounted() {
 		console.log('color picker mounted');
+
+		// picker size
+		const { width, height } = this.$refs.pickerRoot.getBoundingClientRect();
+		this.pickerHeight = height;
+		this.pickerWidth = width;
+		console.log(height, width);
 
 		// get canvas rects and set initial values
 		this.getCanvasRects();

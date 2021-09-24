@@ -2,8 +2,12 @@
 	<div id="app">
 		<h1>vue-color-input demo</h1>
 		<input v-model="color" spellcheck="false">
+		<select v-model="position">
+			<option v-for="opt in positionOptions" :value="opt">{{opt}}</option>
+		</select>
 		<color-input v-model="color"
 		ref="colorInput"
+		:position="position"
 		@pickStart="logEvent('pickStart')"
 		@pickEnd="logEvent('pickEnd')"
 		@huePickStart="logEvent('huePickStart ' + $event)"
@@ -77,6 +81,7 @@
 			return {
 				color: 'pink',
 				styles: demoStyles,
+				position: 'bottom',
 			}
 		},
 		methods: {
@@ -99,6 +104,14 @@
 				this.styles = demoStyles;
 				this.updateStyles();
 			}
+		},
+		created() {
+			const values = ['top','right','bottom','left'];
+			const conflicts = { top: 'bottom', right: 'left', bottom: 'top', left: 'right' }
+			this.positionOptions = values.flatMap((v, i) => values.map(q => {
+				if (conflicts[v] === q) return false;
+				return v === q ? v : v + ' ' + q;
+			})).filter(v => v);
 		},
 		mounted() {
 			this.styleSheet = document.createElement("style");

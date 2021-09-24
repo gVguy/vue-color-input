@@ -1,12 +1,18 @@
 <template>
-	<div :class="['color-input-box', 'user', { active }]"
-	:style="boxStyles"
-	@click.stop="pickStart"
-	ref="colorInputBox">
+	<div class="color-input-container">
+		<div :class="['color-input-box', 'user', { active }]"
+		@click.stop="pickStart"
+		ref="colorInputBox">
+			<div class="box-transparent">
+				<div class="box-color" :style="boxStyles"></div>
+			</div>
+		</div>
 		<transition name="color-input-picker" @after-enter="afterEnterHandler">
 			<color-picker
 			class="color-input-picker user"
 			:color="this.color"
+			:position="processedPosition"
+			:boxSize="{ width: boxWidth, height: boxHeight }"
 			v-if="active"
 			@updateColor="emitUpdate"
 			@huePickStart="$emit('huePickStart', $event)"
@@ -35,7 +41,10 @@
 
 	export default /*#__PURE__*/defineComponent({
 		name: 'ColorInput',
-		props: ['modelValue'],
+		props: {
+			modelValue: [String, Object],
+			position: String
+		},
   		emits: [
   			'update:modelValue',
   			'pickStart',
@@ -53,6 +62,8 @@
 				active: false,
 				output: null,
 				originalColor: tinycolor(this.modelValue),
+				boxWidth: 0,
+				boxHeight: 0,
 			}
 		},
 		computed: {
@@ -63,7 +74,23 @@
 				return {
 					background: this.color.toRgbString()
 				}
-			}
+			},
+			processedPosition() {
+				// array of all valid position combination
+				const values = ['top','right','bottom','left','center'];
+				const conflicts = { top: 'bottom', right: 'left', bottom: 'top', left: 'right' }
+				const combinations = values.slice(0,4).flatMap((v, i) => values.map(q => {
+					if (conflicts[v] === q) return false;
+					return v === q ? v : v + ' ' + q;
+				})).filter(v => v);
+
+				let position = this.position;
+				if (!combinations.includes(position)) position = 'bottom center';
+				position = position.split(' ');
+				position[1] = position[1] || 'center';
+
+				return position;
+			},
 		},
 		methods: {
 			afterEnterHandler(e) {
@@ -95,12 +122,22 @@
 					this.output = color['to' + format.charAt(0).toUpperCase() + format.slice(1)]();
 				}
 				this.$emit('update:modelValue', this.output);
+			},
+			getBoxSize() {
+				const { width, height } = this.$refs.colorInputBox.getBoundingClientRect();
+				this.boxWidth = width;
+				this.boxHeight = height;
+				console.log('box size updated: ' + this.boxWidth + ', ' + this.boxHeight);
 			}
 		},
 		created() {
 			if (!this.color.isValid()) {
 				console.warn('[vue-color-input]: invalid color -> ' + this.color.getOriginalInput());
 			}
+		},
+		mounted() {
+			this.getBoxSize();
+			new ResizeObserver(this.getBoxSize).observe(this.$refs.colorInputBox);
 		},
 		watch: {
 			modelValue() {
@@ -118,9 +155,11 @@
 </script>
 
 <style scoped>
-	.color-input-box {
+	.color-input-container {
 		position: relative;
 		display: inline-block;
+	}
+	.color-input-box {
 		width: 40px;
 		height: 40px;
 		cursor: pointer;
@@ -128,19 +167,27 @@
    	box-sizing: border-box;
 		border: 2px transparent solid;
 		transition: all .2s, background 0s;
+		overflow: hidden;
 	}
 	.color-input-box.active {
 		border-color: #fbfbfb;
 	}
+	.box-transparent {
+		width: 100%;
+		height: 100%;
+		background-image: url('./assets/method-transparent-pattern.svg');
+	}
+	.box-color {
+		width: 100%;
+		height: 100%;
+	}
 	.color-input-picker {
 		position: absolute;
 		z-index: 9999;
-		top: 100%;
-		margin-top: 10px;
-		cursor: auto;
 		width: 250px;
 		background-color: #fbfbfb;
 		box-shadow: 0px 5px 10px rgba(15,15,15,.4);
+		margin: 10px;
 	}
 	.color-input-picker-enter-from,
 	.color-input-picker-leave-to {
@@ -149,6 +196,6 @@
 	}
 	.color-input-picker-enter-active,
 	.color-input-picker-leave-active {
-		transition: .3s;
+		transition: transform .3s, opacity .3s;
 	}
 </style>
