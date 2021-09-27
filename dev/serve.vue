@@ -1,51 +1,90 @@
 <template>
 	<div id="app">
 		<h1>vue-color-input demo</h1>
-		<input v-model="color" spellcheck="false">
-		<select v-model="position">
-			<option v-for="opt in positionOptions" :value="opt">{{opt}}</option>
-		</select>
+		<h3><a class="docsLink" href="https://github.com/gVguy/vue-color-input#vue-color-input">Docs</a></h3>
+		<div class="setup">
+			<div class="setup-block">
+				<h3>v-model</h3>
+				<input v-model="color" spellcheck="false">
+			</div>
+			<div class="setup-block">
+				<h3>position</h3>
+				<select v-model="position">
+					<option v-for="opt in positionOptions" :value="opt">{{opt}}</option>
+				</select>
+			</div>
+			<div class="setup-block">
+				<h3>disable-alpha</h3>
+				<input type="checkbox" v-model="disableAlpha" @pointerdown.stop @change="checkboxHandler">
+			</div>
+		</div>
 		<color-input v-model="color"
 		ref="colorInput"
 		:position="position"
-		@pickStart="logEvent('pickStart')"
-		@pickEnd="logEvent('pickEnd')"
-		@huePickStart="logEvent('huePickStart ' + $event)"
-		@huePickEnd="logEvent('huePickEnd ' + $event)"
-		@alphaPickStart="logEvent('alphaPickStart ' + $event)"
-		@alphaPickEnd="logEvent('alphaPickEnd ' + $event)"
-		@saturationPickStart="logEvent('saturationPickStart ' + JSON.stringify($event))"
-		@saturationPickEnd="logEvent('saturationPickEnd ' + JSON.stringify($event))" />
+		:disable-alpha="disableAlpha"
+		@pickStart="logEvent('pickStart', '')"
+		@pickEnd="logEvent('pickEnd', '')"
+		@huePickStart="logEvent('huePickStart', $event)"
+		@huePickEnd="logEvent('huePickEnd', $event)"
+		@hueChange="logEvent('hueChange', $event)"
+		@alphaPickStart="logEvent('alphaPickStart', $event)"
+		@alphaPickEnd="logEvent('alphaPickEnd', $event)"
+		@alphaChange="logEvent('alphaChange', $event)"
+		@saturationPickStart="logEvent('saturationPickStart', $event)"
+		@saturationPickEnd="logEvent('saturationPickEnd', $event)"
+		@saturationChange="logEvent('saturationChange', $event)" />
 		<div class="detailsSection">
 			<div class="detailsBlock">
 				<h2>Style it</h2>
 				<textarea
 				@focus="textareaFocusHandler"
-				@mousedown.stop
+				@pointerdown.stop
 				@input="updateStyles"
-				@keydown.tab.prevent="textareaTabHandler"
+				@keydown="textareaKeyHandler"
+				ref="textarea"
 				v-model="styles"
 				spellcheck="false">
 				</textarea>
 				<button
-				@mousedown.prevent
+				@pointerdown.prevent.stop
 				@click="resetDemoStyles"
-				@mousedown.stop
 				style="display:block">Reset</button>
 				<p>
 					By default the component renders a 40x40 square inline-block.<br>
-					The 'input' itself has class <span class="code">.color-input-box</span>,<br>
-					Once clicked on, it gets an <span class="code">.active</span> class,<br>
-					Color picker popup has class <span class="code">.color-input-picker</span>
+					Root element has class `.color-input`,<br>
+					The 'input' box has class `.box`,<br>
+					Once clicked on, it gets an `.active` class,<br>
+					Color picker popup has class `.picker-popup`.
 				</p>
 				<p>
-					You can take control of their styles by adding <span class="code">.user</span> class to the selector.
+					You can override default styles by using `.color-input ` in the selector.
 				</p>
 			</div>
 			<div class="detailsBlock">
 				<h2>Event Log</h2>
-				<div ref="eventLog" class="event-log">
+				<div class="event-log-wrapper">
+					<div class="event-log" ref="eventLog">
+						<p>&nbsp;</p>
+						<p>&nbsp;</p>
+					</div>
 				</div>
+				<p class="small">NB: for perfomance purposes, this log is limited to recording events of the <i>same type</i> not more often than once in 100ms</p>
+				<p>
+					Vue-color-input instance emits events on every interaction.<br>
+					When color pick procces is initiated (color box is clicked and the popup comes on) `pickStart` event is fired,<br>
+					And the other way around, when popup is closed the instance emits `pickEnd`.<br>
+					These two events don't carry any payload.
+				</p>
+				<p>
+					All other events can be categorized in three groups by color components they're associated with.<br>
+					These are:<br>
+					- hue events: (`huePickStart` | `alphaPickStart` | `saturationPickStart`)<br>
+					- alpha events: (`hueChange` | `alphaChange` | `saturationChange`)<br>
+					- saturation events: (`huePickEnd` | `alphaPickEnd` | `saturationPickEnd`)
+				</p>
+				<p>
+					All these provide current state of their respective color components.
+				</p>
 			</div>
 		</div>
 	</div>
@@ -55,22 +94,21 @@
 	import { defineComponent } from 'vue';
 	import ColorInput from '@/color-input.vue';
 
-	const demoStyles = `.color-input-box.user {
-  width: 100px;
-  height: 100px;
-  border-radius: 50px;
+	const demoStyles = `.color-input {
+	margin-bottom: 180px;
 }
-.color-input-box.user.active {
-  border-color: #0f0f0f;
+.color-input .box {
+	width: 100px;
+	height: 100px;
+	border-radius: 50px;
 }
-.color-input-picker.user {
+.color-input .box.active {
+	border-color: #0f0f0f;
 }
-.color-input-picker.user .slider {
-}
-.color-input-picker.user .slider-pointer {
-}
-.color-input-picker.user .saturation-pointer {
-}`;
+.color-input .picker-popup {}
+.color-input .slider {}
+.color-input .slider-pointer {}
+.color-input .saturation-pointer {}`;
 
 	export default defineComponent({
 		name: 'ServeDev',
@@ -82,28 +120,69 @@
 				color: 'pink',
 				styles: demoStyles,
 				position: 'bottom',
+				disableAlpha: false,
 			}
 		},
 		methods: {
 			textareaFocusHandler() {
 				if (this.$refs.colorInput.active) return;
-				this.$refs.colorInput.$refs.colorInputBox.click();
+				this.$refs.colorInput.pickStart();
 			},
-			textareaTabHandler(e) {
+			textareaKeyHandler(e) {
 				const textarea = e.target;
-				const start = textarea.selectionStart;
-				textarea.setRangeText('  ', start, start, 'end');
+				switch (e.key) {
+					case 'Tab': {
+						e.preventDefault();
+						textarea.setRangeText('\t', textarea.selectionStart, textarea.selectionEnd, 'end');
+						break;
+					}
+					case 'Enter': {
+						const textBeforeInsertion = textarea.value.slice(0,textarea.selectionStart);
+						if (textBeforeInsertion.split('{').length > textBeforeInsertion.split('}').length) {
+							e.preventDefault();
+							textarea.setRangeText('\n\t', textarea.selectionStart, textarea.selectionEnd, 'end');
+						}
+						break;
+					}
+					case '}': {
+						const textBeforeInsertion = textarea.value.slice(0,textarea.selectionStart);
+						const lineStartPosition = textBeforeInsertion.lastIndexOf('\n');
+						const thisLine = textBeforeInsertion.slice(lineStartPosition);
+						if (!thisLine.trim().length) textarea.setRangeText('', lineStartPosition + 1, textarea.selectionEnd, 'end');
+						break;
+					}
+				}
+			},
+			resizeTextarea() {
+				this.$refs.textarea.style.height = this.$refs.textarea.scrollHeight + 3 + 'px';
 			},
 			updateStyles() {
 				this.styleSheet.innerText = this.styles;
+				// this.$refs.colorInput.getBoxRect();
 			},
-			logEvent(e) {
-				this.$refs.eventLog.innerHTML = e + '<br>' + this.$refs.eventLog.innerHTML;
+			checkboxHandler(e) {
+				const active = this.$refs.colorInput.active;
+				this.$refs.colorInput.pickEnd({}, true);
+				if (active) this.$nextTick(function() {
+					this.$refs.colorInput.pickStart();
+				});
+				this.$refs.colorInput.emitUpdate(this.$refs.colorInput.color.toHsv());
+			},
+			logEvent(eventName, value) {
+				const now = Date.now();
+				if (this.lastLog[eventName] && now - this.lastLog[eventName] < 100) return;
+				this.$refs.eventLog.scrollTop = 0;
+				this.lastLog[eventName] = now;
+
+				if (typeof value === 'object') value = JSON.stringify(value);
+				const record = document.createElement('p');
+				record.innerHTML = eventName + ' ' + value;
+				this.$refs.eventLog.prepend(record);
 			},
 			resetDemoStyles() {
 				this.styles = demoStyles;
 				this.updateStyles();
-			}
+			},
 		},
 		created() {
 			const values = ['top','right','bottom','left'];
@@ -114,10 +193,30 @@
 			})).filter(v => v);
 		},
 		mounted() {
+			// empty object for log records
+			this.lastLog = {};
+
+			// style node for demo styles
 			this.styleSheet = document.createElement("style");
 			this.styleSheet.type = "text/css";
 			this.styleSheet.innerText = this.styles;
 			document.head.appendChild(this.styleSheet);
+
+			// textarea size
+			this.resizeTextarea();
+
+			// observe box size changes
+			this.boxObserver = new ResizeObserver(this.$refs.colorInput.getBoxRect);
+			this.boxObserver.observe(this.$refs.colorInput.$refs.boxRoot);
+
+			//add code spans instead of `` in description blocks
+			document.querySelectorAll('.detailsBlock p').forEach(p => {
+				let result = p.innerHTML.replace(/([^`]*`[^`]*)`/gm, '$1</span>').replace(/`/gm, '<span class="code">');
+				p.innerHTML = result;
+			});
+		},
+		beforeUnmount() {
+			this.boxObserver.disconnect();
 		}
 	});
 </script>
@@ -137,15 +236,40 @@
 		text-align: center;
 		width: 100%;
 	}
-	input {
+	h1 {
+		margin-bottom: 0;
+	}
+	.docsLink {
+		margin-bottom: 20px;
+		text-decoration: underline;
+	}
+	.setup {
+		display: flex;
+		align-items: center;
+		margin-bottom: 20px;
+	}
+	.setup-block {
+		margin: 10px;
+		text-align: center;
+	}
+	.setup-block h3 {
+		margin: 0;
+	}
+	input, select {
 		font-family: inherit;
 		font-size: 20px;
-		margin-bottom: 20px;
 		outline: none;
 		border-width: 0 0 1px 0;
+		border-color: #0f0f0f;
 		padding: 2px;
 		background: inherit;
 		width: 230px;
+		height: 30px;
+		box-sizing: border-box;
+	}
+	select {
+		background-image: none;
+		border-radius: 0;
 	}
 	.detailsSection {
 		display: flex;
@@ -157,17 +281,17 @@
 		padding: 20px;
 		text-align: left;
 		position: relative;
-		min-width: 250px;
+		min-width: 350px;
 		flex: 1 1;
 	}
 	.detailsBlock h2 {
 		text-align: center;
 	}
 	textarea {
+		tab-size: 3;
 		width: 100%;
 		max-width: 100%;
 		padding: 10px;
-		height: 350px;
 		border-radius: 3px;
 		font-size: 16px;
 		box-sizing: border-box;
@@ -176,12 +300,19 @@
 		font-family: 'Source Code Pro', monospace;
 		background-color: #efefef;
 	}
-	.event-log {
-		height: 95px;
-		overflow: auto;
+	.event-log-wrapper {
 		position: relative;
+		height: 95px;
 	}
-	.event-log::after {
+	.event-log {
+		height: 100%;
+		overflow-y: auto;
+		overflow-x: hidden;
+	}
+	.event-log p {
+		margin: 0;
+	}
+	.event-log-wrapper::after {
 		display: block;
 		content: '';
 		position: absolute;
@@ -190,5 +321,9 @@
 		width: 100%;
 		height: 100%;
 		background: linear-gradient(0deg, rgb(250,250,250) 0%, rgba(250,250,250,0) 70%);
+		pointer-events: none;
+	}
+	.small {
+		font-size: .8em;
 	}
 </style>

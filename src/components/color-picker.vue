@@ -1,16 +1,16 @@
 <template>
 	<div ref="pickerRoot" :style="pickerPosition">
-		<div class="saturation-area" :style="pureHueBackground" @mousedown.prevent="saturationPickStart">
+		<div class="saturation-area" :style="pureHueBackground" @pointerdown.prevent="saturationPickStart">
 			<canvas class="slider-canvas" ref="saturationCanvas"></canvas>
 			<div class="saturation-pointer" ref="saturationPointer" :style="[saturationPointerStyles, hexBackground]"></div>
 		</div>
-		<div class="slider-area" @mousedown.prevent="huePickStart">
+		<div class="slider-area" @pointerdown.prevent="huePickStart">
 			<div class="slider">
 				<canvas class="slider-canvas" ref="hueCanvas"></canvas>
 			</div>
 			<div class="slider-pointer" ref="huePointer" :style="[ huePointerStyles, pureHueBackground ]"></div>
 		</div>
-		<div class="slider-area" @mousedown.prevent="alphaPickStart">
+		<div v-if="!disableAlpha" class="slider-area" @pointerdown.prevent="alphaPickStart">
 			<div class="slider transparency-pattern">
 				<div class="slider-canvas" ref="alphaCanvas" :style="alphaCanvasStyles"></div>
 			</div>
@@ -27,15 +27,18 @@
 
 export default {
 	name: 'ColorPicker',
-	props: ['color', 'position', 'boxSize'],
+	props: ['color', 'position', 'boxRect', 'disableAlpha'],
 	emits: [
 		'updateColor',
 		'huePickStart',
 		'huePickEnd',
+		'hueChange',
 		'alphaPickStart',
 		'alphaPickEnd',
+		'alphaChange',
 		'saturationPickStart',
 		'saturationPickEnd',
+		'saturationChange'
 	],
 	data() {
 		return {
@@ -111,11 +114,11 @@ export default {
 			if (['top','bottom'].includes(this.position[0])) {
 				pickerPosition.marginLeft = 0;
 				pickerPosition.marginRight = 0;
-				offset = this.boxSize.height;
+				offset = this.boxRect.height;
 			} else {
 				pickerPosition.marginTop = 0;
 				pickerPosition.marginBottom = 0;
-				offset = this.boxSize.width;
+				offset = this.boxRect.width;
 			}
 			let anchor = invertMap[this.position[0]];
 			pickerPosition[anchor] = offset + 'px';
@@ -125,15 +128,15 @@ export default {
 				if (['left','right'].includes(anchor)) {
 					// centering on x-aixs
 					anchor = 'top';
-					offset = this.pickerHeight - this.boxSize.height;
+					offset = this.pickerHeight - this.boxRect.height;
 				} else {
 					// centering on y-aixs
 					anchor = 'left';
-					offset = this.pickerWidth - this.boxSize.width;
+					offset = this.pickerWidth - this.boxRect.width;
 				}
 				offset *= 0.5;
 			} else {
-				anchor = this.position[1];
+				anchor = invertMap[this.position[1]];
 				offset = 0;
 			}
 			pickerPosition[anchor] = -offset + 'px';
@@ -143,85 +146,100 @@ export default {
 	},
 	methods: {
 		huePickStart(e) {
-			document.addEventListener('mouseup', this.huePickEnd);
-			document.addEventListener('mousemove', this.huePickMove);
+			this.getCanvasRects();
+			document.addEventListener('pointerup', this.huePickEnd);
+			document.addEventListener('pointermove', this.huePickMove);
 			this.huePickMove(e);
-			this.$emit('huePickStart', this.h);
+			this.emitHook('huePickStart', { h: this.h });
 		},
 		huePickEnd(e) {
-			document.removeEventListener('mouseup', this.huePickEnd);
-			document.removeEventListener('mousemove', this.huePickMove);
-			this.$emit('huePickEnd', this.h);
+			document.removeEventListener('pointerup', this.huePickEnd);
+			document.removeEventListener('pointermove', this.huePickMove);
+			this.emitHook('huePickEnd', { h: this.h });
 		},
 		huePickMove(e) {
-			if (e.pageX >= this.hueCanvasRect.x && e.pageX <= this.hueCanvasRect.right) {
-				this.h = Number(((e.pageX - this.hueCanvasRect.x) * 360 / this.hueCanvasRect.width).toFixed(3));
-			} else if (e.pageX < this.hueCanvasRect.x) this.h = 0;
+			if (e.clientX >= this.hueCanvasRect.x && e.clientX <= this.hueCanvasRect.right) {
+				this.h = ((e.clientX - this.hueCanvasRect.x) * 360 / this.hueCanvasRect.width);
+			} else if (e.clientX < this.hueCanvasRect.x) this.h = 0;
 			else this.h = 360;
 		},
 		alphaPickStart(e) {
-			document.addEventListener('mouseup', this.alphaPickEnd);
-			document.addEventListener('mousemove', this.alphaPickMove);
+			this.getCanvasRects();
+			document.addEventListener('pointerup', this.alphaPickEnd);
+			document.addEventListener('pointermove', this.alphaPickMove);
 			this.alphaPickMove(e);
-			this.$emit('alphaPickStart', this.a);
+			this.emitHook('alphaPickStart', { a: this.a });
 		},
 		alphaPickEnd(e) {
-			document.removeEventListener('mouseup', this.alphaPickEnd);
-			document.removeEventListener('mousemove', this.alphaPickMove);
-			this.$emit('alphaPickEnd', this.a);
+			document.removeEventListener('pointerup', this.alphaPickEnd);
+			document.removeEventListener('pointermove', this.alphaPickMove);
+			this.emitHook('alphaPickEnd', { a: this.a });
 		},
 		alphaPickMove(e) {
-			if (e.pageX >= this.alphaCanvasRect.x && e.pageX <= this.alphaCanvasRect.right) {
-				this.a = Number(((e.pageX - this.alphaCanvasRect.x) / this.alphaCanvasRect.width).toFixed(3));
-			} else if (e.pageX < this.alphaCanvasRect.x) this.a = 0;
+			if (e.clientX >= this.alphaCanvasRect.x && e.clientX <= this.alphaCanvasRect.right) {
+				this.a = ((e.clientX - this.alphaCanvasRect.x) / this.alphaCanvasRect.width);
+			} else if (e.clientX < this.alphaCanvasRect.x) this.a = 0;
 			else this.a = 1;
 		},
 		saturationPickStart(e) {
-			document.addEventListener('mouseup', this.saturationPickEnd);
-			document.addEventListener('mousemove', this.saturationPickMove);
+			this.getCanvasRects();
+			document.addEventListener('pointerup', this.saturationPickEnd);
+			document.addEventListener('pointermove', this.saturationPickMove);
 			this.saturationPickMove(e);
-			this.$emit('saturationPickStart', { s: this.s, v: this.v });
+			this.emitHook('saturationPickStart', { s: this.s, v: this.v });
 		},
 		saturationPickEnd(e) {
-			document.removeEventListener('mouseup', this.saturationPickEnd);
-			document.removeEventListener('mousemove', this.saturationPickMove);
-			this.$emit('saturationPickEnd', { s: this.s, v: this.v });
+			document.removeEventListener('pointerup', this.saturationPickEnd);
+			document.removeEventListener('pointermove', this.saturationPickMove);
+			this.emitHook('saturationPickEnd', { s: this.s, v: this.v });
 		},
 		saturationPickMove(e) {
-			if (e.pageX >= this.saturationCanvasRect.x && e.pageX <= this.saturationCanvasRect.right) {
-				this.s = Number(((e.pageX - this.saturationCanvasRect.x) / this.saturationCanvasRect.width).toFixed(3));
-			} else if (e.pageX < this.saturationCanvasRect.x) this.s = 0;
+			if (e.clientX >= this.saturationCanvasRect.x && e.clientX <= this.saturationCanvasRect.right) {
+				this.s = ((e.clientX - this.saturationCanvasRect.x) / this.saturationCanvasRect.width);
+			} else if (e.clientX < this.saturationCanvasRect.x) this.s = 0;
 			else this.s = 1;
-			if (e.pageY >= this.saturationCanvasRect.y && e.pageY <= this.saturationCanvasRect.bottom) {
-				this.v = Number((1 - ((e.pageY - this.saturationCanvasRect.y) / this.saturationCanvasRect.height)).toFixed(3));
-			} else if (e.pageY < this.saturationCanvasRect.y) this.v = 1;
+			if (e.clientY >= this.saturationCanvasRect.y && e.clientY <= this.saturationCanvasRect.bottom) {
+				this.v = (1 - ((e.clientY - this.saturationCanvasRect.y) / this.saturationCanvasRect.height));
+			} else if (e.clientY < this.saturationCanvasRect.y) this.v = 1;
 			else this.v = 0;
 		},
 		getCanvasRects() {
-			this.hueCanvasRect = this.$refs.hueCanvas.getBoundingClientRect();
-			this.alphaCanvasRect = this.$refs.alphaCanvas.getBoundingClientRect();
 			this.saturationCanvasRect = this.$refs.saturationCanvas.getBoundingClientRect();
+			this.hueCanvasRect = this.$refs.hueCanvas.getBoundingClientRect();
+			this.alphaCanvasRect = this.disableAlpha ? {} : this.$refs.alphaCanvas.getBoundingClientRect();
 		},
 		emitUpdate() {
 			this.$emit('updateColor', { h: this.h, s: this.s, v: this.v, a: this.a });
+		},
+		emitHook(eventName, value) {
+			if (typeof value === 'object') {
+				for (let [k, v] of Object.entries(value)) value[k] = Number(v.toFixed(3));
+			} else {
+				value = Number(value.toFixed(3));
+			}
+			this.$emit(eventName, value);
 		}
 	},
 	watch: {
 		h() {
 			this.emitUpdate();
 			this.hueTranslateX = this.h * this.hueCanvasRect.width / 360;
+			this.emitHook('hueChange', { h: this.h });
 		},
 		s() {
 			this.emitUpdate();
 			this.saturationTranslateX = this.s * this.saturationCanvasRect.width;
+			this.emitHook('saturationChange', { s: this.s, v: this.v });
 		},
 		v() {
 			this.emitUpdate();
 			this.saturationTranslateY = -this.v * this.saturationCanvasRect.height;
+			this.emitHook('saturationChange', { s: this.s, v: this.v });
 		},
 		a() {
 			this.emitUpdate();
 			this.alphaTranslateX = this.a * this.alphaCanvasRect.width;
+			this.emitHook('alphaChange', { a: this.a });
 		},
 	},
 	mounted() {
@@ -231,7 +249,6 @@ export default {
 		const { width, height } = this.$refs.pickerRoot.getBoundingClientRect();
 		this.pickerHeight = height;
 		this.pickerWidth = width;
-		console.log(height, width);
 
 		// get canvas rects and set initial values
 		this.getCanvasRects();
@@ -274,7 +291,7 @@ export default {
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 		// window resize event listeners for updating canvas rects
-		window.addEventListener('resize', this.getCanvasRects);
+		// window.addEventListener('resize', this.getCanvasRects);
 	},
 	beforeUnmount() {
 		console.log('color picker unmounting');

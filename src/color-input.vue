@@ -1,27 +1,32 @@
 <template>
-	<div class="color-input-container">
-		<div :class="['color-input-box', 'user', { active }]"
+	<div class="color-input override"
+	ref="boxRoot">
+		<div :class="['box', { active }]"
 		@click.stop="pickStart"
-		ref="colorInputBox">
-			<div class="box-transparent">
-				<div class="box-color" :style="boxStyles"></div>
+		ref="box">
+			<div class="box-transparent" :style="boxTransparentStyles">
+				<div class="box-color" :style="boxColorStyles"></div>
 			</div>
 		</div>
-		<transition name="color-input-picker" @after-enter="afterEnterHandler">
+		<transition :name="transition" @after-enter="afterEnterHandler">
 			<color-picker
-			class="color-input-picker user"
+			class="picker-popup"
 			:color="this.color"
 			:position="processedPosition"
-			:boxSize="{ width: boxWidth, height: boxHeight }"
+			:disable-alpha="disableAlpha"
+			:boxRect="boxRect"
 			v-if="active"
 			@updateColor="emitUpdate"
 			@huePickStart="$emit('huePickStart', $event)"
 			@huePickEnd="$emit('huePickEnd', $event)"
+			@hueChange="$emit('hueChange', $event)"
 			@alphaPickStart="$emit('alphaPickStart', $event)"
 			@alphaPickEnd="$emit('alphaPickEnd', $event)"
+			@alphaChange="$emit('alphaChange', $event)"
 			@saturationPickStart="$emit('saturationPickStart', $event)"
 			@saturationPickEnd="$emit('saturationPickEnd', $event)"
-			ref="colorPicker" />
+			@saturationChange="$emit('saturationChange', $event)"
+			ref="picker" />
 		</transition>
 	</div>
 </template>
@@ -31,10 +36,18 @@
 	import ColorPicker from './components/color-picker.vue'
 	const tinycolor = require("tinycolor2");
 
-	const hasClassRecursive = (el, className) => {
-		while (!/^(body|html)$/i.test(el.tagName)) {
-			if (el.className.split(' ').includes(className)) return true;
-			el = el.parentNode;
+	// const hasClassRecursive = (el, className) => {
+	// 	while (!/^(body|html)$/i.test(el.tagName)) {
+	// 		if (el.className.split(' ').includes(className)) return true;
+	// 		el = el.parentNode;
+	// 	}
+	// 	return false;
+	// }
+
+	const isSameNodeRecursive = (elA, elB) => {
+		while (!/^(body|html)$/i.test(elA.tagName)) {
+			if (elA === elB) return true;
+			elA = elA.parentNode;
 		}
 		return false;
 	}
@@ -43,7 +56,15 @@
 		name: 'ColorInput',
 		props: {
 			modelValue: [String, Object],
-			position: String
+			position: String,
+			transition: {
+				type: String,
+				default: 'color-input-picker-popup'
+			},
+			disableAlpha: {
+				type: Boolean,
+				default: false
+			}
 		},
   		emits: [
   			'update:modelValue',
@@ -51,10 +72,13 @@
   			'pickEnd',
 			'huePickStart',
 			'huePickEnd',
+			'hueChange',
 			'alphaPickStart',
 			'alphaPickEnd',
+			'alphaChange',
 			'saturationPickStart',
 			'saturationPickEnd',
+			'saturationChange'
   		],
   		components: { ColorPicker },
 		data() {
@@ -62,17 +86,24 @@
 				active: false,
 				output: null,
 				originalColor: tinycolor(this.modelValue),
-				boxWidth: 0,
-				boxHeight: 0,
+				boxRect: {},
+				innerBoxRect: {},
 			}
 		},
 		computed: {
 			color() {
-				return tinycolor(this.modelValue);
+				const color = tinycolor(this.modelValue);
+				if (this.disableAlpha) color.setAlpha(1);
+				return color;
 			},
-			boxStyles() {
+			boxColorStyles() {
 				return {
 					background: this.color.toRgbString()
+				}
+			},
+			boxTransparentStyles() {
+				return {
+					// backgroundSize: Math.min(this.$refs.box.clientWidth, this.$refs.box.clientHeight) * 0.5 + 'px'
 				}
 			},
 			processedPosition() {
@@ -94,17 +125,19 @@
 		},
 		methods: {
 			afterEnterHandler(e) {
-				this.$refs.colorPicker.getCanvasRects();
+				console.log('enter complete');
+				this.$refs.picker.getCanvasRects();
 			},
 			pickStart(e) {
 				if (this.active) return;
+				this.getBoxRect();
 				this.active = true;
-				document.body.addEventListener('mousedown', this.pickEnd);
+				document.body.addEventListener('pointerdown', this.pickEnd);
 				this.$emit('pickStart');
 			},
-			pickEnd(e) {
-				if (hasClassRecursive(e.target, 'color-input-picker')) return;
-				document.body.removeEventListener('mousedown', this.pickEnd);
+			pickEnd(e, force) {
+				if (!force && isSameNodeRecursive(e.target, this.$refs.picker.$refs.pickerRoot)) return;
+				document.body.removeEventListener('pointerdown', this.pickEnd);
 				this.active = false;
 				this.$emit('pickEnd');
 			},
@@ -123,11 +156,8 @@
 				}
 				this.$emit('update:modelValue', this.output);
 			},
-			getBoxSize() {
-				const { width, height } = this.$refs.colorInputBox.getBoundingClientRect();
-				this.boxWidth = width;
-				this.boxHeight = height;
-				console.log('box size updated: ' + this.boxWidth + ', ' + this.boxHeight);
+			getBoxRect() {
+				this.boxRect = this.$refs.boxRoot.getBoundingClientRect();
 			}
 		},
 		created() {
@@ -136,8 +166,11 @@
 			}
 		},
 		mounted() {
-			this.getBoxSize();
-			new ResizeObserver(this.getBoxSize).observe(this.$refs.colorInputBox);
+			console.log('color input mounted');
+		},
+		beforeUnmount() {
+			if (this.active) this.pickEnd({}, true);
+			console.log('color input unmounting');
 		},
 		watch: {
 			modelValue() {
@@ -155,47 +188,49 @@
 </script>
 
 <style scoped>
-	.color-input-container {
+	.color-input {
 		position: relative;
 		display: inline-block;
 	}
-	.color-input-box {
+	.box {
 		width: 40px;
 		height: 40px;
 		cursor: pointer;
 		border-radius: 5px;
-   	box-sizing: border-box;
+		box-sizing: border-box;
 		border: 2px transparent solid;
 		transition: all .2s, background 0s;
 		overflow: hidden;
 	}
-	.color-input-box.active {
+	.box.active {
 		border-color: #fbfbfb;
 	}
 	.box-transparent {
 		width: 100%;
 		height: 100%;
 		background-image: url('./assets/method-transparent-pattern.svg');
+		background-size: 50%;
 	}
 	.box-color {
 		width: 100%;
 		height: 100%;
 	}
-	.color-input-picker {
+	.picker-popup {
 		position: absolute;
 		z-index: 9999;
 		width: 250px;
 		background-color: #fbfbfb;
 		box-shadow: 0px 5px 10px rgba(15,15,15,.4);
 		margin: 10px;
+		user-select: none;
 	}
-	.color-input-picker-enter-from,
-	.color-input-picker-leave-to {
+	.color-input-picker-popup-enter-from,
+	.color-input-picker-popup-leave-to {
 		transform: translateY(-10px);
 		opacity: 0;
 	}
-	.color-input-picker-enter-active,
-	.color-input-picker-leave-active {
+	.color-input-picker-popup-enter-active,
+	.color-input-picker-popup-leave-active {
 		transition: transform .3s, opacity .3s;
 	}
 </style>
