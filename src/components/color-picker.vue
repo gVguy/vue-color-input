@@ -20,6 +20,15 @@
 				</div>
 			</div>
 		</div>
+		<div class="text-inputs-container">
+			<div v-for="value, key in textInputs" 
+			:key="'text-input-' + key"
+			class="text-input">
+				<label :for="'text-input-' + key">{{key}}</label>
+				<input :value="value"
+				:id="'text-input-' + key">
+			</div>
+		</div>
 	</div>
 </template>
 
@@ -27,7 +36,13 @@
 
 export default {
 	name: 'ColorPicker',
-	props: ['color', 'position', 'boxRect', 'disableAlpha'],
+	props: [
+		'color',
+		'position',
+		'boxRect',
+		'disableAlpha',
+		'textInputs'
+	],
 	emits: [
 		'updateColor',
 		'huePickStart',
@@ -42,7 +57,11 @@ export default {
 	],
 	data() {
 		return {
-			...this.color.toHsv(),
+			// ...this.color.toHsv(),
+			h: 0,
+			s: 0,
+			v: 0,
+			a: 0,
 			hueTranslateX: 0,
 			alphaTranslateX: 0,
 			saturationTranslateX: 0,
@@ -59,7 +78,7 @@ export default {
 				offset: 0
 			},
 			pickerWidth: 0,
-			pickerHeight: 0
+			pickerHeight: 0,
 		}
 	},
 	computed: {
@@ -218,6 +237,56 @@ export default {
 				value = Number(value.toFixed(3));
 			}
 			this.$emit(eventName, value);
+		},
+		init() {
+			// get color values from model value
+			Object.assign(this.$data, this.color.toHsv());
+
+			// picker size
+			const { width, height } = this.$refs.pickerRoot.getBoundingClientRect();
+			this.pickerHeight = height;
+			this.pickerWidth = width;
+
+			// get canvas rects and set initial values
+			this.getCanvasRects();
+			this.hueTranslateX = this.h * this.hueCanvasRect.width / 360;
+			this.alphaTranslateX = this.a * this.alphaCanvasRect.width;
+			this.saturationTranslateX = this.s * this.saturationCanvasRect.width;
+			this.saturationTranslateY = -this.v * this.saturationCanvasRect.height;
+			this.sliderPointerWidth = this.$refs.huePointer.offsetWidth;
+			this.saturationPointerWidth = this.$refs.saturationPointer.offsetWidth;
+			this.saturationPointerHeight = this.$refs.saturationPointer.offsetHeight;
+		},
+		fillCanvas() {
+			// fill hue canvas
+			let canvas = this.$refs.hueCanvas;
+			let ctx = canvas.getContext('2d');
+			let gradient = ctx.createLinearGradient(canvas.width, 0, 0, 0);
+			gradient.addColorStop(0, 'hsl(0,100%,50%)');
+			gradient.addColorStop(.17, 'hsl(298.8, 100%, 50%)');
+			gradient.addColorStop(.33, 'hsl(241.2, 100%, 50%)');
+			gradient.addColorStop(.50, 'hsl(180, 100%, 50%)');
+			gradient.addColorStop(.67, 'hsl(118.8, 100%, 50%)');
+			gradient.addColorStop(.83, 'hsl(61.2,100%,50%)');
+			gradient.addColorStop(1, 'hsl(360,100%,50%)');
+			ctx.fillStyle = gradient;
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+			// fill saturation canvas
+			canvas = this.$refs.saturationCanvas;
+			ctx = canvas.getContext('2d');
+			// white layer
+			gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+			gradient.addColorStop(0, 'rgba(250,250,250,1)');
+			gradient.addColorStop(1, 'rgba(250,250,250,0)');
+			ctx.fillStyle = gradient;
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			// black layer
+			gradient = ctx.createLinearGradient(0, canvas.height, 0, 0);
+			gradient.addColorStop(0, 'rgba(0,0,0,1)');
+			gradient.addColorStop(1, 'rgba(0,0,0,0)');
+			ctx.fillStyle = gradient;
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
 		}
 	},
 	watch: {
@@ -244,54 +313,8 @@ export default {
 	},
 	mounted() {
 		console.log('color picker mounted');
-
-		// picker size
-		const { width, height } = this.$refs.pickerRoot.getBoundingClientRect();
-		this.pickerHeight = height;
-		this.pickerWidth = width;
-
-		// get canvas rects and set initial values
-		this.getCanvasRects();
-		this.hueTranslateX = this.h * this.hueCanvasRect.width / 360;
-		this.alphaTranslateX = this.a * this.alphaCanvasRect.width;
-		this.saturationTranslateX = this.s * this.saturationCanvasRect.width;
-		this.saturationTranslateY = -this.v * this.saturationCanvasRect.height;
-		this.sliderPointerWidth = this.$refs.huePointer.offsetWidth;
-		this.saturationPointerWidth = this.$refs.saturationPointer.offsetWidth;
-		this.saturationPointerHeight = this.$refs.saturationPointer.offsetHeight;
-
-		// fill hue canvas
-		let canvas = this.$refs.hueCanvas;
-		let ctx = canvas.getContext('2d');
-		let gradient = ctx.createLinearGradient(canvas.width, 0, 0, 0);
-		gradient.addColorStop(0, 'hsl(0,100%,50%)');
-		gradient.addColorStop(.17, 'hsl(298.8, 100%, 50%)');
-		gradient.addColorStop(.33, 'hsl(241.2, 100%, 50%)');
-		gradient.addColorStop(.50, 'hsl(180, 100%, 50%)');
-		gradient.addColorStop(.67, 'hsl(118.8, 100%, 50%)');
-		gradient.addColorStop(.83, 'hsl(61.2,100%,50%)');
-		gradient.addColorStop(1, 'hsl(360,100%,50%)');
-		ctx.fillStyle = gradient;
-		ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-		// fill saturation canvas
-		canvas = this.$refs.saturationCanvas;
-		ctx = canvas.getContext('2d');
-		// white layer
-		gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-		gradient.addColorStop(0, 'rgba(250,250,250,1)');
-		gradient.addColorStop(1, 'rgba(250,250,250,0)');
-		ctx.fillStyle = gradient;
-		ctx.fillRect(0, 0, canvas.width, canvas.height);
-		// black layer
-		gradient = ctx.createLinearGradient(0, canvas.height, 0, 0);
-		gradient.addColorStop(0, 'rgba(0,0,0,1)');
-		gradient.addColorStop(1, 'rgba(0,0,0,0)');
-		ctx.fillStyle = gradient;
-		ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-		// window resize event listeners for updating canvas rects
-		// window.addEventListener('resize', this.getCanvasRects);
+		this.init();
+		this.fillCanvas();
 	},
 	beforeUnmount() {
 		console.log('color picker unmounting');
@@ -358,6 +381,20 @@ export default {
 		position: absolute;
 		bottom: 0;
 		left: 0;
+	}
+	.text-inputs-container {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-bottom: 10px;
+		& input {
+			width: 4ch;
+			text-align: center;
+			margin: 5px;
+			&#text-input-hex {
+				width: 8ch;
+			}
+		}
 	}
 
 </style>

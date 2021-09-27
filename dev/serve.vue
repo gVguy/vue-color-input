@@ -5,7 +5,7 @@
 		<div class="setup">
 			<div class="setup-block">
 				<h3>v-model</h3>
-				<input v-model="color" spellcheck="false">
+				<input class="colorText" v-model="color" spellcheck="false">
 			</div>
 			<div class="setup-block">
 				<h3>position</h3>
@@ -14,14 +14,21 @@
 				</select>
 			</div>
 			<div class="setup-block">
+				<h3>disabled</h3>
+				<input type="checkbox" class="chx" v-model="disabled" @pointerdown.stop>
+			</div>
+			<div class="setup-block">
 				<h3>disable-alpha</h3>
-				<input type="checkbox" v-model="disableAlpha" @pointerdown.stop @change="checkboxHandler">
+				<input type="checkbox" class="chx" v-model="disableAlpha" @pointerdown.stop>
 			</div>
 		</div>
 		<color-input v-model="color"
 		ref="colorInput"
 		:position="position"
 		:disable-alpha="disableAlpha"
+		:disabled="disabled"
+		@hook:mounted="mountedHandler"
+		@hook:beforeUnmount="beforeUnmountHandler"
 		@pickStart="logEvent('pickStart', '')"
 		@pickEnd="logEvent('pickEnd', '')"
 		@huePickStart="logEvent('huePickStart', $event)"
@@ -54,6 +61,7 @@
 					Root element has class `.color-input`,<br>
 					The 'input' box has class `.box`,<br>
 					Once clicked on, it gets an `.active` class,<br>
+					If `disabled` property is set to `true`, it gets a `.disabled` class,<br>
 					Color picker popup has class `.picker-popup`.
 				</p>
 				<p>
@@ -105,6 +113,7 @@
 .color-input .box.active {
 	border-color: #0f0f0f;
 }
+.color-input .box.disabled {}
 .color-input .picker-popup {}
 .color-input .slider {}
 .color-input .slider-pointer {}
@@ -121,11 +130,11 @@
 				styles: demoStyles,
 				position: 'bottom',
 				disableAlpha: false,
+				disabled: false,
 			}
 		},
 		methods: {
 			textareaFocusHandler() {
-				if (this.$refs.colorInput.active) return;
 				this.$refs.colorInput.pickStart();
 			},
 			textareaKeyHandler(e) {
@@ -160,14 +169,6 @@
 				this.styleSheet.innerText = this.styles;
 				// this.$refs.colorInput.getBoxRect();
 			},
-			checkboxHandler(e) {
-				const active = this.$refs.colorInput.active;
-				this.$refs.colorInput.pickEnd({}, true);
-				if (active) this.$nextTick(function() {
-					this.$refs.colorInput.pickStart();
-				});
-				this.$refs.colorInput.emitUpdate(this.$refs.colorInput.color.toHsv());
-			},
 			logEvent(eventName, value) {
 				const now = Date.now();
 				if (this.lastLog[eventName] && now - this.lastLog[eventName] < 100) return;
@@ -183,8 +184,17 @@
 				this.styles = demoStyles;
 				this.updateStyles();
 			},
+			mountedHandler() {
+				// observe box size changes
+				if (!this.boxObserver) this.boxObserver = new ResizeObserver(this.$refs.colorInput.getBoxRect);
+				this.boxObserver.observe(this.$refs.colorInput.$refs.boxRoot);
+			},
+			beforeUnmountHandler() {
+				this.boxObserver.disconnect();
+			}
 		},
 		created() {
+			//create options for position dropdown
 			const values = ['top','right','bottom','left'];
 			const conflicts = { top: 'bottom', right: 'left', bottom: 'top', left: 'right' }
 			this.positionOptions = values.flatMap((v, i) => values.map(q => {
@@ -205,10 +215,6 @@
 			// textarea size
 			this.resizeTextarea();
 
-			// observe box size changes
-			this.boxObserver = new ResizeObserver(this.$refs.colorInput.getBoxRect);
-			this.boxObserver.observe(this.$refs.colorInput.$refs.boxRoot);
-
 			//add code spans instead of `` in description blocks
 			document.querySelectorAll('.detailsBlock p').forEach(p => {
 				let result = p.innerHTML.replace(/([^`]*`[^`]*)`/gm, '$1</span>').replace(/`/gm, '<span class="code">');
@@ -216,7 +222,6 @@
 			});
 		},
 		beforeUnmount() {
-			this.boxObserver.disconnect();
 		}
 	});
 </script>
@@ -245,17 +250,21 @@
 	}
 	.setup {
 		display: flex;
+		justify-content: center;
 		align-items: center;
+		flex-wrap: wrap;
 		margin-bottom: 20px;
 	}
 	.setup-block {
+		flex: 0 1;
 		margin: 10px;
 		text-align: center;
 	}
 	.setup-block h3 {
 		margin: 0;
+		white-space: nowrap;
 	}
-	input, select {
+	input.colorText, select {
 		font-family: inherit;
 		font-size: 20px;
 		outline: none;
@@ -270,6 +279,10 @@
 	select {
 		background-image: none;
 		border-radius: 0;
+	}
+	input.chx {
+		width: 30px;
+		height: 30px;
 	}
 	.detailsSection {
 		display: flex;

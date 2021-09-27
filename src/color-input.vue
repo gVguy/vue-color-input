@@ -1,10 +1,10 @@
 <template>
 	<div class="color-input override"
 	ref="boxRoot">
-		<div :class="['box', { active }]"
+		<div :class="['box', { active, disabled }]"
 		@click.stop="pickStart"
 		ref="box">
-			<div class="box-transparent" :style="boxTransparentStyles">
+			<div class="box-transparent">
 				<div class="box-color" :style="boxColorStyles"></div>
 			</div>
 		</div>
@@ -15,6 +15,7 @@
 			:position="processedPosition"
 			:disable-alpha="disableAlpha"
 			:boxRect="boxRect"
+			:text-inputs="textInputs"
 			v-if="active"
 			@updateColor="emitUpdate"
 			@huePickStart="$emit('huePickStart', $event)"
@@ -64,6 +65,10 @@
 			disableAlpha: {
 				type: Boolean,
 				default: false
+			},
+			disabled: {
+				type: Boolean,
+				default: false
 			}
 		},
   		emits: [
@@ -85,25 +90,19 @@
 			return {
 				active: false,
 				output: null,
-				originalColor: tinycolor(this.modelValue),
+				originalColor: null,
 				boxRect: {},
 				innerBoxRect: {},
+				textInputsFormat: 'rgb',
 			}
 		},
 		computed: {
 			color() {
-				const color = tinycolor(this.modelValue);
-				if (this.disableAlpha) color.setAlpha(1);
-				return color;
+				return tinycolor(this.modelValue);
 			},
 			boxColorStyles() {
 				return {
 					background: this.color.toRgbString()
-				}
-			},
-			boxTransparentStyles() {
-				return {
-					// backgroundSize: Math.min(this.$refs.box.clientWidth, this.$refs.box.clientHeight) * 0.5 + 'px'
 				}
 			},
 			processedPosition() {
@@ -122,6 +121,18 @@
 
 				return position;
 			},
+			textInputs() {
+				let format = this.textInputsFormat ? this.textInputsFormat.replace(/\d/,'') : 'rgb'; // remove digits eg hex8
+				let result;
+				if (['name','hex'].includes(format)) {
+					result = { hex: this.color.toString(format), a: this.color.getAlpha() }
+				} else {
+					format = format.charAt(0).toUpperCase() + format.slice(1); // capitalize 1st letter
+					result = this.color['to' + format]();
+				}
+				if (this.disableAlpha) delete result.a;
+				return result;
+			}
 		},
 		methods: {
 			afterEnterHandler(e) {
@@ -129,17 +140,24 @@
 				this.$refs.picker.getCanvasRects();
 			},
 			pickStart(e) {
-				if (this.active) return;
+				if (this.active || this.disabled) return;
 				this.getBoxRect();
 				this.active = true;
 				document.body.addEventListener('pointerdown', this.pickEnd);
 				this.$emit('pickStart');
 			},
-			pickEnd(e, force) {
-				if (!force && isSameNodeRecursive(e.target, this.$refs.picker.$refs.pickerRoot)) return;
+			pickEnd(e) {
+				if (!this.active || e && isSameNodeRecursive(e.target, this.$refs.picker.$refs.pickerRoot)) return;
 				document.body.removeEventListener('pointerdown', this.pickEnd);
 				this.active = false;
 				this.$emit('pickEnd');
+			},
+			init() {
+				// initial format for text inputs
+				this.textInputsFormat = this.color.getFormat();
+
+				// remember initial color
+				this.originalColor = this.color;
 			},
 			emitUpdate(hsv) {
 				const color = tinycolor(hsv);
@@ -161,16 +179,16 @@
 			}
 		},
 		created() {
+			// warn of inbalid color
 			if (!this.color.isValid()) {
 				console.warn('[vue-color-input]: invalid color -> ' + this.color.getOriginalInput());
 			}
+			this.init();
 		},
 		mounted() {
-			console.log('color input mounted');
 		},
 		beforeUnmount() {
-			if (this.active) this.pickEnd({}, true);
-			console.log('color input unmounting');
+			this.pickEnd();
 		},
 		watch: {
 			modelValue() {
@@ -180,8 +198,22 @@
 					// modelValue updated from elsewhere
 					// update color data
 					console.log('new model value');
-					this.originalColor = this.color;
+					this.init();
 				}
+			},
+			disabled() {
+				this.pickEnd();
+			},
+			disableAlpha(newVal) {
+				if (newVal) {
+					// alpha disabled
+					// update model value to no alpha
+					this.color.setAlpha(1);
+					this.emitUpdate(this.color.toHsv());
+				}
+				if (this.active) this.$nextTick(function() { 
+					this.$refs.picker.init();
+				});
 			}
 		}
 	});
@@ -204,6 +236,9 @@
 	}
 	.box.active {
 		border-color: #fbfbfb;
+	}
+	.box.disabled {
+		cursor: auto;
 	}
 	.box-transparent {
 		width: 100%;
