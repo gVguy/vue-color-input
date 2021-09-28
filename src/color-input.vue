@@ -86,6 +86,7 @@
 			'saturationChange'
   		],
   		components: { ColorPicker },
+  		provide: { tinycolor },
 		data() {
 			return {
 				active: false,
@@ -123,15 +124,14 @@
 			},
 			textInputs() {
 				let format = this.textInputsFormat ? this.textInputsFormat.replace(/\d/,'') : 'rgb'; // remove digits eg hex8
-				let result;
+				let values;
 				if (['name','hex'].includes(format)) {
-					result = { hex: this.color.toString(format), a: this.color.getAlpha() }
+					values = { hex: this.color.toString(format), a: this.color.getAlpha() }
 				} else {
-					format = format.charAt(0).toUpperCase() + format.slice(1); // capitalize 1st letter
-					result = this.color['to' + format]();
+					values = this.color['to' + format.charAt(0).toUpperCase() + format.slice(1)]();
 				}
-				if (this.disableAlpha) delete result.a;
-				return result;
+				if (this.disableAlpha) delete values.a;
+				return values;
 			}
 		},
 		methods: {
@@ -253,7 +253,8 @@
 	.picker-popup {
 		position: absolute;
 		z-index: 9999;
-		width: 250px;
+		width: auto;
+		min-width: 250px;
 		background-color: #fbfbfb;
 		box-shadow: 0px 5px 10px rgba(15,15,15,.4);
 		margin: 10px;

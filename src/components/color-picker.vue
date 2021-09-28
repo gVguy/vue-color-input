@@ -1,16 +1,16 @@
 <template>
 	<div ref="pickerRoot" :style="pickerPosition">
-		<div class="saturation-area" :style="pureHueBackground" @pointerdown.prevent="saturationPickStart">
+		<div class="saturation-area" :style="pureHueBackground" @pointerdown="saturationPickStart">
 			<canvas class="slider-canvas" ref="saturationCanvas"></canvas>
 			<div class="saturation-pointer" ref="saturationPointer" :style="[saturationPointerStyles, hexBackground]"></div>
 		</div>
-		<div class="slider-area" @pointerdown.prevent="huePickStart">
+		<div class="slider-area" @pointerdown="huePickStart">
 			<div class="slider">
 				<canvas class="slider-canvas" ref="hueCanvas"></canvas>
 			</div>
 			<div class="slider-pointer" ref="huePointer" :style="[ huePointerStyles, pureHueBackground ]"></div>
 		</div>
-		<div v-if="!disableAlpha" class="slider-area" @pointerdown.prevent="alphaPickStart">
+		<div v-if="!disableAlpha" class="slider-area" @pointerdown="alphaPickStart">
 			<div class="slider transparency-pattern">
 				<div class="slider-canvas" ref="alphaCanvas" :style="alphaCanvasStyles"></div>
 			</div>
@@ -21,12 +21,16 @@
 			</div>
 		</div>
 		<div class="text-inputs-container">
-			<div v-for="value, key in textInputs" 
+			<div v-for="value, key in (textInputsActive) ? textInputsFreeze : textInputs" 
 			:key="'text-input-' + key"
 			class="text-input">
 				<label :for="'text-input-' + key">{{key}}</label>
 				<input :value="value"
-				:id="'text-input-' + key">
+				:id="'text-input-' + key"
+				:data-component="key"
+				@input="textInputInputHandler"
+				@focus="textInputFocusHandler"
+				@blur="textInputBlurHandler">
 			</div>
 		</div>
 	</div>
@@ -55,6 +59,7 @@ export default {
 		'saturationPickEnd',
 		'saturationChange'
 	],
+	inject: [ 'tinycolor' ],
 	data() {
 		return {
 			// ...this.color.toHsv(),
@@ -79,6 +84,8 @@ export default {
 			},
 			pickerWidth: 0,
 			pickerHeight: 0,
+			textInputsActive: false,
+			textInputsFreeze: {},
 		}
 	},
 	computed: {
@@ -227,8 +234,9 @@ export default {
 			this.hueCanvasRect = this.$refs.hueCanvas.getBoundingClientRect();
 			this.alphaCanvasRect = this.disableAlpha ? {} : this.$refs.alphaCanvas.getBoundingClientRect();
 		},
-		emitUpdate() {
-			this.$emit('updateColor', { h: this.h, s: this.s, v: this.v, a: this.a });
+		emitUpdate(output) {
+			output = output || { h: this.h, s: this.s, v: this.v, a: this.a };
+			this.$emit('updateColor', output);
 		},
 		emitHook(eventName, value) {
 			if (typeof value === 'object') {
@@ -237,6 +245,30 @@ export default {
 				value = Number(value.toFixed(3));
 			}
 			this.$emit(eventName, value);
+		},
+		textInputInputHandler(e) {
+			const component = e.target.dataset.component;
+			let output = { ...this.textInputs, [component]: e.target.value }
+			this.textInputsFreeze = output;
+			if (output.hasOwnProperty('hex')) {
+				output = this.tinycolor(output.hex).setAlpha(output.a).toHsv();
+			}
+			this.emitUpdate(output);
+			// update sliders on next tick
+			this.$nextTick(function() {
+				this.init();
+			})
+			console.log(output);
+		},
+		textInputFocusHandler() {
+			this.textInputsFreeze = this.textInputs;
+			this.textInputsActive = true;
+			console.log('focus');
+		},
+		textInputBlurHandler() {
+			this.textInputsFreeze = {};
+			this.textInputsActive = false;
+			console.log('blur');
 		},
 		init() {
 			// get color values from model value
@@ -386,11 +418,13 @@ export default {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		margin-bottom: 10px;
+		margin: 0 5px 10px;
+		white-space: nowrap;
 		& input {
+			font-family: inherit;
 			width: 4ch;
 			text-align: center;
-			margin: 5px;
+			margin: 0 5px;
 			&#text-input-hex {
 				width: 8ch;
 			}
