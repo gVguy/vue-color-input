@@ -21,25 +21,30 @@
 				<h3>disable-alpha</h3>
 				<input type="checkbox" class="chx" v-model="disableAlpha" @pointerdown.stop>
 			</div>
+			<div class="setup-block">
+				<h3>disable-text-inputs</h3>
+				<input type="checkbox" class="chx" v-model="disableTextInputs" @pointerdown.stop>
+			</div>
 		</div>
 		<color-input v-model="color"
 		ref="colorInput"
 		:position="position"
 		:disable-alpha="disableAlpha"
 		:disabled="disabled"
+		:disable-text-inputs="disableTextInputs"
 		@hook:mounted="mountedHandler"
 		@hook:beforeUnmount="beforeUnmountHandler"
-		@pickStart="logEvent('pickStart', '')"
-		@pickEnd="logEvent('pickEnd', '')"
-		@huePickStart="logEvent('huePickStart', $event)"
-		@huePickEnd="logEvent('huePickEnd', $event)"
-		@hueChange="logEvent('hueChange', $event)"
-		@alphaPickStart="logEvent('alphaPickStart', $event)"
-		@alphaPickEnd="logEvent('alphaPickEnd', $event)"
-		@alphaChange="logEvent('alphaChange', $event)"
-		@saturationPickStart="logEvent('saturationPickStart', $event)"
-		@saturationPickEnd="logEvent('saturationPickEnd', $event)"
-		@saturationChange="logEvent('saturationChange', $event)" />
+		@pickStart="pickStartHandler"
+		@pickEnd="pickEndHandler"
+		@hueInputStart="logEvent('hueInputStart', $event)"
+		@hueInputEnd="logEvent('hueInputEnd', $event)"
+		@hueInput="logEvent('hueInput', $event)"
+		@alphaInputStart="logEvent('alphaInputStart', $event)"
+		@alphaInputEnd="logEvent('alphaInputEnd', $event)"
+		@alphaInput="logEvent('alphaInput', $event)"
+		@saturationInputStart="logEvent('saturationInputStart', $event)"
+		@saturationInputEnd="logEvent('saturationInputEnd', $event)"
+		@saturationInput="logEvent('saturationInput', $event)" />
 		<div class="detailsSection">
 			<div class="detailsBlock">
 				<h2>Style it</h2>
@@ -71,10 +76,16 @@
 			<div class="detailsBlock">
 				<h2>Event Log</h2>
 				<div class="event-log-wrapper">
-					<div class="event-log" ref="eventLog">
-						<p>&nbsp;</p>
-						<p>&nbsp;</p>
+					<div class="event-log" ref="eventLog" :style="logStyles">
+						<p v-for="line in log">{{line}}</p>
 					</div>
+					<div class="log-overlay">
+						<h2 v-if="!logEnabled">Log disabled</h2>
+					</div>
+				</div>
+				<div>
+					<button @pointerdown.prevent.stop @click="log = []">Clear</button>
+					<button @pointerdown.prevent.stop @click="logEnabled = !logEnabled">{{ logEnabled ? 'Disable' : 'Enable' }}</button>
 				</div>
 				<p class="small">NB: for perfomance purposes, this log is limited to recording events of the <i>same type</i> not more often than once in 100ms</p>
 				<p>
@@ -86,9 +97,9 @@
 				<p>
 					All other events can be categorized in three groups by color components they're associated with.<br>
 					These are:<br>
-					- hue events: (`huePickStart` | `alphaPickStart` | `saturationPickStart`)<br>
-					- alpha events: (`hueChange` | `alphaChange` | `saturationChange`)<br>
-					- saturation events: (`huePickEnd` | `alphaPickEnd` | `saturationPickEnd`)
+					- hue events: (`hueInputStart` | `hueInput` | `hueInputEnd`)<br>
+					- alpha events: (`alphaInputStart` | `alphaInput` | `alphaInputEnd`)<br>
+					- saturation events: (`saturationInputStart` | `saturationInput` | `saturationInputEnd`)
 				</p>
 				<p>
 					All these provide current state of their respective color components.
@@ -131,6 +142,16 @@
 				position: 'bottom',
 				disableAlpha: false,
 				disabled: false,
+				disableTextInputs: false,
+				log: [],
+				logEnabled: true,
+			}
+		},
+		computed: {
+			logStyles() {
+				return {
+					opacity: this.logEnabled ? 1 : .3
+				}
 			}
 		},
 		methods: {
@@ -147,7 +168,16 @@
 					}
 					case 'Enter': {
 						const textBeforeInsertion = textarea.value.slice(0,textarea.selectionStart);
-						if (textBeforeInsertion.split('{').length > textBeforeInsertion.split('}').length) {
+						const symbolBeforeInsertion = textBeforeInsertion.slice(-1);
+						const symbolAfterInsertion = textarea.value.charAt(textarea.selectionEnd);
+						if (symbolBeforeInsertion === '{' && symbolAfterInsertion === '}') {
+							const finalPosition = textarea.selectionStart + 2;
+							textarea.setRangeText('\n\t\n', textarea.selectionStart, textarea.selectionEnd, 'end');
+							textarea.selectionStart = finalPosition;
+							textarea.selectionEnd = finalPosition;
+							e.preventDefault();
+						}
+						else if (textBeforeInsertion.split('{').length > textBeforeInsertion.split('}').length) {
 							e.preventDefault();
 							textarea.setRangeText('\n\t', textarea.selectionStart, textarea.selectionEnd, 'end');
 						}
@@ -170,15 +200,14 @@
 				// this.$refs.colorInput.getBoxRect();
 			},
 			logEvent(eventName, value) {
+				if (!this.logEnabled) return;
 				const now = Date.now();
 				if (this.lastLog[eventName] && now - this.lastLog[eventName] < 100) return;
 				this.$refs.eventLog.scrollTop = 0;
 				this.lastLog[eventName] = now;
 
 				if (typeof value === 'object') value = JSON.stringify(value);
-				const record = document.createElement('p');
-				record.innerHTML = eventName + ' ' + value;
-				this.$refs.eventLog.prepend(record);
+				this.log.unshift(eventName + ' ' + value);
 			},
 			resetDemoStyles() {
 				this.styles = demoStyles;
@@ -191,6 +220,17 @@
 			},
 			beforeUnmountHandler() {
 				this.boxObserver.disconnect();
+			},
+			pickStartHandler() {
+				this.$nextTick(function() {
+					this.pickerObserver = new ResizeObserver(this.$refs.colorInput.$refs.picker.init);
+					this.pickerObserver.observe(this.$refs.colorInput.$refs.picker.$refs.pickerRoot);
+				});
+				this.logEvent('pickStart', '');
+			},
+			pickEndHandler() {
+				this.pickerObserver.disconnect();
+				this.logEvent('pickEnd', '');
 			}
 		},
 		created() {
@@ -226,7 +266,7 @@
 	});
 </script>
 
-<style>
+<style lang="scss">
 	@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@200&display=swap');
 	@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@300&display=swap');
 	body {
@@ -324,10 +364,14 @@
 	}
 	.event-log p {
 		margin: 0;
+		&:last-child {
+			margin-bottom: 40px;
+		}
 	}
-	.event-log-wrapper::after {
-		display: block;
-		content: '';
+	.log-overlay {
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		position: absolute;
 		top: 0;
 		left: 0;
@@ -338,5 +382,8 @@
 	}
 	.small {
 		font-size: .8em;
+	}
+	button {
+		margin-right: 5px;
 	}
 </style>

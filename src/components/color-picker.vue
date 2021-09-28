@@ -2,7 +2,7 @@
 	<div ref="pickerRoot" :style="pickerPosition">
 		<div class="saturation-area" :style="pureHueBackground" @pointerdown="saturationPickStart">
 			<canvas class="slider-canvas" ref="saturationCanvas"></canvas>
-			<div class="saturation-pointer" ref="saturationPointer" :style="[saturationPointerStyles, hexBackground]"></div>
+			<div class="saturation-pointer" ref="saturationPointer" :style="[saturationPointerStyles, {background: hexString}]"></div>
 		</div>
 		<div class="slider-area" @pointerdown="huePickStart">
 			<div class="slider">
@@ -16,21 +16,27 @@
 			</div>
 			<div class="slider-pointer" ref="alphaPointer" :style="alphaPointerStyles">
 				<div class="pointer-transparent" :style="alphaPointerTransparentStyles">
-					<div class="pointer-color" :style="[alphaPointerColorStyles, hexBackground]"></div>
+					<div class="pointer-color" :style="[alphaPointerColorStyles, {background: hexString}]"></div>
 				</div>
 			</div>
 		</div>
-		<div class="text-inputs-container">
-			<div v-for="value, key in (textInputsActive) ? textInputsFreeze : textInputs" 
+		<div class="text-inputs-area" v-if="!disableTextInputs" :style="{'--outline-color': hexString}">
+			<div v-for="value, key in (textInputActive) ? textInputsFreeze : textInputs" 
 			:key="'text-input-' + key"
-			class="text-input">
+			class="text-input-container">
 				<label :for="'text-input-' + key">{{key}}</label>
 				<input :value="value"
+				class="text-input"
+				autocomplete="off"
 				:id="'text-input-' + key"
 				:data-component="key"
-				@input="textInputInputHandler"
+				@input.prevent="textInputInputHandler"
 				@focus="textInputFocusHandler"
 				@blur="textInputBlurHandler">
+			</div>
+			<div class="text-format-arrows">
+				<div class="arrow up" @click="textInputFormatChange(-1)"></div>
+				<div class="arrow down" @click="textInputFormatChange(1)"></div>
 			</div>
 		</div>
 	</div>
@@ -45,28 +51,30 @@ export default {
 		'position',
 		'boxRect',
 		'disableAlpha',
-		'textInputs'
+		'textInputs',
+		'disableTextInputs'
 	],
 	emits: [
 		'updateColor',
-		'huePickStart',
-		'huePickEnd',
-		'hueChange',
-		'alphaPickStart',
-		'alphaPickEnd',
-		'alphaChange',
-		'saturationPickStart',
-		'saturationPickEnd',
-		'saturationChange'
+		'hueInputStart',
+		'hueInputEnd',
+		'hueInput',
+		'alphaInputStart',
+		'alphaInputEnd',
+		'alphaInput',
+		'saturationInputStart',
+		'saturationInputEnd',
+		'saturationInput',
+		'textInputFormatChange'
 	],
 	inject: [ 'tinycolor' ],
 	data() {
 		return {
 			// ...this.color.toHsv(),
-			h: 0,
-			s: 0,
-			v: 0,
-			a: 0,
+			h: undefined,
+			s: undefined,
+			v: undefined,
+			a: undefined,
 			hueTranslateX: 0,
 			alphaTranslateX: 0,
 			saturationTranslateX: 0,
@@ -84,8 +92,8 @@ export default {
 			},
 			pickerWidth: 0,
 			pickerHeight: 0,
-			textInputsActive: false,
-			textInputsFreeze: {},
+			textInputActive: null,
+			textInputsFreeze: {}
 		}
 	},
 	computed: {
@@ -94,10 +102,8 @@ export default {
 				background: 'hsl(' + this.h + ', 100%, 50%)'
 			}
 		},
-		hexBackground() {
-			return {
-				background: this.color.toHexString()
-			}
+		hexString() {
+			return this.color.toHexString()
 		},
 		huePointerStyles() {
 			return {
@@ -176,12 +182,12 @@ export default {
 			document.addEventListener('pointerup', this.huePickEnd);
 			document.addEventListener('pointermove', this.huePickMove);
 			this.huePickMove(e);
-			this.emitHook('huePickStart', { h: this.h });
+			this.emitHook('hueInputStart', { h: this.h });
 		},
 		huePickEnd(e) {
 			document.removeEventListener('pointerup', this.huePickEnd);
 			document.removeEventListener('pointermove', this.huePickMove);
-			this.emitHook('huePickEnd', { h: this.h });
+			this.emitHook('hueInputEnd', { h: this.h });
 		},
 		huePickMove(e) {
 			if (e.clientX >= this.hueCanvasRect.x && e.clientX <= this.hueCanvasRect.right) {
@@ -194,12 +200,12 @@ export default {
 			document.addEventListener('pointerup', this.alphaPickEnd);
 			document.addEventListener('pointermove', this.alphaPickMove);
 			this.alphaPickMove(e);
-			this.emitHook('alphaPickStart', { a: this.a });
+			this.emitHook('alphaInputStart', { a: this.a });
 		},
 		alphaPickEnd(e) {
 			document.removeEventListener('pointerup', this.alphaPickEnd);
 			document.removeEventListener('pointermove', this.alphaPickMove);
-			this.emitHook('alphaPickEnd', { a: this.a });
+			this.emitHook('alphaInputEnd', { a: this.a });
 		},
 		alphaPickMove(e) {
 			if (e.clientX >= this.alphaCanvasRect.x && e.clientX <= this.alphaCanvasRect.right) {
@@ -212,12 +218,12 @@ export default {
 			document.addEventListener('pointerup', this.saturationPickEnd);
 			document.addEventListener('pointermove', this.saturationPickMove);
 			this.saturationPickMove(e);
-			this.emitHook('saturationPickStart', { s: this.s, v: this.v });
+			this.emitHook('saturationInputStart', { s: this.s, v: this.v });
 		},
 		saturationPickEnd(e) {
 			document.removeEventListener('pointerup', this.saturationPickEnd);
 			document.removeEventListener('pointermove', this.saturationPickMove);
-			this.emitHook('saturationPickEnd', { s: this.s, v: this.v });
+			this.emitHook('saturationInputEnd', { s: this.s, v: this.v });
 		},
 		saturationPickMove(e) {
 			if (e.clientX >= this.saturationCanvasRect.x && e.clientX <= this.saturationCanvasRect.right) {
@@ -248,37 +254,45 @@ export default {
 		},
 		textInputInputHandler(e) {
 			const component = e.target.dataset.component;
-			let output = { ...this.textInputs, [component]: e.target.value }
-			this.textInputsFreeze = output;
+			this.textInputsFreeze[component] = e.target.value;
+			// let output = { ...this.textInputs, [component]: e.target.value };
+			let output = { ...this.textInputsFreeze };
 			if (output.hasOwnProperty('hex')) {
-				output = this.tinycolor(output.hex).setAlpha(output.a).toHsv();
+				output = this.tinycolor(output.hex).setAlpha(output.a);
+			} else {
+				output = this.tinycolor(output);
 			}
-			this.emitUpdate(output);
-			// update sliders on next tick
-			this.$nextTick(function() {
-				this.init();
-			})
-			console.log(output);
+			output = output.toHsv();
+			Object.assign(this.$data, output);
 		},
-		textInputFocusHandler() {
+		textInputFocusHandler(e) {
+			// if focused from blur, freeze current color
+			// if focused from another text input, don't update
+			// if (!this.textInputActive) this.textInputsFreeze = this.textInputs;
 			this.textInputsFreeze = this.textInputs;
-			this.textInputsActive = true;
-			console.log('focus');
+			this.textInputActive = e.target.dataset.component;
 		},
-		textInputBlurHandler() {
-			this.textInputsFreeze = {};
-			this.textInputsActive = false;
-			console.log('blur');
+		textInputBlurHandler(e) {
+			setTimeout(() => {
+				if (this.textInputActive === e.target.dataset.component) {
+					// actually blurred, not just focused another
+					this.textInputsFreeze = {};
+					this.textInputActive = null;
+				}
+			}, 0);
+		},
+		textInputFormatChange(dir) {
+			this.$emit('textInputFormatChange', dir);
 		},
 		init() {
 			// get color values from model value
 			Object.assign(this.$data, this.color.toHsv());
 
-			// picker size
+			// get picker size
 			const { width, height } = this.$refs.pickerRoot.getBoundingClientRect();
 			this.pickerHeight = height;
 			this.pickerWidth = width;
-
+			
 			// get canvas rects and set initial values
 			this.getCanvasRects();
 			this.hueTranslateX = this.h * this.hueCanvasRect.width / 360;
@@ -322,34 +336,36 @@ export default {
 		}
 	},
 	watch: {
-		h() {
-			this.emitUpdate();
+		h(newVal, oldVal) {
 			this.hueTranslateX = this.h * this.hueCanvasRect.width / 360;
-			this.emitHook('hueChange', { h: this.h });
-		},
-		s() {
+			if (oldVal === undefined) return;
 			this.emitUpdate();
+			this.emitHook('hueInput', { h: this.h });
+		},
+		s(newVal, oldVal) {
 			this.saturationTranslateX = this.s * this.saturationCanvasRect.width;
-			this.emitHook('saturationChange', { s: this.s, v: this.v });
-		},
-		v() {
+			if (oldVal === undefined) return;
 			this.emitUpdate();
+			this.emitHook('saturationInput', { s: this.s, v: this.v });
+		},
+		v(newVal, oldVal) {
 			this.saturationTranslateY = -this.v * this.saturationCanvasRect.height;
-			this.emitHook('saturationChange', { s: this.s, v: this.v });
-		},
-		a() {
+			if (oldVal === undefined) return;
 			this.emitUpdate();
+			this.emitHook('saturationInput', { s: this.s, v: this.v });
+		},
+		a(newVal, oldVal) {
 			this.alphaTranslateX = this.a * this.alphaCanvasRect.width;
-			this.emitHook('alphaChange', { a: this.a });
+			if (oldVal === undefined) return;
+			this.emitUpdate();
+			this.emitHook('alphaInput', { a: this.a });
 		},
 	},
 	mounted() {
-		console.log('color picker mounted');
 		this.init();
 		this.fillCanvas();
 	},
 	beforeUnmount() {
-		console.log('color picker unmounting');
 		window.removeEventListener('resize', this.getCanvasRects);
 	}
 }
@@ -414,19 +430,55 @@ export default {
 		bottom: 0;
 		left: 0;
 	}
-	.text-inputs-container {
+	.text-inputs-area {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
 		justify-content: center;
 		margin: 0 5px 10px;
-		white-space: nowrap;
-		& input {
+		.text-input-container {
+			white-space: nowrap;
+		}
+		.text-input {
 			font-family: inherit;
 			width: 4ch;
 			text-align: center;
 			margin: 0 5px;
+			&:focus {
+				outline-color: var(--outline-color);
+			}
 			&#text-input-hex {
 				width: 8ch;
+			}
+		}
+		.text-format-arrows {
+			.arrow {
+				width: 12px;
+				height: 10px;
+				opacity: .4;
+				transition: .3s;
+				position: relative;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				&::before {
+					display: block;
+					margin: auto;
+					content: '';
+					width: 0;
+					height: 0;
+					border-left: 5px solid transparent;
+					border-right: 5px solid transparent;
+				}
+				&.up::before {
+					border-bottom: 5px solid #0f0f0f;
+				}
+				&.down::before {
+					border-top: 5px solid #0f0f0f;
+				}
+				&:hover {
+					opacity: .8;
+				}
 			}
 		}
 	}

@@ -16,17 +16,19 @@
 			:disable-alpha="disableAlpha"
 			:boxRect="boxRect"
 			:text-inputs="textInputs"
+			:disable-text-inputs="disableTextInputs"
 			v-if="active"
 			@updateColor="emitUpdate"
-			@huePickStart="$emit('huePickStart', $event)"
-			@huePickEnd="$emit('huePickEnd', $event)"
-			@hueChange="$emit('hueChange', $event)"
-			@alphaPickStart="$emit('alphaPickStart', $event)"
-			@alphaPickEnd="$emit('alphaPickEnd', $event)"
-			@alphaChange="$emit('alphaChange', $event)"
-			@saturationPickStart="$emit('saturationPickStart', $event)"
-			@saturationPickEnd="$emit('saturationPickEnd', $event)"
-			@saturationChange="$emit('saturationChange', $event)"
+			@textInputFormatChange="textInputFormatChange"
+			@hueInputStart="$emit('hueInputStart', $event)"
+			@hueInputEnd="$emit('hueInputEnd', $event)"
+			@hueInput="$emit('hueInput', $event)"
+			@alphaInputStart="$emit('alphaInputStart', $event)"
+			@alphaInputEnd="$emit('alphaInputEnd', $event)"
+			@alphaInput="$emit('alphaInput', $event)"
+			@saturationInputStart="$emit('saturationInputStart', $event)"
+			@saturationInputEnd="$emit('saturationInputEnd', $event)"
+			@saturationInput="$emit('saturationInput', $event)"
 			ref="picker" />
 		</transition>
 	</div>
@@ -36,14 +38,6 @@
 	import { defineComponent } from 'vue';
 	import ColorPicker from './components/color-picker.vue'
 	const tinycolor = require("tinycolor2");
-
-	// const hasClassRecursive = (el, className) => {
-	// 	while (!/^(body|html)$/i.test(el.tagName)) {
-	// 		if (el.className.split(' ').includes(className)) return true;
-	// 		el = el.parentNode;
-	// 	}
-	// 	return false;
-	// }
 
 	const isSameNodeRecursive = (elA, elB) => {
 		while (!/^(body|html)$/i.test(elA.tagName)) {
@@ -69,21 +63,25 @@
 			disabled: {
 				type: Boolean,
 				default: false
+			},
+			disableTextInputs: {
+				type: Boolean,
+				default: false
 			}
 		},
   		emits: [
   			'update:modelValue',
   			'pickStart',
   			'pickEnd',
-			'huePickStart',
-			'huePickEnd',
-			'hueChange',
-			'alphaPickStart',
-			'alphaPickEnd',
-			'alphaChange',
-			'saturationPickStart',
-			'saturationPickEnd',
-			'saturationChange'
+			'hueInputStart',
+			'hueInputEnd',
+			'hueInput',
+			'alphaInputStart',
+			'alphaInputEnd',
+			'alphaInput',
+			'saturationInputStart',
+			'saturationInputEnd',
+			'saturationInput'
   		],
   		components: { ColorPicker },
   		provide: { tinycolor },
@@ -94,7 +92,7 @@
 				originalColor: null,
 				boxRect: {},
 				innerBoxRect: {},
-				textInputsFormat: 'rgb',
+				textInputsFormat: 'rgb', // overwritten in init()
 			}
 		},
 		computed: {
@@ -123,20 +121,20 @@
 				return position;
 			},
 			textInputs() {
-				let format = this.textInputsFormat ? this.textInputsFormat.replace(/\d/,'') : 'rgb'; // remove digits eg hex8
-				let values;
+				let format = this.textInputsFormat;
+				let values = {};
 				if (['name','hex'].includes(format)) {
-					values = { hex: this.color.toString(format), a: this.color.getAlpha() }
+					values.hex = this.color.toString(format);
 				} else {
-					values = this.color['to' + format.charAt(0).toUpperCase() + format.slice(1)]();
+					const stringSplit = this.color.toString(format).split('(')[1].slice(0,-1).split(', ');
+					format.split('').forEach((k, i) => values[k] = stringSplit[i]);
 				}
-				if (this.disableAlpha) delete values.a;
+				if (!this.disableAlpha) values.a = this.color.getAlpha();
 				return values;
 			}
 		},
 		methods: {
 			afterEnterHandler(e) {
-				console.log('enter complete');
 				this.$refs.picker.getCanvasRects();
 			},
 			pickStart(e) {
@@ -152,9 +150,19 @@
 				this.active = false;
 				this.$emit('pickEnd');
 			},
+			textInputFormatChange(dir) {
+				const formats = ['rgb','name','hsv','hsl'];
+				let currentFormat = this.textInputsFormat;
+				if (currentFormat === 'hex') currentFormat = 'name'; // use name because name falls back to hex
+				let i = formats.indexOf(this.textInputsFormat) + dir;
+				if (i < 0) i = formats.length - 1;
+				else if (i === formats.length) i = 0;
+				this.textInputsFormat = formats[i];
+			},
 			init() {
 				// initial format for text inputs
-				this.textInputsFormat = this.color.getFormat();
+				const format = this.color.getFormat().replace(/\d/,''); // remove digit eg hex8
+				this.textInputsFormat = format;
 
 				// remember initial color
 				this.originalColor = this.color;
@@ -197,7 +205,6 @@
 				if (input !== output) {
 					// modelValue updated from elsewhere
 					// update color data
-					console.log('new model value');
 					this.init();
 				}
 			},
@@ -223,6 +230,7 @@
 	.color-input {
 		position: relative;
 		display: inline-block;
+		color: #0f0f0f;
 	}
 	.box {
 		width: 40px;
@@ -238,7 +246,7 @@
 		border-color: #fbfbfb;
 	}
 	.box.disabled {
-		cursor: auto;
+		cursor: not-allowed;
 	}
 	.box-transparent {
 		width: 100%;
@@ -254,7 +262,7 @@
 		position: absolute;
 		z-index: 9999;
 		width: auto;
-		min-width: 250px;
+		min-width: 280px;
 		background-color: #fbfbfb;
 		box-shadow: 0px 5px 10px rgba(15,15,15,.4);
 		margin: 10px;
