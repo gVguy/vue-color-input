@@ -1,7 +1,7 @@
 {
   "name": "vue-color-input",
   "version": "1.0.0",
-  "description": "simple vue 3 color picker component whose goal is to replace <input type=color>",
+  "description": "Slick and perfomant vue 3 color picker component whose goal is to replace <input type=color>",
   "main": "dist/color-input.ssr.js",
   "browser": "dist/color-input.esm.js",
   "module": "dist/color-input.esm.js",
@@ -17,7 +17,9 @@
     "build": "cross-env NODE_ENV=production rollup --config build/rollup.config.js",
     "build:ssr": "cross-env NODE_ENV=production rollup --config build/rollup.config.js --format cjs",
     "build:es": "cross-env NODE_ENV=production rollup --config build/rollup.config.js --format es",
-    "build:unpkg": "cross-env NODE_ENV=production rollup --config build/rollup.config.js --format iife"
+    "build:unpkg": "cross-env NODE_ENV=production rollup --config build/rollup.config.js --format iife",
+    "build:demo": "vue-cli-service build dev/serve.js --dest demo",
+    "publish:demo": "gh-pages -d demo"
   },
   "dependencies": {
     "tinycolor2": "^1.4.2"
@@ -34,6 +36,7 @@
     "@vue/cli-service": "^4.5.13",
     "@vue/compiler-sfc": "^3.0.11",
     "cross-env": "^7.0.3",
+    "gh-pages": "^3.2.3",
     "minimist": "^1.2.5",
     "postcss": "^8.2.10",
     "rimraf": "^3.0.2",
