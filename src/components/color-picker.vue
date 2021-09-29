@@ -266,7 +266,32 @@ export default {
 				output = this.tinycolor(output);
 			}
 			output = output.toHsv();
-			Object.assign(this.$data, output);
+
+			// assign new values with gate for the convertion noise
+			const threshold = {
+				h: .5,
+				s: .001,
+				v: .001,
+			}
+			if (component !== 'a') {
+				// editing color component (not alpha)
+				// gate and assign new values if change is over threshold
+				Object.keys(output).filter(k => k !== 'a').forEach(k => {
+					const oldVal = this[k];
+					const newVal = output[k];
+					if (Math.abs(oldVal - newVal) > threshold[k]) {
+						console.log('change: ' + k);
+						this[k] = newVal;
+					} else {
+						console.log('[ignored]: ' + k)
+					}
+					console.log('was ' + oldVal + ' new ' + newVal);
+				});
+			} else {
+				// editing alpha assign it right away. Don't touch other components
+				this.a = output.a;
+			}
+			// Object.assign(this.$data, output);
 		},
 		textInputFocusHandler(e) {
 			// if focused from blur, freeze current color

@@ -125,7 +125,9 @@
 					const stringSplit = this.color.toString(format).split('(')[1].slice(0,-1).split(', ');
 					format.split('').forEach((k, i) => values[k] = stringSplit[i]);
 				}
-				if (!this.disableAlpha) values.a = this.color.getAlpha().toFixed(2);
+				if (!this.disableAlpha) {
+					values.a = Number(this.color.getAlpha().toFixed(2));
+				}
 				return values;
 			}
 		},
