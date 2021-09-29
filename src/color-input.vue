@@ -87,18 +87,14 @@
   		provide: { tinycolor },
 		data() {
 			return {
+				color: null,
 				active: false,
-				output: null,
-				originalColor: null,
 				boxRect: {},
 				innerBoxRect: {},
-				textInputsFormat: 'rgb', // overwritten in init()
+				textInputsFormat: null,
 			}
 		},
 		computed: {
-			color() {
-				return tinycolor(this.modelValue);
-			},
 			boxColorStyles() {
 				return {
 					background: this.color.toRgbString()
@@ -129,7 +125,7 @@
 					const stringSplit = this.color.toString(format).split('(')[1].slice(0,-1).split(', ');
 					format.split('').forEach((k, i) => values[k] = stringSplit[i]);
 				}
-				if (!this.disableAlpha) values.a = this.color.getAlpha();
+				if (!this.disableAlpha) values.a = this.color.getAlpha().toFixed(2);
 				return values;
 			}
 		},
@@ -160,27 +156,33 @@
 				this.textInputsFormat = formats[i];
 			},
 			init() {
-				// initial format for text inputs
-				let format = this.color.getFormat();
-				// remove digit eg hex8 & if invalid or hsv go with rgb
-				format = (!format || format === 'hsv') ? 'rgb' : format.replace(/\d/,'');
-				this.textInputsFormat = format;
+				// get color
+				this.color = tinycolor(this.modelValue);
 
-				// remember initial color
-				this.originalColor = this.color;
+				// store original format (this is the format modelValue will be converted to)
+				this.originalFormat = this.color.getFormat();
+
+				// for storing output value (to react to external modelValue changes)
+				this.output = null;
+
+				// initial format for text inputs
+				let textInputsFormat = this.originalFormat;
+				// remove digit eg hex8 & if invalid or hsv go with rgb
+				textInputsFormat = (!textInputsFormat || textInputsFormat === 'hsv') ? 'rgb' : textInputsFormat.replace(/\d/,'');
+				this.textInputsFormat = textInputsFormat;
 			},
 			emitUpdate(hsv) {
-				const color = tinycolor(hsv);
-				let format = this.originalColor.getFormat();
+				this.color = tinycolor(hsv);
+				let format = this.originalFormat;
 				if (hsv.a < 1 && ['hex','name'].includes(format) || format === false) {
 					// original format lacks alpha channel or invalid color
 					// output rgb instead
 					format = 'rgb';
 				}
 				if (typeof this.modelValue !== 'object') {
-					this.output = color.toString(format);
+					this.output = this.color.toString(format);
 				} else {
-					this.output = color['to' + format.charAt(0).toUpperCase() + format.slice(1)]();
+					this.output = this.color['to' + format.charAt(0).toUpperCase() + format.slice(1)]();
 				}
 				this.$emit('update:modelValue', this.output);
 			},
@@ -189,11 +191,12 @@
 			}
 		},
 		created() {
-			// warn of inbalid color
+			this.init();
+
+			// warn of invalid color
 			if (!this.color.isValid()) {
 				console.warn('[vue-color-input]: invalid color -> ' + this.color.getOriginalInput());
 			}
-			this.init();
 		},
 		mounted() {
 		},
