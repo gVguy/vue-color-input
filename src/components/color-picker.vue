@@ -21,18 +21,21 @@
 			</div>
 		</div>
 		<div class="text-inputs-area" v-if="!disableTextInputs" :style="{'--outline-color': hexString}">
-			<div v-for="value, key in (textInputActive) ? textInputsFreeze : textInputs" 
-			:key="'text-input-' + key"
-			class="text-input-container">
-				<label :for="'text-input-' + key">{{key}}</label>
-				<input :value="value"
-				class="text-input"
-				autocomplete="off"
-				:id="'text-input-' + key"
-				:data-component="key"
-				@input.prevent="textInputInputHandler"
-				@focus="textInputFocusHandler"
-				@blur="textInputBlurHandler">
+			<div class="text-inputs-wrapper">
+				<div v-for="value, key in (textInputActive) ? textInputsFreeze : textInputs" 
+				:key="'text-input-' + key"
+				class="text-input-container">
+					<label :for="'text-input-' + key">{{key}}</label>
+					<input :value="value"
+					class="text-input"
+					autocomplete="off"
+					:id="'text-input-' + key"
+					:data-component="key"
+					@input.prevent="textInputInputHandler"
+					@focus="textInputFocusHandler"
+					@blur="textInputBlurHandler"
+					@keypress.enter="$event.target.blur()">
+				</div>
 			</div>
 			<div class="text-format-arrows">
 				<div class="arrow up" @click="textInputFormatChange(-1)"></div>
@@ -377,6 +380,11 @@ export default {
 		width: 100%;
 		height: 100%;
 	}
+	%flex-center {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
 	.slider-area {
 		width: 85%;
 		margin: 10px auto;
@@ -432,10 +440,12 @@ export default {
 	}
 	.text-inputs-area {
 		display: flex;
+		margin: 0 7px 10px;
+	}
+	.text-inputs-wrapper {
+		flex: 1 0;
+		@extend %flex-center;
 		flex-wrap: wrap;
-		align-items: center;
-		justify-content: center;
-		margin: 0 5px 10px;
 		.text-input-container {
 			white-space: nowrap;
 		}
@@ -451,34 +461,34 @@ export default {
 				width: 8ch;
 			}
 		}
-		.text-format-arrows {
-			.arrow {
-				width: 12px;
-				height: 10px;
-				opacity: .4;
-				transition: .3s;
-				position: relative;
-				display: flex;
-				justify-content: center;
-				align-items: center;
-				&::before {
-					display: block;
-					margin: auto;
-					content: '';
-					width: 0;
-					height: 0;
-					border-left: 5px solid transparent;
-					border-right: 5px solid transparent;
-				}
-				&.up::before {
-					border-bottom: 5px solid #0f0f0f;
-				}
-				&.down::before {
-					border-top: 5px solid #0f0f0f;
-				}
-				&:hover {
-					opacity: .8;
-				}
+	}
+	.text-format-arrows {
+		flex: 0 1;
+		@extend %flex-center;
+		flex-direction: column;
+		.arrow {
+			width: 12px;
+			height: 10px;
+			opacity: .4;
+			transition: .3s;
+			position: relative;
+			@extend %flex-center;
+			&::before {
+				display: block;
+				content: '';
+				width: 0;
+				height: 0;
+				border-left: 5px solid transparent;
+				border-right: 5px solid transparent;
+			}
+			&.up::before {
+				border-bottom: 5px solid #0f0f0f;
+			}
+			&.down::before {
+				border-top: 5px solid #0f0f0f;
+			}
+			&:hover {
+				opacity: .8;
 			}
 		}
 	}
