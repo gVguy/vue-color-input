@@ -268,8 +268,8 @@ export default {
 		textInputFocusHandler(e) {
 			// if focused from blur, freeze current color
 			// if focused from another text input, don't update
-			// if (!this.textInputActive) this.textInputsFreeze = this.textInputs;
-			this.textInputsFreeze = this.textInputs;
+			if (!this.textInputActive) this.textInputsFreeze = { ...this.textInputs };
+			// this.textInputsFreeze = { ...this.textInputs };
 			this.textInputActive = e.target.dataset.component;
 		},
 		textInputBlurHandler(e) {

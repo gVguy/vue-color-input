@@ -222,10 +222,10 @@
 				this.boxObserver.disconnect();
 			},
 			pickStartHandler() {
-				this.$nextTick(function() {
+				setTimeout(() => {
 					this.pickerObserver = new ResizeObserver(this.$refs.colorInput.$refs.picker.init);
 					this.pickerObserver.observe(this.$refs.colorInput.$refs.picker.$refs.pickerRoot);
-				});
+				},0);
 				this.logEvent('pickStart', '');
 			},
 			pickEndHandler() {

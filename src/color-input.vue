@@ -151,7 +151,7 @@
 				this.$emit('pickEnd');
 			},
 			textInputFormatChange(dir) {
-				const formats = ['rgb','name','hsv','hsl'];
+				const formats = ['rgb','name','hsl'];
 				let currentFormat = this.textInputsFormat;
 				if (currentFormat === 'hex') currentFormat = 'name'; // use name because name falls back to hex
 				let i = formats.indexOf(this.textInputsFormat) + dir;
@@ -161,7 +161,9 @@
 			},
 			init() {
 				// initial format for text inputs
-				const format = this.color.getFormat().replace(/\d/,''); // remove digit eg hex8
+				let format = this.color.getFormat();
+				// remove digit eg hex8 & if invalid or hsv go with rgb
+				format = (!format || format === 'hsv') ? 'rgb' : format.replace(/\d/,'');
 				this.textInputsFormat = format;
 
 				// remember initial color
