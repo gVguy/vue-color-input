@@ -161,7 +161,7 @@
 				let type = format.findIndex(f => ['string','object'].includes(f));
 				if (type < 0) {
 					// type not specified use type from input
-					type = this.originalType;
+					type = ['rgb', 'hsv', 'hsl'].includes(format[0]) ? this.originalType : 'string';
 				} else {
 					// type specified
 					type = format.splice(type, 1)[0];

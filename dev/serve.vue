@@ -3,14 +3,20 @@
 		<h1>vue-color-input demo</h1>
 		<h3><a class="docsLink" href="https://github.com/gVguy/vue-color-input#vue-color-input">Docs</a></h3>
 		<div class="setup">
-			<div class="setup-block">
+			<div class="setup-block main">
 				<h3>v-model</h3>
-				<input class="colorText" v-model="color" spellcheck="false">
+				<input class="color-text" v-model="colorString" spellcheck="false">
 				<div>
 					<span v-for="f in formatOptions"
 					:class="['setup-radio-button', { active: (format === f) }]"
 					@click="formatSelect(f)"
 					@pointerdown.stop>{{f}}</span>
+				</div>
+				<div>
+					<span v-for="(state, t) in typeOptions"
+					:class="['setup-radio-button', { active: (type === t), disabled: !state }]"
+					@click="state ? typeSelect(t) : null"
+					@pointerdown.stop>{{t}}</span>
 				</div>
 			</div>
 			<div class="setup-block">
@@ -26,7 +32,7 @@
 			<div class="setup-block">
 				<h3>disable-alpha</h3>
 				<input v-if="!hexNameSelected" type="checkbox" class="chx" v-model="disableAlpha" @pointerdown.stop>
-				<input v-else type="checkbox" class="chx" checked disabled @pointerdown.stop>
+				<input v-else type="checkbox" class="chx disabled" checked disabled @pointerdown.stop>
 			</div>
 			<div class="setup-block">
 				<h3>disable-text-inputs</h3>
@@ -155,7 +161,7 @@
 				logEnabled: true,
 				format: '',
 				type: '',
-				formatOptions: ['rgb', 'hex', 'hex8', 'name', 'hsl', 'hsv']
+				formatOptions: ['rgb', 'hex', 'hex8', 'name', 'hsl', 'hsv'],
 			}
 		},
 		computed: {
@@ -166,11 +172,49 @@
 			},
 			hexNameSelected() {
 				return ['hex','name'].includes(this.format);
+			},
+			typeOptions() {
+				const options = { string: false, object: false };
+				if (this.format) {
+					if (['rgb','hsl','hsv'].includes(this.format)) {
+						options.object = true;
+					} else if (this.type === 'object') {
+						this.type = '';
+					}
+					options.string = true;
+				}
+				return options;
+			},
+			colorString: {
+				get() {
+					let color = this.color;
+					if (typeof color === 'object') {
+						color = JSON.parse(JSON.stringify(color));
+						for (let [k,v] of Object.entries(color)) {
+							color[k] = Number(v.toFixed(3));
+						}
+						color = JSON.stringify(color)
+					}
+					return color;
+				},
+				set(v) {
+					if (/{.*}/.test(v.trim())) {
+						v = v.replace(/'/g,'"');
+						v = v.replace(/([{,])\s?(\w*)(:)/g, '$1"$2"$3'); // add quotes for parse
+						try {
+							v = JSON.parse(v);
+						} catch(e) {}
+					}
+					this.color = v;
+				}
 			}
 		},
 		methods: {
 			formatSelect(f) {
 				this.format = (this.format === f) ? '' : f; 
+			},
+			typeSelect(t) {
+				this.type = (this.type === t) ? '' : t; 
 			},
 			textareaFocusHandler() {
 				this.$refs.colorInput.pickStart();
@@ -316,6 +360,13 @@
 		flex: 0 1;
 		margin: 10px;
 		text-align: center;
+		&.main {
+			flex-basis: 100%;
+			& .color-text {
+				width: 380px;
+				height: 40px;
+			}
+		}
 	}
 	.setup-block h3 {
 		margin: 0;
@@ -328,14 +379,18 @@
 		margin: 2px;
 		background: #ddd;
 		cursor: pointer;
-		&:hover {
+		&:not(.disabled):hover {
 			background: #ccc;
 		}
 		&.active {
 			background: #aaa;
 		}
+		&.disabled {
+			color: #777;
+			cursor: default;
+		}
 	}
-	input.colorText, select {
+	input.color-text, select {
 		font-family: inherit;
 		font-size: 20px;
 		outline: none;
@@ -343,17 +398,20 @@
 		border-color: #0f0f0f;
 		padding: 2px;
 		background: inherit;
-		width: 230px;
-		height: 30px;
 		box-sizing: border-box;
 	}
 	select {
 		background-image: none;
 		border-radius: 0;
+		width: 230px;
+		height: 30px;
 	}
 	input.chx {
 		width: 30px;
 		height: 30px;
+		&.disabled {
+			cursor: not-allowed;
+		}
 	}
 	.detailsSection {
 		display: flex;

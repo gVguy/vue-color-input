@@ -288,7 +288,7 @@ export default {
 						this[k] = newVal;
 					}
 				});
-				console.log(this.disableAlpha);
+				
 				if (output.getFormat() === 'hex8' && output.getOriginalInput().length > 7) {
 					// hex8 was entered into hex field
 					if (!this.disableAlpha) {
