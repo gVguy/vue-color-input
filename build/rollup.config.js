@@ -40,9 +40,6 @@ const baseConfig = {
           },
         ],
       }),
-      // copy({ // added this
-      //   targets: [{ src: 'src/assets', dest: 'dist' }]
-      // })
       svg({ // added this
         base64: true
       })

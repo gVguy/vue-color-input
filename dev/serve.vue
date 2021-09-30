@@ -6,6 +6,12 @@
 			<div class="setup-block">
 				<h3>v-model</h3>
 				<input class="colorText" v-model="color" spellcheck="false">
+				<div>
+					<span v-for="f in formatOptions"
+					:class="['setup-radio-button', { active: (format === f) }]"
+					@click="formatSelect(f)"
+					@pointerdown.stop>{{f}}</span>
+				</div>
 			</div>
 			<div class="setup-block">
 				<h3>position</h3>
@@ -19,7 +25,8 @@
 			</div>
 			<div class="setup-block">
 				<h3>disable-alpha</h3>
-				<input type="checkbox" class="chx" v-model="disableAlpha" @pointerdown.stop>
+				<input v-if="!hexNameSelected" type="checkbox" class="chx" v-model="disableAlpha" @pointerdown.stop>
+				<input v-else type="checkbox" class="chx" checked disabled @pointerdown.stop>
 			</div>
 			<div class="setup-block">
 				<h3>disable-text-inputs</h3>
@@ -27,7 +34,7 @@
 			</div>
 		</div>
 		<color-input v-model="color"
-		ref="colorInput"
+		:format="format + (type ? ' ' + type : '')"
 		:position="position"
 		:disable-alpha="disableAlpha"
 		:disabled="disabled"
@@ -44,7 +51,8 @@
 		@alphaInput="logEvent('alphaInput', $event)"
 		@saturationInputStart="logEvent('saturationInputStart', $event)"
 		@saturationInputEnd="logEvent('saturationInputEnd', $event)"
-		@saturationInput="logEvent('saturationInput', $event)" />
+		@saturationInput="logEvent('saturationInput', $event)"
+		ref="colorInput" />
 		<div class="detailsSection">
 			<div class="detailsBlock">
 				<h2>Style it</h2>
@@ -145,6 +153,9 @@
 				disableTextInputs: false,
 				log: [],
 				logEnabled: true,
+				format: '',
+				type: '',
+				formatOptions: ['rgb', 'hex', 'hex8', 'name', 'hsl', 'hsv']
 			}
 		},
 		computed: {
@@ -152,9 +163,15 @@
 				return {
 					opacity: this.logEnabled ? 1 : .3
 				}
+			},
+			hexNameSelected() {
+				return ['hex','name'].includes(this.format);
 			}
 		},
 		methods: {
+			formatSelect(f) {
+				this.format = (this.format === f) ? '' : f; 
+			},
 			textareaFocusHandler() {
 				this.$refs.colorInput.pickStart();
 			},
@@ -303,6 +320,20 @@
 	.setup-block h3 {
 		margin: 0;
 		white-space: nowrap;
+	}
+	.setup-radio-button {
+		font-size: .8em;
+		border-radius: 5px;
+		padding: 1px 4px;
+		margin: 2px;
+		background: #ddd;
+		cursor: pointer;
+		&:hover {
+			background: #ccc;
+		}
+		&.active {
+			background: #aaa;
+		}
 	}
 	input.colorText, select {
 		font-family: inherit;

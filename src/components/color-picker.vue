@@ -29,6 +29,7 @@
 					<input :value="value"
 					class="text-input"
 					autocomplete="off"
+					spellcheck="false" 
 					:id="'text-input-' + key"
 					:data-component="key"
 					@input.prevent="textInputInputHandler"
@@ -73,7 +74,6 @@ export default {
 	inject: [ 'tinycolor' ],
 	data() {
 		return {
-			// ...this.color.toHsv(),
 			h: undefined,
 			s: undefined,
 			v: undefined,
@@ -140,9 +140,6 @@ export default {
 				transform: 'translate(' + translateX + 'px, ' + translateY + 'px)'
 			}
 		},
-		// pickerRootStyles() {
-		// 	'--transparent-pattern': 'url("data:image/svg+xml;utf8,' + this.transparentPattern + '")';
-		// },
 		pickerPosition() {
 			const pickerPosition = {};
 			const invertMap = { top: 'bottom', bottom: 'top', left: 'right', right: 'left' };
@@ -261,14 +258,19 @@ export default {
 		textInputInputHandler(e) {
 			const component = e.target.dataset.component;
 			this.textInputsFreeze[component] = e.target.value;
-			// let output = { ...this.textInputs, [component]: e.target.value };
 			let output = { ...this.textInputsFreeze };
 			if (output.hasOwnProperty('hex')) {
-				output = this.tinycolor(output.hex).setAlpha(output.a);
+				const a = output.a;
+				output = this.tinycolor(output.hex);
+				if (output.getFormat() !== 'hex8') {
+					// unless hex8 is entered use existing alpha
+					output.setAlpha(a);
+					var hex8 = true;
+				}
 			} else {
 				output = this.tinycolor(output);
 			}
-			output = output.toHsv();
+			const hsv = output.toHsv();
 
 			// assign new values with gate for the convertion noise
 			const threshold = {
@@ -279,28 +281,36 @@ export default {
 			if (component !== 'a') {
 				// editing color component (not alpha)
 				// gate and assign new values if change is over threshold
-				Object.keys(output).filter(k => k !== 'a').forEach(k => {
+				Object.keys(hsv).filter(k => k !== 'a').forEach(k => {
 					const oldVal = this[k];
-					const newVal = output[k];
+					const newVal = hsv[k];
 					if (Math.abs(oldVal - newVal) > threshold[k]) {
-						console.log('change: ' + k);
 						this[k] = newVal;
-					} else {
-						console.log('[ignored]: ' + k)
 					}
-					console.log('was ' + oldVal + ' new ' + newVal);
 				});
+				console.log(this.disableAlpha);
+				if (output.getFormat() === 'hex8' && output.getOriginalInput().length > 7) {
+					// hex8 was entered into hex field
+					if (!this.disableAlpha) {
+						// alpha enabled, update it too
+						this.a = hsv.a;
+						this.$nextTick(function() {
+							this.textInputsFreeze.a = this.textInputs.a;
+						});
+					} else {
+						// alpha disabled, treat the color as invalid
+						Object.assign(this.$data, { h: 0, s: 0, v: 0 });
+					}
+				}
 			} else {
 				// editing alpha assign it right away. Don't touch other components
-				this.a = output.a;
+				this.a = hsv.a;
 			}
-			// Object.assign(this.$data, output);
 		},
 		textInputFocusHandler(e) {
 			// if focused from blur, freeze current color
 			// if focused from another text input, don't update
 			if (!this.textInputActive) this.textInputsFreeze = { ...this.textInputs };
-			// this.textInputsFreeze = { ...this.textInputs };
 			this.textInputActive = e.target.dataset.component;
 		},
 		textInputBlurHandler(e) {

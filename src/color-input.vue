@@ -14,7 +14,7 @@
 			class="picker-popup"
 			:color="this.color"
 			:position="processedPosition"
-			:disable-alpha="disableAlpha"
+			:disable-alpha="processedDisableAlpha"
 			:boxRect="boxRect"
 			:text-inputs="textInputs"
 			:disable-text-inputs="disableTextInputs"
@@ -96,6 +96,8 @@
 				boxRect: {},
 				innerBoxRect: {},
 				textInputsFormat: null,
+				originalFormat: 'rgb',
+				originalType: null,
 			}
 		},
 		computed: {
@@ -116,8 +118,8 @@
 				let position = this.position;
 				if (!combinations.includes(position)) {
 					if (position) {
-						//position is defined but invalid
-						console.warn('[vue-color-input]: invalid position -> ' + this.position);
+						// position is defined but invalid
+						console.warn('[vue-color-input]: invalid position -> ' + position);
 					}
 					position = 'bottom center';
 				}
@@ -131,18 +133,61 @@
 				formats = formats.concat(formats.flatMap(f => {
 					return [f + ' object', 'object ' + f, f + ' string', 'string ' + f]
 				}));
-				console.log(formats);
+				formats = formats.concat(['name', 'hex', 'hex8'].flatMap(f => {
+					return [f, f + ' string', 'string ' + f]
+				}));
+
+				// validate and fallback to default
+				let format = this.format;
+				let force = false; // this will represent whether the resulting format is coming from the input or forced by user
+				if (format) {
+					// format is defined
+					format = format.toLowerCase(); // allow 'rGb StRinG'
+					if (!formats.includes(format)) {
+						// format is defined but invalid
+						console.warn('[vue-color-input]: invalid format -> ' + format);
+						format = this.originalFormat;
+					} else {
+						// user-defined format is valid
+						force = true;
+					}
+				} else {
+					// format is undefined
+					format = this.originalFormat;
+				}
+
+				// extract type and format separately
+				format = format.split(' ');
+				let type = format.findIndex(f => ['string','object'].includes(f));
+				if (type < 0) {
+					// type not specified use type from input
+					type = this.originalType;
+				} else {
+					// type specified
+					type = format.splice(type, 1)[0];
+				}
+				format = format[0];
+
+				return { type, format, force }
+			},
+			processedDisableAlpha() {
+				const format = this.processedFormat;
+				if (format.force && ['hex','name'].includes(format.format)) {
+					return true;
+				} else {
+					return this.disableAlpha;
+				}
 			},
 			textInputs() {
 				let format = this.textInputsFormat;
 				let values = {};
 				if (['name','hex'].includes(format)) {
-					values.hex = this.color.toString(format);
+					values.hex = this.color.toString('hex');
 				} else {
 					const stringSplit = this.color.toString(format).split('(')[1].slice(0,-1).split(', ');
 					format.split('').forEach((k, i) => values[k] = stringSplit[i]);
 				}
-				if (!this.disableAlpha) {
+				if (!this.processedDisableAlpha) {
 					values.a = Number(this.color.getAlpha().toFixed(2));
 				}
 				return values;
@@ -183,8 +228,12 @@
 				// get color
 				this.color = tinycolor(this.modelValue);
 
-				// store original format (this is the format modelValue will be converted to)
-				this.originalFormat = this.format || this.color.getFormat();
+				// original format (this is the format modelValue will be converted to)
+				let format = this.color.getFormat();
+				this.originalFormat = (format) ? format : 'rgb';
+				let type = typeof this.modelValue;
+				this.originalType = (['string', 'object'].includes(type)) ? type : 'string';
+				this.processedFormat; // trigger computed processedFormat()
 
 				// for storing output value (to react to external modelValue changes)
 				this.output = null;
@@ -196,14 +245,21 @@
 				this.textInputsFormat = textInputsFormat;
 			},
 			emitUpdate(hsv) {
-				this.color = tinycolor(hsv);
-				let format = this.originalFormat;
-				if (hsv.a < 1 && ['hex','name'].includes(format) || format === false) {
-					// original format lacks alpha channel or invalid color
-					// output rgb instead
-					format = 'rgb';
+				// if new value specified, update color, otherwise emit update with existing color
+				if (hsv) this.color = tinycolor(hsv);
+
+				let format = this.processedFormat.format;
+				if (this.color.getAlpha() < 1 && ['hex','name'].includes(format)) {
+					// alpha < 1 but output format lacks alpha channel
+					if (this.processedFormat.force) {
+						// format is user defined, output it anyway
+						this.color.setAlpha(1);
+					} else {
+						// format is calculate from input, output rgb instead
+						format = 'rgb';
+					}
 				}
-				if (typeof this.modelValue === 'object') {
+				if (this.processedFormat.type === 'object') {
 					this.output = this.color['to' + format.charAt(0).toUpperCase() + format.slice(1)]();
 				} else {
 					this.output = this.color.toString(format);
@@ -240,16 +296,19 @@
 			disabled() {
 				this.pickEnd();
 			},
-			disableAlpha(newVal) {
+			processedDisableAlpha(newVal) {
 				if (newVal) {
 					// alpha disabled
 					// update model value to no alpha
 					this.color.setAlpha(1);
-					this.emitUpdate(this.color.toHsv());
+					this.emitUpdate();
 				}
 				if (this.active) this.$nextTick(function() { 
 					this.$refs.picker.init();
 				});
+			},
+			format() {
+				this.emitUpdate();
 			}
 		}
 	});

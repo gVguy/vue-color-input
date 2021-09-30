@@ -51,7 +51,6 @@
     "postcss": "^8.2.10",
     "rimraf": "^3.0.2",
     "rollup": "^2.52.8",
-    "rollup-plugin-copy": "^3.4.0",
     "rollup-plugin-postcss": "^4.0.0",
     "rollup-plugin-sass": "^1.2.9",
     "rollup-plugin-svg": "^2.0.0",
