@@ -10,6 +10,9 @@ import babel from '@rollup/plugin-babel';
 import PostCSS from 'rollup-plugin-postcss';
 import { terser } from 'rollup-plugin-terser';
 import minimist from 'minimist';
+import Sass from 'rollup-plugin-sass'; // added this for using scss
+import svg from 'rollup-plugin-svg'; // added this to inline svg
+
 
 // Get browserslist config and remove ie from es build targets
 const esbrowserslist = fs.readFileSync('./.browserslistrc')
@@ -18,8 +21,8 @@ const esbrowserslist = fs.readFileSync('./.browserslistrc')
   .filter((entry) => entry && entry.substring(0, 2) !== 'ie');
 
 // Extract babel preset-env config, to combine with esbrowserslist
-const babelPresetEnvConfig = require('../babel.config')
-  .presets.filter((entry) => entry[0] === '@babel/preset-env')[0][1];
+// const babelPresetEnvConfig = require('../babel.config')
+//   .presets.filter((entry) => entry[0] === '@babel/preset-env')[0][1];
 
 const argv = minimist(process.argv.slice(2));
 
@@ -37,11 +40,18 @@ const baseConfig = {
           },
         ],
       }),
+      // copy({ // added this
+      //   targets: [{ src: 'src/assets', dest: 'dist' }]
+      // })
+      svg({ // added this
+        base64: true
+      })
     ],
     replace: {
       'process.env.NODE_ENV': JSON.stringify('production'),
     },
     vue: {
+      preprocessStyles: true,
     },
     postVue: [
       resolve({
@@ -56,6 +66,7 @@ const baseConfig = {
       }),
       // Process all `<style>` blocks except `<style module>`.
       PostCSS({ include: /(?<!&module=.*)\.css$/ }),
+      Sass(), // added this
       commonjs(),
     ],
     babel: {
@@ -105,7 +116,7 @@ if (!argv.format || argv.format === 'es') {
           [
             '@babel/preset-env',
             {
-              ...babelPresetEnvConfig,
+              // ...babelPresetEnvConfig,
               targets: esbrowserslist,
             },
           ],

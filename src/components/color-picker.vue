@@ -1,5 +1,5 @@
 <template>
-	<div ref="pickerRoot" :style="pickerPosition">
+	<div ref="pickerRoot" :style="[pickerPosition]">
 		<div class="saturation-area" :style="pureHueBackground" @pointerdown="saturationPickStart">
 			<canvas class="slider-canvas" ref="saturationCanvas"></canvas>
 			<div class="saturation-pointer" ref="saturationPointer" :style="[saturationPointerStyles, {background: hexString}]"></div>
@@ -140,6 +140,9 @@ export default {
 				transform: 'translate(' + translateX + 'px, ' + translateY + 'px)'
 			}
 		},
+		// pickerRootStyles() {
+		// 	'--transparent-pattern': 'url("data:image/svg+xml;utf8,' + this.transparentPattern + '")';
+		// },
 		pickerPosition() {
 			const pickerPosition = {};
 			const invertMap = { top: 'bottom', bottom: 'top', left: 'right', right: 'left' };
@@ -440,7 +443,8 @@ export default {
 		box-shadow: 0 0 5px rgba(15,15,15,.3);
 	}
 	.transparency-pattern {
-		background-image: url('../assets/method-transparent-pattern.svg');
+		background-image: var(--transparent-pattern);
+		// background-image: url('~@/assets/method-transparent-pattern.svg');
 	}
 	.pointer-color {
 		@extend %fill-100;

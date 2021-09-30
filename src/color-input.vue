@@ -1,6 +1,7 @@
 <template>
 	<div class="color-input override"
-	ref="boxRoot">
+	ref="boxRoot"
+	:style="cssVars">
 		<div :class="['box', { active, disabled }]"
 		@click.stop="pickStart"
 		ref="box">
@@ -39,6 +40,8 @@
 	import ColorPicker from './components/color-picker.vue'
 	const tinycolor = require("tinycolor2");
 
+	import transparentPattern from '@/assets/method-transparent-pattern.svg';
+
 	const isSameNodeRecursive = (elA, elB) => {
 		while (!/^(body|html)$/i.test(elA.tagName)) {
 			if (elA === elB) return true;
@@ -67,7 +70,8 @@
 			disableTextInputs: {
 				type: Boolean,
 				default: false
-			}
+			},
+			format: String,
 		},
   		emits: [
   			'update:modelValue',
@@ -110,11 +114,24 @@
 				})).filter(v => v);
 
 				let position = this.position;
-				if (!combinations.includes(position)) position = 'bottom center';
+				if (!combinations.includes(position)) {
+					if (position) {
+						//position is defined but invalid
+						console.warn('[vue-color-input]: invalid position -> ' + this.position);
+					}
+					position = 'bottom center';
+				}
 				position = position.split(' ');
 				position[1] = position[1] || 'center';
 
 				return position;
+			},
+			processedFormat() {
+				let formats = ['rgb', 'hsv', 'hsl'];
+				formats = formats.concat(formats.flatMap(f => {
+					return [f + ' object', 'object ' + f, f + ' string', 'string ' + f]
+				}));
+				console.log(formats);
 			},
 			textInputs() {
 				let format = this.textInputsFormat;
@@ -129,7 +146,12 @@
 					values.a = Number(this.color.getAlpha().toFixed(2));
 				}
 				return values;
-			}
+			},
+			cssVars() {
+				return {
+					'--transparent-pattern': 'url(' + transparentPattern + ')'
+				}
+			},
 		},
 		methods: {
 			afterEnterHandler(e) {
@@ -162,7 +184,7 @@
 				this.color = tinycolor(this.modelValue);
 
 				// store original format (this is the format modelValue will be converted to)
-				this.originalFormat = this.color.getFormat();
+				this.originalFormat = this.format || this.color.getFormat();
 
 				// for storing output value (to react to external modelValue changes)
 				this.output = null;
@@ -181,10 +203,10 @@
 					// output rgb instead
 					format = 'rgb';
 				}
-				if (typeof this.modelValue !== 'object') {
-					this.output = this.color.toString(format);
-				} else {
+				if (typeof this.modelValue === 'object') {
 					this.output = this.color['to' + format.charAt(0).toUpperCase() + format.slice(1)]();
+				} else {
+					this.output = this.color.toString(format);
 				}
 				this.$emit('update:modelValue', this.output);
 			},
@@ -258,7 +280,7 @@
 	.box-transparent {
 		width: 100%;
 		height: 100%;
-		background-image: url('./assets/method-transparent-pattern.svg');
+		background-image: var(--transparent-pattern);
 		background-size: 50%;
 	}
 	.box-color {
