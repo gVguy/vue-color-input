@@ -270,7 +270,34 @@ export default {
 			} else {
 				output = this.tinycolor(output);
 			}
+
 			const hsv = output.toHsv();
+
+			// if editing h or s,
+			// process them separately
+			if (Object.keys(hsv).includes(component)) {
+				let value = e.target.value;
+				const isPercent = (value.indexOf('%') !== -1);
+				value = parseFloat(value);
+				// 80 -> 0.8 (s,v)
+				if (component !== 'h' && (isPercent || (value > 1 && value < 100) )) {
+					value = value * 0.01;
+				}
+				const range = {
+					h: 360,
+					s: 1,
+				}
+				if (!value || value < 0) {
+					// NaN or < 0
+					value = 0;
+				} else if (value > range[component]) {
+					// value > allowed
+					value = range[component];
+				}
+				// otherwise value is ok, leave it as is
+				
+				hsv[component] = value;
+			} 
 
 			// assign new values with gate for the convertion noise
 			const threshold = {
@@ -288,7 +315,7 @@ export default {
 						this[k] = newVal;
 					}
 				});
-				
+
 				if (output.getFormat() === 'hex8' && output.getOriginalInput().length > 7) {
 					// hex8 was entered into hex field
 					if (!this.disableAlpha) {

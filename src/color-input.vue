@@ -243,6 +243,12 @@
 				// remove digit eg hex8 & if invalid or hsv go with rgb
 				textInputsFormat = (!textInputsFormat || textInputsFormat === 'hsv') ? 'rgb' : textInputsFormat.replace(/\d/,'');
 				this.textInputsFormat = textInputsFormat;
+
+
+				// warn of invalid color
+				if (!this.color.isValid()) {
+					console.warn('[vue-color-input]: invalid color -> ' + this.color.getOriginalInput());
+				}
 			},
 			emitUpdate(hsv) {
 				// if new value specified, update color, otherwise emit update with existing color
@@ -272,11 +278,6 @@
 		},
 		created() {
 			this.init();
-
-			// warn of invalid color
-			if (!this.color.isValid()) {
-				console.warn('[vue-color-input]: invalid color -> ' + this.color.getOriginalInput());
-			}
 		},
 		mounted() {
 		},
@@ -291,6 +292,12 @@
 					// modelValue updated from elsewhere
 					// update color data
 					this.init();
+					// if active at the moment, update picker as well
+					if (this.active) {
+						this.$nextTick(function() {
+							this.$refs.picker.init();
+						});
+					}
 				}
 			},
 			disabled() {
