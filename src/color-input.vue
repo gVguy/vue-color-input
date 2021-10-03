@@ -216,7 +216,7 @@
 				this.$emit('pickEnd');
 			},
 			textInputFormatChange(dir) {
-				const formats = ['rgb','name','hsl'];
+				const formats = ['rgb','name','hsv'];
 				let currentFormat = this.textInputsFormat;
 				if (currentFormat === 'hex') currentFormat = 'name'; // use name because name falls back to hex
 				let i = formats.indexOf(this.textInputsFormat) + dir;

@@ -22,7 +22,7 @@
 		</div>
 		<div class="text-inputs-area" v-if="!disableTextInputs" :style="{'--outline-color': hexString}">
 			<div class="text-inputs-wrapper">
-				<div v-for="value, key in (textInputActive) ? textInputsFreeze : textInputs" 
+				<div v-for="value, key in (textInputActive) ? textInputsFreeze : processedTextInputs" 
 				:key="'text-input-' + key"
 				class="text-input-container">
 					<label :for="'text-input-' + key">{{key}}</label>
@@ -177,6 +177,19 @@ export default {
 			pickerPosition[anchor] = -offset + 'px';
 
 			return pickerPosition;
+		},
+		processedTextInputs() {
+			const textInputs = { ...this.textInputs };
+			// if textInputs has hue, add it from this.h
+			if (textInputs.hasOwnProperty('h')) {
+				// editing in mode with hue
+				textInputs.h = parseInt(this.h);
+				if (textInputs.hasOwnProperty('v')) {
+					// editing in hsv
+					textInputs.s = Math.round(this.s * 100) + '%';
+				}
+			}
+			return textInputs;
 		}
 	},
 	methods: {
@@ -258,14 +271,16 @@ export default {
 		textInputInputHandler(e) {
 			const component = e.target.dataset.component;
 			this.textInputsFreeze[component] = e.target.value;
+
 			let output = { ...this.textInputsFreeze };
+
 			if (output.hasOwnProperty('hex')) {
+				// editing hex
 				const a = output.a;
 				output = this.tinycolor(output.hex);
 				if (output.getFormat() !== 'hex8') {
 					// unless hex8 is entered use existing alpha
 					output.setAlpha(a);
-					var hex8 = true;
 				}
 			} else {
 				output = this.tinycolor(output);
@@ -273,31 +288,24 @@ export default {
 
 			const hsv = output.toHsv();
 
-			// if editing h or s,
-			// process them separately
-			if (Object.keys(hsv).includes(component)) {
-				let value = e.target.value;
-				const isPercent = (value.indexOf('%') !== -1);
-				value = parseFloat(value);
-				// 80 -> 0.8 (s,v)
-				if (component !== 'h' && (isPercent || (value > 1 && value < 100) )) {
-					value = value * 0.01;
+			if (this.textInputsFreeze.hasOwnProperty('h')) {
+				// editing in mode with hue
+				if (hsv.h === 0) {
+					// hue is set to 0, use previous value
+					hsv.h = parseInt(this.textInputsFreeze.h);
 				}
-				const range = {
-					h: 360,
-					s: 1,
+				if (this.textInputsFreeze.hasOwnProperty('s') && this.textInputsFreeze.hasOwnProperty('v') && hsv.v === 0) {
+					// fix for editing sat but v is 0, so it converts to 0
+					let s = this.textInputsFreeze.s;
+					const isPercent = (s.indexOf('%') !== -1);
+					s = parseFloat(s);
+					if (!s || s < 0) s = 0;
+					else if (isPercent || s > 1) {
+						s = Math.min(s * 0.01, 1);
+					}
+					hsv.s = s;
 				}
-				if (!value || value < 0) {
-					// NaN or < 0
-					value = 0;
-				} else if (value > range[component]) {
-					// value > allowed
-					value = range[component];
-				}
-				// otherwise value is ok, leave it as is
-				
-				hsv[component] = value;
-			} 
+			}
 
 			// assign new values with gate for the convertion noise
 			const threshold = {
@@ -330,14 +338,14 @@ export default {
 					}
 				}
 			} else {
-				// editing alpha assign it right away. Don't touch other components
+				// editing alpha, assign it right away. Don't touch other components
 				this.a = hsv.a;
 			}
 		},
 		textInputFocusHandler(e) {
 			// if focused from blur, freeze current color
 			// if focused from another text input, don't update
-			if (!this.textInputActive) this.textInputsFreeze = { ...this.textInputs };
+			if (!this.textInputActive) this.textInputsFreeze = { ...this.processedTextInputs };
 			this.textInputActive = e.target.dataset.component;
 		},
 		textInputBlurHandler(e) {
