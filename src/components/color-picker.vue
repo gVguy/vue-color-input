@@ -4,14 +4,14 @@
 			<canvas class="slider-canvas" ref="saturationCanvas"></canvas>
 			<div class="saturation-pointer" ref="saturationPointer" :style="[saturationPointerStyles, {background: hexString}]"></div>
 		</div>
-		<div class="slider-area" @pointerdown="huePickStart" :style="sliderAreaStyles">
-			<div class="slider" ref="firstSlider" :style="sliderStyles">
+		<div class="slider" @pointerdown="huePickStart">
+			<div class="slider-container">
 				<canvas class="slider-canvas" ref="hueCanvas"></canvas>
 			</div>
 			<div class="slider-pointer" ref="huePointer" :style="[ huePointerStyles, pureHueBackground ]"></div>
 		</div>
-		<div v-if="!disableAlpha" class="slider-area" @pointerdown="alphaPickStart" :style="sliderAreaStyles">
-			<div class="slider transparency-pattern" :style="sliderStyles">
+		<div v-if="!disableAlpha" class="slider" @pointerdown="alphaPickStart">
+			<div class="slider-container transparency-pattern">
 				<div class="slider-canvas" ref="alphaCanvas" :style="alphaCanvasStyles"></div>
 			</div>
 			<div class="slider-pointer" ref="alphaPointer" :style="alphaPointerStyles">
@@ -110,24 +110,14 @@ export default {
 		hexString() {
 			return this.color.toHexString()
 		},
-		sliderAreaStyles() {
-			return {
-				width: (this.sliderWidth) ? this.sliderWidth + 'px' : '100%'
-			}
-		},
-		sliderStyles() {
-			return (this.sliderWidth) ? {
-				width: '100%'
-			} : null;
-		},
 		huePointerStyles() {
 			return {
-				transform: 'translateX(' + (this.hueTranslateX - this.sliderPointerWidth * .5) + 'px)'
+				transform: 'translate(' + (this.hueTranslateX - this.sliderPointerWidth * .5) + 'px, -50%)'
 			}
 		},
 		alphaPointerStyles() {
 			return {
-				transform: 'translateX(' + (this.alphaTranslateX - this.sliderPointerWidth * .5) + 'px)'
+				transform: 'translate(' + (this.alphaTranslateX - this.sliderPointerWidth * .5) + 'px, -50%)'
 			}
 		},
 		alphaPointerTransparentStyles() {
@@ -386,9 +376,6 @@ export default {
 			this.pickerHeight = height;
 			this.pickerWidth = width;
 
-			// get slider width for slider-area width
-			this.sliderWidth = this.$refs.firstSlider.offsetWidth;
-
 			// get canvas rects and set initial values
 			this.getCanvasRects();
 			this.hueTranslateX = this.h * this.hueCanvasRect.width / 360;
@@ -484,19 +471,18 @@ export default {
 		justify-content: center;
 		align-items: center;
 	}
-	.slider-area {
+	.slider {
+		width: 85%;
 		margin: 10px auto;
 		position: relative;
 	}
-	.slider {
+	.slider-container {
 		display: block;
-		width: 85%;
 		height: 6px;
 		top: 50%;
-		position: absolute;
+		width: 100%;
 		border-radius: 3px;
 		overflow: hidden;
-		transform: translateY(-50%);
 		background-size: contain;
 	}
 	.slider-canvas {
@@ -504,6 +490,9 @@ export default {
 		display: block;
 	}
 	.slider-pointer {
+		position: absolute;
+		top: 50%;
+		left: 0;
 		width: 12px;
 		height: 12px;
 		border-radius: 50%;
@@ -514,7 +503,6 @@ export default {
 	}
 	.transparency-pattern {
 		background-image: var(--transparent-pattern);
-		// background-image: url('~@/assets/method-transparent-pattern.svg');
 	}
 	.pointer-color {
 		@extend %fill-100;
@@ -531,6 +519,7 @@ export default {
 	}
 	.saturation-pointer {
 		@extend .slider-pointer;
+		top: auto;
 		width: 20px;
 		height: 20px;
 		position: absolute;
