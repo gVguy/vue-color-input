@@ -172,7 +172,7 @@ _Note 2: format without type is allowed, type without format is not._
 #### Default value
 Calculated to match the input.
 
-#### Example usage
+#### Example
 ```xml
 <color-input v-model="color" format="rgb object" />
 ```
@@ -194,7 +194,7 @@ _Note: Omitting the second parameter results in center alignment, making `"top"`
 #### Default value
 `bottom`
 
-#### Example usage
+#### Example
 ```xml
 <color-input v-model="color" position="right top" />
 ```
@@ -215,7 +215,7 @@ Boolean
 #### Default value
 `false`
 
-#### Example usage
+#### Example
 ```xml
 <color-input v-model="color" :disabled="!allowColorAdjustment" />
 ```
@@ -224,7 +224,7 @@ Boolean
 
 If you set this to `true`, alpha slider will be removed from the color picker, and the returned color will always have full opacity.
 
->Specifying name or hex as the target `format` will make this property default to `true`, and ignore any passed value.
+>Specifying name or hex as the target `format` will make this property default to `true` and ignore any passed value.
 
 #### Type
 Boolean
@@ -238,7 +238,7 @@ Boolean
 `false`,
 `true` if target format is hex or name
 
-#### Example usage
+#### Example
 ```xml
 <color-input v-model="color" disable-alpha />
 ```
@@ -258,13 +258,99 @@ Boolean
 #### Default value
 `false`
 
-#### Example usage
+#### Example
 ```xml
 <color-input v-model="color" disable-text-inputs />
 ```
 
+# Styling
 
+As previously mentioned, applying styles to vue-color-input is a breeze. Default CSS is written with custumizability in mind, so anything you want to style will likely work as expected, and the whole component's layout will not get screwed up by that.
 
+To override factory styles, you should address elemets through `.color-input` parent selector, e.g. `.color input .box { }`.
 
+### Class names
+
+| class               | description                                             |
+|---------------------|---------------------------------------------------------|
+| .box                | Initial clickable box                                   |
+| .picker-popup       | Popup color picker window                               |
+| .saturation-area    | Picking area where you select saturation and brightness |
+| .slider             | Hue and opacity sliders (track)                         |
+| .saturation-pointer | Pointer in the saturation-brightness area               |
+| .slider-pointer     | Pointer on a slider                                     |
+| .text-input         | Text inputs of the color picker                         |
+
+Feel free to scout the HTML for more class names if theese don't cut it.
+
+### Example
+
+```css
+.color-input .box {
+	/* make clickable box a 100x100 circle */
+	width: 100px;
+	height: 100px;
+	border-radius: 50px;
+}
+.color-input .picker-popup {
+	/* dark mode for popup window */
+	background: #000;
+	color: #fbfbfb;
+	/* and make it wide */
+	width: 400px;
+}
+.color-input .slider {
+	/* thin out the sliders and make them wider */
+	height: 2px;
+	width: 92%;
+}
+.color-input .saturation-area {
+	/* bigger picking area */
+	height: 150px;
+}
+.color-input .slider-pointer {
+	/* make slider pointers square-ish and 10x10 */
+	border-radius: 4px;
+	width: 10px;
+	height: 10px;
+}
+.color-input .saturation-pointer {
+	/* increase saturation picker size */
+	width: 40px;
+	height: 40px;
+}
+```
+
+# Events
+
+The instance provides hooks for custom handling of key events.
+
+### Event names
+
+| event                | description                                                                                                                                                                         | payload                                                        |
+|----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------|
+| mounted              | lifecycle hook, emitted from root component's mounted()                                                                                                                             |                                                                |
+| beforeUnmount        | lifecycle hook, emitted from root component's beforeUnmount()                                                                                                                       |                                                                |
+| pickStart            | color picking process is initiated, popup is opening                                                                                                                                |                                                                |
+| pickEnd              | color picking process is finished, popup will close now                                                                                                                             |                                                                |
+| saturationInputStart | saturation-brightness adjustment has begun. This is only emitted when pointerdown inside saturation-brightness area is registered. This will _not_ emit when text inputs are edited | current state of saturation & value (hsv) `{ s: 0.5, v: 0.5 }` |
+| saturationInputEnd   | saturation-brightness adjustment has ended. This is only emitted when pointerdown inside saturation-brightness area is registered. This will _not_ emit when text inputs are edited | current state of saturation & value (hsv) `{ s: 0.5, v: 0.5 }` |
+| saturationInput      | saturation-brightness is being adjusted. This will emit every time saturation-brightness is changed, including text inputs                                                          | current state of saturation & value (hsv) `{ s: 0.5, v: 0.5 }` |
+| hueInputStart        | hue adjustment has begun. This is only emitted when pointerdown over the hue slider is registered. This will _not_ emit when hue is changed from text inputs                        | current state of hue `{ h: 180 }`                              |
+| hueInputEnd          | hue adjustment has ended. This is only emitted when pointerdown over the hue slider is registered. This will _not_ emit when hue is changed from text inputs                        | current state of hue `{ h: 180 }`                              |
+| hueInput             | hue is being adjusted. This will emit every time hue is changed, including text inputs                                                                                              | current state of hue `{ h: 180 }`                              |
+| alphaInputStart      | alpha adjustment has begun. This is only emitted when pointerdown over the alpha slider is registered. This will _not_ emit when alpha is changed from text inputs                  | current state of alpha `{ a: 0.5 }`                            |
+| alphaInputEnd        | alpha adjustment has ended. This is only emitted when pointerdown over the alpha slider is registered. This will _not_ emit when alpha is changed from text inputs                  | current state of alpha `{ a: 0.5 }`                            |
+| alphaInput           | alpha is being adjusted. This will emit every time alpha is changed, including text inputs                                                                                          | current state of alpha `{ a: 0.5 }`                            |
+
+### Example
+
+```xml
+<color-input v-model="color"
+@mounted="colorPickerMountedHandler"
+@saturationInputStart="saturationStartHandler"
+@hueInputStart="hueStartHandler"
+@alphaInput="alphaInputHandler" />
+```
 
 

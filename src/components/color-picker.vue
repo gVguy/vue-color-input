@@ -8,15 +8,19 @@
 			<div class="slider-container">
 				<canvas class="slider-canvas" ref="hueCanvas"></canvas>
 			</div>
-			<div class="slider-pointer" ref="huePointer" :style="[ huePointerStyles, pureHueBackground ]"></div>
+			<div class="slider-active-area">
+				<div class="slider-pointer" ref="huePointer" :style="[ huePointerStyles, pureHueBackground ]"></div>
+			</div>
 		</div>
 		<div v-if="!disableAlpha" class="slider" @pointerdown="alphaPickStart">
 			<div class="slider-container transparency-pattern">
 				<div class="slider-canvas" ref="alphaCanvas" :style="alphaCanvasStyles"></div>
 			</div>
-			<div class="slider-pointer" ref="alphaPointer" :style="alphaPointerStyles">
-				<div class="pointer-transparent" :style="alphaPointerTransparentStyles">
-					<div class="pointer-color" :style="[alphaPointerColorStyles, {background: hexString}]"></div>
+			<div class="slider-active-area">
+				<div class="slider-pointer" ref="alphaPointer" :style="alphaPointerStyles">
+					<div class="pointer-transparent" :style="alphaPointerTransparentStyles">
+						<div class="pointer-color" :style="[alphaPointerColorStyles, {background: hexString}]"></div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -112,12 +116,12 @@ export default {
 		},
 		huePointerStyles() {
 			return {
-				transform: 'translate(' + (this.hueTranslateX - this.sliderPointerWidth * .5) + 'px, -50%)'
+				transform: 'translate(' + (this.hueTranslateX - this.sliderPointerWidth * .5) + 'px)'
 			}
 		},
 		alphaPointerStyles() {
 			return {
-				transform: 'translate(' + (this.alphaTranslateX - this.sliderPointerWidth * .5) + 'px, -50%)'
+				transform: 'translate(' + (this.alphaTranslateX - this.sliderPointerWidth * .5) + 'px)'
 			}
 		},
 		alphaPointerTransparentStyles() {
@@ -473,14 +477,14 @@ export default {
 	}
 	.slider {
 		width: 85%;
+		height: 6px;
 		margin: 18px auto;
 		position: relative;
 	}
 	.slider-container {
 		display: block;
-		height: 6px;
+		@extend %fill-100;
 		top: 50%;
-		width: 100%;
 		border-radius: 3px;
 		overflow: hidden;
 		background-size: contain;
@@ -489,10 +493,14 @@ export default {
 		@extend %fill-100;
 		display: block;
 	}
-	.slider-pointer {
+	.slider-active-area {
 		position: absolute;
 		top: 50%;
+		transform: translateY(-50%);
 		left: 0;
+		width: 100%;
+	}
+	.slider-pointer {
 		width: 12px;
 		height: 12px;
 		border-radius: 50%;
@@ -525,6 +533,7 @@ export default {
 		position: absolute;
 		bottom: 0;
 		left: 0;
+		z-index: 10001;
 	}
 	.text-inputs-area {
 		display: flex;
