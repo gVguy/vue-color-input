@@ -74,6 +74,8 @@
 			format: String,
 		},
   		emits: [
+  			'mounted',
+  			'beforeUnmount',
   			'update:modelValue',
   			'pickStart',
   			'pickEnd',
@@ -115,7 +117,7 @@
 					return v === q ? v : v + ' ' + q;
 				})).filter(v => v);
 
-				let position = this.position;
+				let position = this.position.toLowerCase(); // allow 'bOtToM RiGHt'
 				if (!combinations.includes(position)) {
 					if (position) {
 						// position is defined but invalid
@@ -280,9 +282,11 @@
 			this.init();
 		},
 		mounted() {
+			this.$emit('mounted');
 		},
 		beforeUnmount() {
 			this.pickEnd();
+			this.$emit('beforeUnmount');
 		},
 		watch: {
 			modelValue() {

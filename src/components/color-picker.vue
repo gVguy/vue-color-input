@@ -38,7 +38,7 @@
 					@keypress.enter="$event.target.blur()">
 				</div>
 			</div>
-			<div class="text-format-arrows">
+			<div class="text-format-arrows" :style="arrowsStyles">
 				<div class="arrow up" @click="textInputFormatChange(-1)"></div>
 				<div class="arrow down" @click="textInputFormatChange(1)"></div>
 			</div>
@@ -96,7 +96,8 @@ export default {
 			pickerWidth: 0,
 			pickerHeight: 0,
 			textInputActive: null,
-			textInputsFreeze: {}
+			textInputsFreeze: {},
+			arrowColor: '#0f0f0f'
 		}
 	},
 	computed: {
@@ -138,6 +139,11 @@ export default {
 			const translateY = this.saturationTranslateY + this.saturationPointerHeight * .5;
 			return {
 				transform: 'translate(' + translateX + 'px, ' + translateY + 'px)'
+			}
+		},
+		arrowsStyles() {
+			return {
+				'--arrow-color': this.arrowColor
 			}
 		},
 		pickerPosition() {
@@ -378,6 +384,12 @@ export default {
 			this.sliderPointerWidth = this.$refs.huePointer.offsetWidth;
 			this.saturationPointerWidth = this.$refs.saturationPointer.offsetWidth;
 			this.saturationPointerHeight = this.$refs.saturationPointer.offsetHeight;
+
+			// get background-color to color the arrows
+			const background = window.getComputedStyle(this.$refs.pickerRoot).getPropertyValue('background-color');
+			if (this.tinycolor(background).isDark()) {
+				this.arrowColor = '#fbfbfb';
+			}
 		},
 		fillCanvas() {
 			// fill hue canvas
@@ -556,10 +568,10 @@ export default {
 				border-right: 5px solid transparent;
 			}
 			&.up::before {
-				border-bottom: 5px solid #0f0f0f;
+				border-bottom: 5px solid var(--arrow-color);
 			}
 			&.down::before {
-				border-top: 5px solid #0f0f0f;
+				border-top: 5px solid var(--arrow-color);
 			}
 			&:hover {
 				opacity: .8;

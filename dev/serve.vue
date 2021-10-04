@@ -45,8 +45,8 @@
 		:disable-alpha="disableAlpha"
 		:disabled="disabled"
 		:disable-text-inputs="disableTextInputs"
-		@hook:mounted="mountedHandler"
-		@hook:beforeUnmount="beforeUnmountHandler"
+		@mounted="mountedHandler"
+		@beforeUnmount="beforeUnmountHandler"
 		@pickStart="pickStartHandler"
 		@pickEnd="pickEndHandler"
 		@hueInputStart="logEvent('hueInputStart', $event)"
@@ -276,9 +276,15 @@
 				// observe box size changes
 				if (!this.boxObserver) this.boxObserver = new ResizeObserver(this.$refs.colorInput.getBoxRect);
 				this.boxObserver.observe(this.$refs.colorInput.$refs.boxRoot);
+
+				// log the event
+				this.logEvent('mounted');
 			},
 			beforeUnmountHandler() {
 				this.boxObserver.disconnect();
+
+				//log the event
+				this.logEvent('beforeUnmount');
 			},
 			pickStartHandler() {
 				setTimeout(() => {
@@ -300,11 +306,11 @@
 				if (conflicts[v] === q) return false;
 				return v === q ? v : v + ' ' + q;
 			})).filter(v => v);
-		},
-		mounted() {
+
 			// empty object for log records
 			this.lastLog = {};
-
+		},
+		mounted() {
 			// style node for demo styles
 			this.styleSheet = document.createElement("style");
 			this.styleSheet.type = "text/css";

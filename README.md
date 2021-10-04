@@ -133,3 +133,48 @@ Invalid color initialy diasplays as black. Default output format will be set to 
 "rgba(0, 0, 0, 0.1)" // rgb(a) output
 ```
 
+## format _`optional`_
+
+Here you can supply the color format you want the output to be in.
+
+#### Type
+String
+
+#### Syntax
+```js
+"format type" || "type format" || "format"
+```
+Format is the color model you want the output to be returned in.
+Type
+Both `"hsl object"` & `"object hsl"` are valid values.
+
+#### Allowed values
+```js
+// all allowed values
+[ "rgb", "hsv", "hsl", "rgb object", "rgb string", "hsv object", "hsv string", "hsl object", "hsl string", "name", "name string", "hex", "hex string", "hex8", "hex8 string" ]
+
+// allowed formats
+[ "rgb", "hsv", "hsl", "hsv"]
+```
+
+#### Default value
+None. Output format defaults to initial color format.
+
+## position _`optional`_
+
+This is how you specify the position of the popup color picker window relative to the clickable box.
+
+#### Type
+String ()
+
+#### Allowed values
+```js
+[ "top", "top right", "top left", "top center", "right top", "right", "right bottom", "right center", "bottom right", "bottom", "bottom left", "bottom center", "left top", "left bottom", "left", "left center" ]
+```
+Pretty intuitive: the first value is the direction from the box in which the popup will appear, the second is how it will align.
+_Note: Omitting the second parameter results in center alignment, making `"top"` a shortcut for `"top center"`_
+
+#### Default value
+`bottom`
+
+
