@@ -57,6 +57,7 @@ Under the hood vue-color-input uses tinycolor for color conversion. So everythin
 ### Output
 
 By default output will be a string or an object in the same color model as the initial value.
+
 For example:
 ```js
 // in parent component
@@ -96,4 +97,39 @@ In the same scenario the resulting output would be
 { "h": 0, "s": 1, "l": 0.8, "a": 0.5 }
 ```
 
+#### name|hex -> rgba fallback
+
+However, if initial color format was `name` (e.g. `"purple"`) or `hex` (e.g. `"#800080"`), and then alpha is changed to be less than `1`, output will be formatted as `rgba`:
+```js
+"#cd5c5c" // hex input
+
+/* user changes alpha to 0.9 */
+
+"rgba(205, 92, 92, 0.9)" // rgba output
+```
+
+_Note: this behaviour does not apply if `format` property is explicitly set to be `hex` or `name`._
+_Note 2: if initial color format is `hex8` (e.g. `#800080ff`), output will be `hex8` also, unless specified differently by `format` property._
+
+#### name -> hex fallback
+
+If initial color format was `name`, but the resulting output color does not have a name equivalent, `hex` value will be output instead:
+```js
+"indianred" // name input
+
+/* user changes hue to 180 */
+
+"#5ccdcc" // hex output
+```
+
+#### invalid -> rgb fallback
+
+Invalid color initialy diasplays as black. Default output format will be set to `rgb`:
+```js
+"ironmanred" // invalid string input
+
+/* user changes alpha to 0.1 */
+
+"rgba(0, 0, 0, 0.1)" // rgb(a) output
+```
 
