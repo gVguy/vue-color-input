@@ -473,7 +473,7 @@ export default {
 	}
 	.slider {
 		width: 85%;
-		margin: 10px auto;
+		margin: 18px auto;
 		position: relative;
 	}
 	.slider-container {
