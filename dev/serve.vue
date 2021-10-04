@@ -90,15 +90,13 @@
 			<div class="detailsBlock">
 				<h2>Event Log</h2>
 				<div class="event-log-wrapper">
-					<div class="event-log" ref="eventLog" :style="logStyles">
-						<p v-for="line in log">{{line}}</p>
-					</div>
-					<div class="log-overlay">
+					<textarea ref="eventLog" class="event-log" readonly v-text="log"></textarea>
+					<div :class="['log-overlay', { disabled: !logEnabled }]">
 						<h2 v-if="!logEnabled">Log disabled</h2>
 					</div>
 				</div>
-				<div>
-					<button @pointerdown.prevent.stop @click="log = []">Clear</button>
+				<div class="log-buttons">
+					<button @pointerdown.prevent.stop @click="log = ''">Clear</button>
 					<button @pointerdown.prevent.stop @click="logEnabled = !logEnabled">{{ logEnabled ? 'Disable' : 'Enable' }}</button>
 				</div>
 				<p class="small">NB: for perfomance purposes, this log is limited to recording events of the <i>same type</i> not more often than once in 100ms</p>
@@ -157,7 +155,7 @@
 				disableAlpha: false,
 				disabled: false,
 				disableTextInputs: false,
-				log: [],
+				log: '',
 				logEnabled: true,
 				format: '',
 				type: '',
@@ -260,7 +258,7 @@
 				this.styleSheet.innerText = this.styles;
 				// this.$refs.colorInput.getBoxRect();
 			},
-			logEvent(eventName, value) {
+			logEvent(eventName, value='') {
 				if (!this.logEnabled) return;
 				const now = Date.now();
 				if (this.lastLog[eventName] && now - this.lastLog[eventName] < 100) return;
@@ -268,7 +266,7 @@
 				this.lastLog[eventName] = now;
 
 				if (typeof value === 'object') value = JSON.stringify(value);
-				this.log.unshift(eventName + ' ' + value);
+				this.log = eventName + ' ' + value + '\n' + this.log;
 			},
 			resetDemoStyles() {
 				this.styles = demoStyles;
@@ -450,12 +448,7 @@
 		height: 100%;
 		overflow-y: auto;
 		overflow-x: hidden;
-	}
-	.event-log p {
-		margin: 0;
-		&:last-child {
-			margin-bottom: 40px;
-		}
+		resize: none;
 	}
 	.log-overlay {
 		display: flex;
@@ -466,8 +459,13 @@
 		left: 0;
 		width: 100%;
 		height: 100%;
-		background: linear-gradient(0deg, rgb(250,250,250) 0%, rgba(250,250,250,0) 70%);
 		pointer-events: none;
+		&.disabled {
+			background: rgba(250,250,250,.8)
+		}
+	}
+	.log-buttons {
+		margin-top: 5px;
 	}
 	.small {
 		font-size: .8em;
