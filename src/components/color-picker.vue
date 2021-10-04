@@ -4,14 +4,14 @@
 			<canvas class="slider-canvas" ref="saturationCanvas"></canvas>
 			<div class="saturation-pointer" ref="saturationPointer" :style="[saturationPointerStyles, {background: hexString}]"></div>
 		</div>
-		<div class="slider-area" @pointerdown="huePickStart">
-			<div class="slider">
+		<div class="slider-area" @pointerdown="huePickStart" :style="sliderAreaStyles">
+			<div class="slider" ref="firstSlider" :style="sliderStyles">
 				<canvas class="slider-canvas" ref="hueCanvas"></canvas>
 			</div>
 			<div class="slider-pointer" ref="huePointer" :style="[ huePointerStyles, pureHueBackground ]"></div>
 		</div>
-		<div v-if="!disableAlpha" class="slider-area" @pointerdown="alphaPickStart">
-			<div class="slider transparency-pattern">
+		<div v-if="!disableAlpha" class="slider-area" @pointerdown="alphaPickStart" :style="sliderAreaStyles">
+			<div class="slider transparency-pattern" :style="sliderStyles">
 				<div class="slider-canvas" ref="alphaCanvas" :style="alphaCanvasStyles"></div>
 			</div>
 			<div class="slider-pointer" ref="alphaPointer" :style="alphaPointerStyles">
@@ -97,7 +97,8 @@ export default {
 			pickerHeight: 0,
 			textInputActive: null,
 			textInputsFreeze: {},
-			arrowColor: '#0f0f0f'
+			arrowColor: '#0f0f0f',
+			sliderWidth: 0
 		}
 	},
 	computed: {
@@ -108,6 +109,16 @@ export default {
 		},
 		hexString() {
 			return this.color.toHexString()
+		},
+		sliderAreaStyles() {
+			return {
+				width: (this.sliderWidth) ? this.sliderWidth + 'px' : '100%'
+			}
+		},
+		sliderStyles() {
+			return (this.sliderWidth) ? {
+				width: '100%'
+			} : null;
 		},
 		huePointerStyles() {
 			return {
@@ -374,7 +385,10 @@ export default {
 			const { width, height } = this.$refs.pickerRoot.getBoundingClientRect();
 			this.pickerHeight = height;
 			this.pickerWidth = width;
-			
+
+			// get slider width for slider-area width
+			this.sliderWidth = this.$refs.firstSlider.offsetWidth;
+
 			// get canvas rects and set initial values
 			this.getCanvasRects();
 			this.hueTranslateX = this.h * this.hueCanvasRect.width / 360;
@@ -471,16 +485,15 @@ export default {
 		align-items: center;
 	}
 	.slider-area {
-		width: 85%;
 		margin: 10px auto;
 		position: relative;
 	}
 	.slider {
 		display: block;
+		width: 85%;
 		height: 6px;
 		top: 50%;
 		position: absolute;
-		width: 100%;
 		border-radius: 3px;
 		overflow: hidden;
 		transform: translateY(-50%);

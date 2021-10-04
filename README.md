@@ -44,17 +44,19 @@ export.default {
 <color-input v-model="color" />
 ```
 
+# Properties
+
 ## v-model
 
 This is where you supply the variable holding the color to be adjusted by end user.
 Model value is allowed to be changed externally too, vue-color-input will adjust accordingly.
 When first initialized and every time v-model value updates _from outside the component_, incoming color format is stored to be matched by output.
 
-### Input
+### Input (initial value)
 
 Under the hood vue-color-input uses tinycolor for color conversion. So everything tinycolor [accepts as input](https://github.com/bgrins/TinyColor#accepted-string-input), is valid here as well (both string and object).
 
-### Output
+### Output (return value)
 
 By default output will be a string or an object in the same color model as the initial value.
 
@@ -71,7 +73,7 @@ export.default {
 ```xml
 <!-- template -->
 
-<color-input v-model="color">
+<color-input v-model="color" />
 ```
 User adjusts hue to `0`, now `color` becomes
 ```js
@@ -97,7 +99,10 @@ In the same scenario the resulting output would be
 { "h": 0, "s": 1, "l": 0.8, "a": 0.5 }
 ```
 
-#### name|hex -> rgba fallback
+vue-color-input will always try to output color in the same color model as the initial value (unless target format is specified explicitly by `format` property.
+However in some cases that would not be possible. For those colors it will fall back to different formats.
+
+#### name || hex -> rgba fallback
 
 However, if initial color format was `name` (e.g. `"purple"`) or `hex` (e.g. `"#800080"`), and then alpha is changed to be less than `1`, output will be formatted as `rgba`:
 ```js
@@ -108,7 +113,7 @@ However, if initial color format was `name` (e.g. `"purple"`) or `hex` (e.g. `"#
 "rgba(205, 92, 92, 0.9)" // rgba output
 ```
 
-_Note: this behaviour does not apply if `format` property is explicitly set to be `hex` or `name`._
+_Note: this behavior does not apply if `format` property is explicitly set to be `hex` or `name`._
 _Note 2: if initial color format is `hex8` (e.g. `#800080ff`), output will be `hex8` also, unless specified differently by `format` property._
 
 #### name -> hex fallback
@@ -137,35 +142,47 @@ Invalid color initialy diasplays as black. Default output format will be set to 
 
 Here you can supply the color format you want the output to be in.
 
+The value consists of two arguments: format & type. The order of two is inconsequential, e.g. both `"hsl object"` & `"object hsl"` are valid values.
+__Format__ is the target color model that the return value is converted to. `[ "rgb", "hsv", "hsl", "hex", "name" ]`
+__Type__ is data type of the return value. `[ "string", "object" ]`
+If you want to use v-model value for styling, `"string"` type should do the job. On the other hand, if you want to continue processing the data, `"object"` is probably more useful.
+
+Hsv & hsl color component values are presented differently in different output types:
+```js
+"hsl(0, 53%, 58%)" // "hsl string"
+
+{ "h": 0, "s": 0.531, "l": 0.582, "a": 1 } // "hsl object"
+```
+Notice how strings contain percent-based values, and object 0-1 floats.
+
+>Note that name & hex formats dont support alpha channel. Specifying either of them as target format will prevent vue-color-input from falling back to rgba. Instead, it will disable alpha slider and always return full opacity color.
+>If this is not the behavior that you want, and you'd rather it fall back to rgba to support alpha, you should not specify the format.
+
 #### Type
 String
-
-#### Syntax
-```js
-"format type" || "type format" || "format"
-```
-Format is the color model you want the output to be returned in.
-Type
-Both `"hsl object"` & `"object hsl"` are valid values.
 
 #### Allowed values
 ```js
 // all allowed values
-[ "rgb", "hsv", "hsl", "rgb object", "rgb string", "hsv object", "hsv string", "hsl object", "hsl string", "name", "name string", "hex", "hex string", "hex8", "hex8 string" ]
-
-// allowed formats
-[ "rgb", "hsv", "hsl", "hsv"]
+[ "rgb", "rgb object", "rgb string", "hsv", "hsv object", "hsv string", "hsl", "hsl object", "hsl string", "name", "name string", "hex", "hex string", "hex8", "hex8 string" ]
 ```
+_Note: `"name object"`, `"hex object"` & `"hex8 object"`, make no sense and therefore are illegal._
+_Note 2: format without type is allowed, type without format is not._
 
 #### Default value
-None. Output format defaults to initial color format.
+Calculated to match the input.
+
+#### Example usage
+```xml
+<color-input v-model="color" format="rgb object" />
+```
 
 ## position _`optional`_
 
-This is how you specify the position of the popup color picker window relative to the clickable box.
+This is where you specify the position of the popup color picker window relative to the clickable box.
 
 #### Type
-String ()
+String
 
 #### Allowed values
 ```js
@@ -176,5 +193,78 @@ _Note: Omitting the second parameter results in center alignment, making `"top"`
 
 #### Default value
 `bottom`
+
+#### Example usage
+```xml
+<color-input v-model="color" position="right top" />
+```
+
+## disabled _`optional`_
+
+Setting this to `true` will make the initial box nonresponsive to user clicks. The popup will not appear.
+However the box will still react to v-model changes, should they come from elsewhere.
+
+#### Type
+Boolean
+
+#### Allowed values
+```js
+[ true, false ]
+```
+
+#### Default value
+`false`
+
+#### Example usage
+```xml
+<color-input v-model="color" :disabled="!allowColorAdjustment" />
+```
+
+## disable-alpha _`optional`_
+
+If you set this to `true`, alpha slider will be removed from the color picker, and the returned color will always have full opacity.
+
+>Specifying name or hex as the target `format` will make this property default to `true`, and ignore any passed value.
+
+#### Type
+Boolean
+
+#### Allowed values
+```js
+[ true, false ]
+```
+
+#### Default value
+`false`,
+`true` if target format is hex or name
+
+#### Example usage
+```xml
+<color-input v-model="color" disable-alpha />
+```
+
+## disable-text-inputs _`optional`_
+
+With this property you can hide the section of the color picker containing the text inputs.
+
+#### Type
+Boolean
+
+#### Allowed values
+```js
+[ true, false ]
+```
+
+#### Default value
+`false`
+
+#### Example usage
+```xml
+<color-input v-model="color" disable-text-inputs />
+```
+
+
+
+
 
 
