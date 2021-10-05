@@ -45,10 +45,10 @@
 		:disable-alpha="disableAlpha"
 		:disabled="disabled"
 		:disable-text-inputs="disableTextInputs"
-		@mounted="mountedHandler"
-		@beforeUnmount="beforeUnmountHandler"
-		@pickStart="pickStartHandler"
-		@pickEnd="pickEndHandler"
+		@mounted="logEvent('mounted');"
+		@beforeUnmount="logEvent('beforeUnmount');"
+		@pickStart="logEvent('pickStart')"
+		@pickEnd="logEvent('pickEnd')"
 		@hueInputStart="logEvent('hueInputStart', $event)"
 		@hueInputEnd="logEvent('hueInputEnd', $event)"
 		@hueInput="logEvent('hueInput', $event)"
@@ -64,7 +64,6 @@
 				<h2>Style it</h2>
 				<textarea
 				@focus="textareaFocusHandler"
-				@pointerdown.stop
 				@input="updateStyles"
 				@keydown="textareaKeyHandler"
 				ref="textarea"
@@ -125,10 +124,7 @@
 	import { defineComponent } from 'vue';
 	import ColorInput from '@/color-input.vue';
 
-	const demoStyles = `.color-input {
-	margin-bottom: 180px;
-}
-.color-input .box {
+	const demoStyles = `.color-input .box {
 	width: 100px;
 	height: 100px;
 	border-radius: 50px;
@@ -215,7 +211,7 @@
 				this.type = (this.type === t) ? '' : t; 
 			},
 			textareaFocusHandler() {
-				this.$refs.colorInput.pickStart();
+				// this.$refs.colorInput.pickStart();
 			},
 			textareaKeyHandler(e) {
 				const textarea = e.target;
@@ -256,7 +252,6 @@
 			},
 			updateStyles() {
 				this.styleSheet.innerText = this.styles;
-				// this.$refs.colorInput.getBoxRect();
 			},
 			logEvent(eventName, value='') {
 				if (!this.logEnabled) return;
@@ -272,38 +267,6 @@
 				this.styles = demoStyles;
 				this.updateStyles();
 			},
-			mountedHandler() {
-				// observe box size changes
-				if (!this.boxObserver) this.boxObserver = new ResizeObserver(this.$refs.colorInput.getBoxRect);
-				this.boxObserver.observe(this.$refs.colorInput.$refs.boxRoot);
-
-				// log the event
-				this.logEvent('mounted');
-			},
-			beforeUnmountHandler() {
-				this.boxObserver.disconnect();
-
-				//log the event
-				this.logEvent('beforeUnmount');
-			},
-			pickStartHandler() {
-				setTimeout(() => {
-					// observe picker root changes
-					this.pickerObserver = new ResizeObserver(this.$refs.colorInput.$refs.picker.init);
-					this.pickerObserver.observe(this.$refs.colorInput.$refs.picker.$refs.pickerRoot);
-					// observe slider size changes
-					this.sliderObserver = new ResizeObserver(this.$refs.colorInput.$refs.picker.init);
-					this.sliderObserver.observe(this.$refs.colorInput.$refs.boxRoot.querySelector('.slider'));
-				},0);
-				this.logEvent('pickStart', '');
-			},
-			pickEndHandler() {
-				// disconnect observers
-				this.pickerObserver.disconnect();
-				this.sliderObserver.disconnect();
-
-				this.logEvent('pickEnd', '');
-			}
 		},
 		created() {
 			//create options for position dropdown

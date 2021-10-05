@@ -9,7 +9,7 @@
 				<div class="box-color" :style="boxColorStyles"></div>
 			</div>
 		</div>
-		<transition :name="transition" @beforeEnter="beforeEnterPopup" @after-enter="afterEnterPopup">
+		<transition :name="transition">
 			<color-picker
 			class="picker-popup"
 			:color="this.color"
@@ -18,7 +18,8 @@
 			:boxRect="boxRect"
 			:text-inputs="textInputs"
 			:disable-text-inputs="disableTextInputs"
-			v-if="active"
+			v-show="active && ready"
+			@ready="ready = true"
 			@updateColor="emitUpdate"
 			@textInputFormatChange="textInputFormatChange"
 			@hueInputStart="$emit('hueInputStart', $event)"
@@ -57,7 +58,7 @@
 			position: String,
 			transition: {
 				type: String,
-				default: 'color-input-picker-popup'
+				default: 'picker-popup'
 			},
 			disableAlpha: {
 				type: Boolean,
@@ -95,6 +96,7 @@
 			return {
 				color: null,
 				active: false,
+				ready: false,
 				boxRect: {},
 				innerBoxRect: {},
 				textInputsFormat: null,
@@ -201,16 +203,15 @@
 			},
 		},
 		methods: {
-			beforeEnterPopup(el) {
-				
-			},
-			afterEnterPopup() {
-				this.$refs.picker.getCanvasRects();
-			},
 			pickStart(e) {
 				if (this.active || this.disabled) return;
 				this.getBoxRect();
 				this.active = true;
+
+				// init the picker before showing in case there were some changes to its layout
+				this.ready = false; // picker will emit 'ready' at the end of init
+				this.$refs.picker.init();
+
 				document.body.addEventListener('pointerdown', this.pickEnd);
 				this.$emit('pickStart');
 			},
@@ -370,13 +371,13 @@
 		margin: 10px;
 		user-select: none;
 	}
-	.color-input-picker-popup-enter-from,
-	.color-input-picker-popup-leave-to {
+	.picker-popup-enter-from,
+	.picker-popup-leave-to {
 		transform: translateY(-10px);
 		opacity: 0;
 	}
-	.color-input-picker-popup-enter-active,
-	.color-input-picker-popup-leave-active {
+	.picker-popup-enter-active,
+	.picker-popup-leave-active {
 		transition: transform .3s, opacity .3s;
 	}
 </style>

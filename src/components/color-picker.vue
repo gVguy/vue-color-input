@@ -73,7 +73,8 @@ export default {
 		'saturationInputStart',
 		'saturationInputEnd',
 		'saturationInput',
-		'textInputFormatChange'
+		'textInputFormatChange',
+		'ready'
 	],
 	inject: [ 'tinycolor' ],
 	data() {
@@ -102,7 +103,7 @@ export default {
 			textInputActive: null,
 			textInputsFreeze: {},
 			arrowColor: '#0f0f0f',
-			sliderWidth: 0
+			sliderWidth: 0,
 		}
 	},
 	computed: {
@@ -262,11 +263,6 @@ export default {
 			} else if (e.clientY < this.saturationCanvasRect.y) this.v = 1;
 			else this.v = 0;
 		},
-		getCanvasRects() {
-			this.saturationCanvasRect = this.$refs.saturationCanvas.getBoundingClientRect();
-			this.hueCanvasRect = this.$refs.hueCanvas.getBoundingClientRect();
-			this.alphaCanvasRect = this.disableAlpha ? {} : this.$refs.alphaCanvas.getBoundingClientRect();
-		},
 		emitUpdate(output) {
 			output = output || { h: this.h, s: this.s, v: this.v, a: this.a };
 			this.$emit('updateColor', output);
@@ -371,30 +367,62 @@ export default {
 		textInputFormatChange(dir) {
 			this.$emit('textInputFormatChange', dir);
 		},
+		getCanvasRects() {
+			this.saturationCanvasRect = this.$refs.saturationCanvas.getBoundingClientRect();
+			this.hueCanvasRect = this.$refs.hueCanvas.getBoundingClientRect();
+			this.alphaCanvasRect = this.disableAlpha ? {} : this.$refs.alphaCanvas.getBoundingClientRect();
+		},
 		init() {
+			const pickerRoot = this.$refs.pickerRoot;
+			const computedStyle = window.getComputedStyle(pickerRoot);
+
 			// get color values from model value
 			Object.assign(this.$data, this.color.toHsv());
 
-			// get picker size
-			const { width, height } = this.$refs.pickerRoot.getBoundingClientRect();
-			this.pickerHeight = height;
-			this.pickerWidth = width;
+			const display = computedStyle.getPropertyValue('display');
+			if (display === 'none') {
+				// picker is currently hidden
+				// stealth display
+				pickerRoot.style.display = 'block';
+				pickerRoot.style.visibility = 'hidden';
+			}
 
-			// get canvas rects and set initial values
-			this.getCanvasRects();
-			this.hueTranslateX = this.h * this.hueCanvasRect.width / 360;
-			this.alphaTranslateX = this.a * this.alphaCanvasRect.width;
-			this.saturationTranslateX = this.s * this.saturationCanvasRect.width;
-			this.saturationTranslateY = -this.v * this.saturationCanvasRect.height;
-			this.sliderPointerWidth = this.$refs.huePointer.offsetWidth;
-			this.saturationPointerWidth = this.$refs.saturationPointer.offsetWidth;
-			this.saturationPointerHeight = this.$refs.saturationPointer.offsetHeight;
+			// wait for picker to render (stealthy)
+			// and then get all the necessary values that rely on element being displayed
+			window.requestAnimationFrame(() => {
+				// get picker size
+				const { width, height } = pickerRoot.getBoundingClientRect();
+				this.pickerHeight = height;
+				this.pickerWidth = width;
+
+				// get canvas rects and set initial values
+				this.getCanvasRects();
+				this.hueTranslateX = this.h * this.hueCanvasRect.width / 360;
+				this.alphaTranslateX = this.a * this.alphaCanvasRect.width;
+				this.saturationTranslateX = this.s * this.saturationCanvasRect.width;
+				this.saturationTranslateY = -this.v * this.saturationCanvasRect.height;
+				this.sliderPointerWidth = this.$refs.huePointer.offsetWidth;
+				this.saturationPointerWidth = this.$refs.saturationPointer.offsetWidth;
+				this.saturationPointerHeight = this.$refs.saturationPointer.offsetHeight;
+
+				// all the values collected
+				// hide it back (assuming it was hidden)
+				pickerRoot.style.visibility = null;
+				pickerRoot.style.display = display;
+
+				// wait for it to hide
+				// and then let the parent know picker is ready
+				window.requestAnimationFrame(() => {
+					this.$emit('ready');
+				});
+			});
 
 			// get background-color to color the arrows
-			const background = window.getComputedStyle(this.$refs.pickerRoot).getPropertyValue('background-color');
+			const background = computedStyle.getPropertyValue('background-color');
 			if (this.tinycolor(background).isDark()) {
 				this.arrowColor = '#fbfbfb';
 			}
+
 		},
 		fillCanvas() {
 			// fill hue canvas
@@ -455,11 +483,11 @@ export default {
 		},
 	},
 	mounted() {
-		this.init();
+		this.getCanvasRects();
+		// this.init();
 		this.fillCanvas();
 	},
 	beforeUnmount() {
-		window.removeEventListener('resize', this.getCanvasRects);
 	}
 }
 

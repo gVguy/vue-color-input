@@ -17,8 +17,7 @@
   "module": "dist/color-input.esm.js",
   "unpkg": "dist/color-input.min.js",
   "files": [
-    "dist/*",
-    "src/**/*.vue"
+    "dist/*"
   ],
   "sideEffects": false,
   "scripts": {

@@ -266,21 +266,32 @@ Boolean
 ## transition _`optional`_
 
 Set this to a custom transition name to override factory enter and leave-to transitions of the popup.
->This is based on [Vue enter/leave transitions](https://v3.vuejs.org/guide/transitions-enterleave.html).
+
+This is _not_ the only way to customize color picker transition.
+You can also override default transition classes from css.
+
+>More information about Vue enter/leave transitions [here](https://v3.vuejs.org/guide/transitions-enterleave.html).
 
 #### Type
 String
 
 #### Default value
-`"color-input-picker-popup"`
+`"picker"`
 
 #### Example
 ```xml
 <color-input v-model="color" transition="my-cool-transition" />
 ```
 ```css
-/* specify custom styles and durations */
-
+.my-cool-transition-enter-from,
+.my-cool-transition-leave-to {
+	transform: rotate(240) scale(.5);
+	opacity: 0;
+}
+.my-cool-transition-enter-active,
+.my-cool-transition-leave-active {
+	transition: transform .3s, opacity .3s;
+}
 ```
 
 
