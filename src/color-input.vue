@@ -1,5 +1,5 @@
 <template>
-	<div class="color-input override"
+	<div class="color-input"
 	ref="boxRoot"
 	:style="cssVars">
 		<div :class="['box', { active, disabled }]"
@@ -9,7 +9,7 @@
 				<div class="box-color" :style="boxColorStyles"></div>
 			</div>
 		</div>
-		<transition :name="transition" @after-enter="afterEnterHandler">
+		<transition :name="transition" @beforeEnter="beforeEnterPopup" @after-enter="afterEnterPopup">
 			<color-picker
 			class="picker-popup"
 			:color="this.color"
@@ -201,7 +201,10 @@
 			},
 		},
 		methods: {
-			afterEnterHandler(e) {
+			beforeEnterPopup(el) {
+				
+			},
+			afterEnterPopup() {
 				this.$refs.picker.getCanvasRects();
 			},
 			pickStart(e) {

@@ -192,7 +192,7 @@ Pretty intuitive: the first value is the direction from the box in which the pop
 _Note: Omitting the second parameter results in center alignment, making `"top"` a shortcut for `"top center"`_
 
 #### Default value
-`bottom`
+`"bottom"`
 
 #### Example
 ```xml
@@ -263,6 +263,28 @@ Boolean
 <color-input v-model="color" disable-text-inputs />
 ```
 
+## transition _`optional`_
+
+Set this to a custom transition name to override factory enter and leave-to transitions of the popup.
+>This is based on [Vue enter/leave transitions](https://v3.vuejs.org/guide/transitions-enterleave.html).
+
+#### Type
+String
+
+#### Default value
+`"color-input-picker-popup"`
+
+#### Example
+```xml
+<color-input v-model="color" transition="my-cool-transition" />
+```
+```css
+/* specify custom styles and durations */
+
+```
+
+
+
 # Styling
 
 As previously mentioned, applying styles to vue-color-input is a breeze. Default CSS is written with custumizability in mind, so anything you want to style will likely work as expected, and the whole component's layout will not get screwed up by that.
@@ -273,6 +295,7 @@ To override factory styles, you should address elemets through `.color-input` pa
 
 | class               | description                                             |
 |---------------------|---------------------------------------------------------|
+| .color-input        | Root element                                            |
 | .box                | Initial clickable box                                   |
 | .picker-popup       | Popup color picker window                               |
 | .saturation-area    | Picking area where you select saturation and brightness |
@@ -282,6 +305,15 @@ To override factory styles, you should address elemets through `.color-input` pa
 | .text-input         | Text inputs of the color picker                         |
 
 Feel free to scout the HTML for more class names if theese don't cut it.
+
+### DOM structure
+```xml
+<div class="color-input">
+	<div class="box [active] [disabled]"></div>
+	<div class="picker-popup"><div>
+</div>
+```
+
 
 ### Example
 

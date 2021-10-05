@@ -288,13 +288,20 @@
 			},
 			pickStartHandler() {
 				setTimeout(() => {
+					// observe picker root changes
 					this.pickerObserver = new ResizeObserver(this.$refs.colorInput.$refs.picker.init);
 					this.pickerObserver.observe(this.$refs.colorInput.$refs.picker.$refs.pickerRoot);
+					// observe slider size changes
+					this.sliderObserver = new ResizeObserver(this.$refs.colorInput.$refs.picker.init);
+					this.sliderObserver.observe(this.$refs.colorInput.$refs.boxRoot.querySelector('.slider'));
 				},0);
 				this.logEvent('pickStart', '');
 			},
 			pickEndHandler() {
+				// disconnect observers
 				this.pickerObserver.disconnect();
+				this.sliderObserver.disconnect();
+
 				this.logEvent('pickEnd', '');
 			}
 		},
