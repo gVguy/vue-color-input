@@ -1,6 +1,8 @@
 # vue-color-input
 Slick and perfomant vue 3 color picker component whose goal is to replace `<input type=color>`
 
+#### [Live demo](#)
+
 ## Why
 
 ### Multi-format
@@ -8,13 +10,13 @@ Forget about color conversions: vue-color-input does it for you. Unlike input ty
 
 ### Customizable
 Html's native color input is annoying to style. Most likely you'll have to get tricky hiding the original input & binding click event to a presentable-looking div. But it only gets you halfway there cause the color picker popup window is still out of reach and it might look way different in different browsers.
-With vue-color-input this poblem is solved. It looks pretty out of the box with the default styles, but it's also intuitive & straight-forward to customize from css. Keep reading for detailed instructions on how.
+With vue-color-input this poblem is solved. It looks pretty out of the box with the default styles, but it's also intuitive & straight-forward to customize from css. [Keep reading](#styling) for detailed instructions on how.
 
 ### Uniform
 Not only that native color input looks different in different browsers, it also operates differently, and in some cases it's just not what you expect it to be. Yes, I'm looking at you, Safari. vue-color-input delivers a color picker that looks and performs the same regardless of browser.
 
 ### It just works
-vue-color-input combines minimalist approach with comprehensive functionality. You *can* customize and extend it to your liking, set it up with additional properties, but you _don't have to_. It works as expected out of the box just as well with only `v-model` provided.
+vue-color-input combines minimalist approach with comprehensive functionality. You *can* customize and extend it to your liking, set it up with additional properties, but you _don't have to_. It works as expected out of the box just as well, with only `v-model` provided.
 
 ## Usage
 
@@ -23,7 +25,7 @@ vue-color-input combines minimalist approach with comprehensive functionality. Y
 npm i vue-color-input
 ```
 ### Import
-```js
+```javascript
 import ColorInput from 'vue-color-input'
 
 
@@ -44,6 +46,7 @@ export.default {
 <color-input v-model="color" />
 ```
 
+
 # Properties
 
 ## v-model
@@ -61,7 +64,7 @@ Under the hood vue-color-input uses tinycolor for color conversion. So everythin
 By default output will be a string or an object in the same color model as the initial value.
 
 For example:
-```js
+```javascript
 // in parent component
 
 export.default {
@@ -76,16 +79,16 @@ export.default {
 <color-input v-model="color" />
 ```
 User adjusts hue to `0`, now `color` becomes
-```js
+```javascript
 "rgb(150, 50, 50)"
 ```
 Then user adjusts alpha to `0.5`, `color` becomes
-```js
+```javascript
 "rgba(150, 50, 50, 0.5)"
 ```
 
 Let's say `color` property was initialy set to be an object:
-```js
+```javascript
 // in parent component
 
 export.default {
@@ -95,7 +98,7 @@ export.default {
 }
 ```
 In the same scenario the resulting output would be
-```js
+```javascript
 { "h": 0, "s": 1, "l": 0.8, "a": 0.5 }
 ```
 
@@ -105,7 +108,7 @@ However in some cases that would not be possible. For those colors it will fall 
 #### name || hex -> rgba fallback
 
 However, if initial color format was `name` (e.g. `"purple"`) or `hex` (e.g. `"#800080"`), and then alpha is changed to be less than `1`, output will be formatted as `rgba`:
-```js
+```javascript
 "#cd5c5c" // hex input
 
 /* user changes alpha to 0.9 */
@@ -119,7 +122,7 @@ _Note 2: if initial color format is `hex8` (e.g. `#800080ff`), output will be `h
 #### name -> hex fallback
 
 If initial color format was `name`, but the resulting output color does not have a name equivalent, `hex` value will be output instead:
-```js
+```javascript
 "indianred" // name input
 
 /* user changes hue to 180 */
@@ -130,7 +133,7 @@ If initial color format was `name`, but the resulting output color does not have
 #### invalid -> rgb fallback
 
 Invalid color initialy diasplays as black. Default output format will be set to `rgb`:
-```js
+```javascript
 "ironmanred" // invalid string input
 
 /* user changes alpha to 0.1 */
@@ -148,7 +151,7 @@ __Type__ is data type of the return value. `[ "string", "object" ]`
 If you want to use v-model value for styling, `"string"` type should do the job. On the other hand, if you want to continue processing the data, `"object"` is probably more useful.
 
 Hsv & hsl color component values are presented differently in different output types:
-```js
+```javascript
 "hsl(0, 53%, 58%)" // "hsl string"
 
 { "h": 0, "s": 0.531, "l": 0.582, "a": 1 } // "hsl object"
@@ -162,7 +165,7 @@ Notice how strings contain percent-based values, and object 0-1 floats.
 String
 
 #### Allowed values
-```js
+```javascript
 // all allowed values
 [ "rgb", "rgb object", "rgb string", "hsv", "hsv object", "hsv string", "hsl", "hsl object", "hsl string", "name", "name string", "hex", "hex string", "hex8", "hex8 string" ]
 ```
@@ -185,7 +188,7 @@ This is where you specify the position of the popup color picker window relative
 String
 
 #### Allowed values
-```js
+```javascript
 [ "top", "top right", "top left", "top center", "right top", "right", "right bottom", "right center", "bottom right", "bottom", "bottom left", "bottom center", "left top", "left bottom", "left", "left center" ]
 ```
 Pretty intuitive: the first value is the direction from the box in which the popup will appear, the second is how it will align.
@@ -208,7 +211,7 @@ However the box will still react to v-model changes, should they come from elsew
 Boolean
 
 #### Allowed values
-```js
+```javascript
 [ true, false ]
 ```
 
@@ -230,7 +233,7 @@ If you set this to `true`, alpha slider will be removed from the color picker, a
 Boolean
 
 #### Allowed values
-```js
+```javascript
 [ true, false ]
 ```
 
@@ -251,7 +254,7 @@ With this property you can hide the section of the color picker containing the t
 Boolean
 
 #### Allowed values
-```js
+```javascript
 [ true, false ]
 ```
 
@@ -268,7 +271,7 @@ Boolean
 Set this to a custom transition name to override factory enter and leave-to transitions of the popup.
 
 This is _not_ the only way to customize color picker transition.
-You can also override default transition classes from css.
+You can also override default transition classes from css. More details [below](#transitions).
 
 >More information about Vue enter/leave transitions [here](https://v3.vuejs.org/guide/transitions-enterleave.html).
 
@@ -295,7 +298,6 @@ String
 ```
 
 
-
 # Styling
 
 As previously mentioned, applying styles to vue-color-input is a breeze. Default CSS is written with custumizability in mind, so anything you want to style will likely work as expected, and the whole component's layout will not get screwed up by that.
@@ -317,14 +319,26 @@ To override factory styles, you should address elemets through `.color-input` pa
 
 Feel free to scout the HTML for more class names if theese don't cut it.
 
-### DOM structure
-```xml
-<div class="color-input">
-	<div class="box [active] [disabled]"></div>
-	<div class="picker-popup"><div>
-</div>
+### Transitions
+
+Instead of using `transition` property with a custom transition name, you can simply override default transition styles.
+This can be done in the same manner as with the other classes, e.g:
+
+```css
+.color-input .picker-popup-enter-from {
+	transform: translateY(-100%) scale(.1);
+}
+.color-input .picker-popup-leave-to {
+	transform: scale(3);
+}
+/* and if you want to change the durations as well */
+.color-input .picker-popup-enter-active,
+.color-input .picker-popup-leave-active {
+	transition: all .5s;
+}
 ```
 
+>More information about Vue enter/leave transitions [here](https://v3.vuejs.org/guide/transitions-enterleave.html).
 
 ### Example
 
@@ -364,6 +378,44 @@ Feel free to scout the HTML for more class names if theese don't cut it.
 }
 ```
 
+### Styling guidelines
+
+#### Root element is _not_ the `.box`
+
+Here's the base structure of the component:
+```xml
+<div class="color-input">
+	<div class="box [active] [disabled]"></div>
+	<div class="picker-popup"></div> <!-- position: absolute -->
+</div>
+```
+Root element wraps arond the clickable box, but if you want to change box styles, you should select it like this: `.color-input .box`.
+Generally, you should attempt to style the root element only if you want to customize the flow: properties like `margin`, `position`, `display`.
+
+_Changing size of the root element independently from the box will mess with how the popup is positioned._
+
+#### Use stylesheets, no need to pass inline styles (unless that's your intention)
+
+Inline styles will only let you style the root element, which is typically not what you want to style very often.
+
+#### Use `.color-input` to override default styles
+
+There is absolutely no need to use `!important`. Default styles are easily overridable by adding specificity to the selectors with `.color-input .[classname]`.
+And if you use scss that's even more natural with nesting:
+```scss
+.color-input {
+	.box {}
+	.picker-popup {}
+	// etc
+}
+```
+
+#### Set margin on the root element
+
+`margin` is one of the few properties that should belong to the `.color-input` itself.
+Setting margin on the `.box` instead will increase the space around it _inside_ the root element, and that _will mess with how the popup is positioned._
+
+
 # Events
 
 The instance provides hooks for custom handling of key events.
@@ -390,10 +442,8 @@ The instance provides hooks for custom handling of key events.
 
 ```xml
 <color-input v-model="color"
-@mounted="colorPickerMountedHandler"
-@saturationInputStart="saturationStartHandler"
-@hueInputStart="hueStartHandler"
-@alphaInput="alphaInputHandler" />
+@mounted="colorInputMountedHandler"
+@pickStart="colorPickerShowHandler" />
 ```
 
 
