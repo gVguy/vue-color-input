@@ -1,7 +1,7 @@
 # vue-color-input
 Slick and perfomant Vue 3 color picker component whose goal is to replace `<input type=color>`
 
-#### <center>[Live demo](#)</center>
+<center><b>[Live demo](#)</b></center>
 
 ## Why
 
@@ -28,6 +28,7 @@ npm i vue-color-input
 ```javascript
 import ColorInput from 'vue-color-input'
 
+// install it with use()
 
 app.use(ColorInput)
 
@@ -107,7 +108,7 @@ However in some cases that would not be possible. For those colors it will fall 
 
 ### name || hex -> rgba fallback
 
-However, if initial color format was `name` (e.g. `"purple"`) or `hex` (e.g. `"#800080"`), and then alpha is changed to be less than `1`, output will be formatted as `rgba`:
+If initial color format was `name` (e.g. `"purple"`) or `hex` (e.g. `"#800080"`), and then alpha is changed to be less than `1`, output will be formatted as `rgba`:
 ```javascript
 "#cd5c5c" // hex input
 
@@ -141,7 +142,7 @@ Invalid color initialy diasplays as black. Default output format will be set to 
 "rgba(0, 0, 0, 0.1)" // rgb(a) output
 ```
 
-## format _`optional`_
+## format <sub><sup>_`optional`_</sup></sub>
 
 Here you can supply the color format you want the output to be in.
 
@@ -166,8 +167,12 @@ String
 
 ### Allowed values
 ```javascript
-// all allowed values
-[ "rgb", "rgb object", "rgb string", "hsv", "hsv object", "hsv string", "hsl", "hsl object", "hsl string", "name", "name string", "hex", "hex string", "hex8", "hex8 string" ]
+[ "rgb", "rgb object", "rgb string", 
+  "hsv", "hsv object", "hsv string", 
+  "hsl", "hsl object", "hsl string",
+  "name", "name string",
+  "hex", "hex string",
+  "hex8", "hex8 string" ]
 ```
 _Note: `"name object"`, `"hex object"` & `"hex8 object"`, make no sense and therefore are illegal._
 _Note 2: format without type is allowed, type without format is not._
@@ -180,7 +185,7 @@ Calculated to match the input.
 <color-input v-model="color" format="rgb object" />
 ```
 
-## position _`optional`_
+## position <sub><sup>_`optional`_</sup></sub>
 
 This is where you specify the position of the popup color picker window relative to the clickable box.
 
@@ -189,7 +194,10 @@ String
 
 ### Allowed values
 ```javascript
-[ "top", "top right", "top left", "top center", "right top", "right", "right bottom", "right center", "bottom right", "bottom", "bottom left", "bottom center", "left top", "left bottom", "left", "left center" ]
+[ "top", "top right", "top left", "top center",
+  "right top", "right", "right bottom", "right center",
+  "bottom right", "bottom", "bottom left", "bottom center",
+  "left top", "left bottom", "left", "left center" ]
 ```
 Pretty intuitive: the first value is the direction from the box in which the popup will appear, the second is how it will align.
 _Note: Omitting the second parameter results in center alignment, making `"top"` a shortcut for `"top center"`_
@@ -202,7 +210,7 @@ _Note: Omitting the second parameter results in center alignment, making `"top"`
 <color-input v-model="color" position="right top" />
 ```
 
-## disabled _`optional`_
+## disabled <sub><sup>_`optional`_</sup></sub>
 
 Setting this to `true` will make the initial box nonresponsive to user clicks. The popup will not appear.
 However the box will still react to v-model changes, should they come from elsewhere.
@@ -223,7 +231,7 @@ Boolean
 <color-input v-model="color" :disabled="!allowColorAdjustment" />
 ```
 
-## disable-alpha _`optional`_
+## disable-alpha <sub><sup>_`optional`_</sup></sub>
 
 If you set this to `true`, alpha slider will be removed from the color picker, and the returned color will always have full opacity.
 
@@ -246,7 +254,7 @@ Boolean
 <color-input v-model="color" disable-alpha />
 ```
 
-## disable-text-inputs _`optional`_
+## disable-text-inputs <sub><sup>_`optional`_</sup></sub>
 
 With this property you can hide the section of the color picker containing the text inputs.
 
@@ -266,7 +274,7 @@ Boolean
 <color-input v-model="color" disable-text-inputs />
 ```
 
-## transition _`optional`_
+## transition <sub><sup>_`optional`_</sup></sub>
 
 Set this to a custom transition name to override factory enter and leave-to transitions of the popup.
 
@@ -441,9 +449,25 @@ The instance provides hooks for custom handling of key events.
 ### Example
 
 ```xml
-<color-input v-model="color"
-@mounted="colorInputMountedHandler"
-@pickStart="colorPickerShowHandler" />
+<color-input v-model="color" @mounted="colorInputMountedHandler" @pickStart="colorPickerShowHandler" />
 ```
+
+
+# $refs & methods
+
+You shouldn't need to manually access instance elements or methods, but if you feel like it, you can.
+This can be done by specifying a ref property on the instance.
+
+The following section implies you have a vue-color-input instance with a `ref` property set to `"colorInput"`:
+```xml
+<color-input ref="colorInput" />
+```
+
+_To be continued..._
+
+# License
+
+MIT
+
 
 
