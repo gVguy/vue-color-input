@@ -1,7 +1,7 @@
 # vue-color-input
-Slick and perfomant vue 3 color picker component whose goal is to replace `<input type=color>`
+Slick and perfomant Vue 3 color picker component whose goal is to replace `<input type=color>`
 
-#### [Live demo](#)
+#### <center>[Live demo](#)</center>
 
 ## Why
 
@@ -38,7 +38,7 @@ app.component('ColorInput', ColorInput)
 // OR locally
 
 export.default {
-	components: { ColorInput }
+    components: { ColorInput }
 }
 ```
 ### Use
@@ -68,9 +68,9 @@ For example:
 // in parent component
 
 export.default {
-	data() {
-		color: "rgb(50, 150, 150)"
-	}
+    data() {
+    color: "rgb(50, 150, 150)"
+    }
 }
 ```
 ```xml
@@ -92,9 +92,9 @@ Let's say `color` property was initialy set to be an object:
 // in parent component
 
 export.default {
-	data() {
-		color: { "h": 350, "s": 1, "l": 0.8 }
-	}
+    data() {
+    color: { "h": 350, "s": 1, "l": 0.8 }
+    }
 }
 ```
 In the same scenario the resulting output would be
@@ -105,7 +105,7 @@ In the same scenario the resulting output would be
 vue-color-input will always try to output color in the same color model as the initial value (unless target format is specified explicitly by `format` property.
 However in some cases that would not be possible. For those colors it will fall back to different formats.
 
-#### name || hex -> rgba fallback
+### name || hex -> rgba fallback
 
 However, if initial color format was `name` (e.g. `"purple"`) or `hex` (e.g. `"#800080"`), and then alpha is changed to be less than `1`, output will be formatted as `rgba`:
 ```javascript
@@ -119,7 +119,7 @@ However, if initial color format was `name` (e.g. `"purple"`) or `hex` (e.g. `"#
 _Note: this behavior does not apply if `format` property is explicitly set to be `hex` or `name`._
 _Note 2: if initial color format is `hex8` (e.g. `#800080ff`), output will be `hex8` also, unless specified differently by `format` property._
 
-#### name -> hex fallback
+### name -> hex fallback
 
 If initial color format was `name`, but the resulting output color does not have a name equivalent, `hex` value will be output instead:
 ```javascript
@@ -130,7 +130,7 @@ If initial color format was `name`, but the resulting output color does not have
 "#5ccdcc" // hex output
 ```
 
-#### invalid -> rgb fallback
+### invalid -> rgb fallback
 
 Invalid color initialy diasplays as black. Default output format will be set to `rgb`:
 ```javascript
@@ -161,10 +161,10 @@ Notice how strings contain percent-based values, and object 0-1 floats.
 >Note that name & hex formats dont support alpha channel. Specifying either of them as target format will prevent vue-color-input from falling back to rgba. Instead, it will disable alpha slider and always return full opacity color.
 >If this is not the behavior that you want, and you'd rather it fall back to rgba to support alpha, you should not specify the format.
 
-#### Type
+### Type
 String
 
-#### Allowed values
+### Allowed values
 ```javascript
 // all allowed values
 [ "rgb", "rgb object", "rgb string", "hsv", "hsv object", "hsv string", "hsl", "hsl object", "hsl string", "name", "name string", "hex", "hex string", "hex8", "hex8 string" ]
@@ -172,10 +172,10 @@ String
 _Note: `"name object"`, `"hex object"` & `"hex8 object"`, make no sense and therefore are illegal._
 _Note 2: format without type is allowed, type without format is not._
 
-#### Default value
+### Default value
 Calculated to match the input.
 
-#### Example
+### Example
 ```xml
 <color-input v-model="color" format="rgb object" />
 ```
@@ -184,20 +184,20 @@ Calculated to match the input.
 
 This is where you specify the position of the popup color picker window relative to the clickable box.
 
-#### Type
+### Type
 String
 
-#### Allowed values
+### Allowed values
 ```javascript
 [ "top", "top right", "top left", "top center", "right top", "right", "right bottom", "right center", "bottom right", "bottom", "bottom left", "bottom center", "left top", "left bottom", "left", "left center" ]
 ```
 Pretty intuitive: the first value is the direction from the box in which the popup will appear, the second is how it will align.
 _Note: Omitting the second parameter results in center alignment, making `"top"` a shortcut for `"top center"`_
 
-#### Default value
+### Default value
 `"bottom"`
 
-#### Example
+### Example
 ```xml
 <color-input v-model="color" position="right top" />
 ```
@@ -207,18 +207,18 @@ _Note: Omitting the second parameter results in center alignment, making `"top"`
 Setting this to `true` will make the initial box nonresponsive to user clicks. The popup will not appear.
 However the box will still react to v-model changes, should they come from elsewhere.
 
-#### Type
+### Type
 Boolean
 
-#### Allowed values
+### Allowed values
 ```javascript
 [ true, false ]
 ```
 
-#### Default value
+### Default value
 `false`
 
-#### Example
+### Example
 ```xml
 <color-input v-model="color" :disabled="!allowColorAdjustment" />
 ```
@@ -229,19 +229,19 @@ If you set this to `true`, alpha slider will be removed from the color picker, a
 
 >Specifying name or hex as the target `format` will make this property default to `true` and ignore any passed value.
 
-#### Type
+### Type
 Boolean
 
-#### Allowed values
+### Allowed values
 ```javascript
 [ true, false ]
 ```
 
-#### Default value
+### Default value
 `false`,
 `true` if target format is hex or name
 
-#### Example
+### Example
 ```xml
 <color-input v-model="color" disable-alpha />
 ```
@@ -250,18 +250,18 @@ Boolean
 
 With this property you can hide the section of the color picker containing the text inputs.
 
-#### Type
+### Type
 Boolean
 
-#### Allowed values
+### Allowed values
 ```javascript
 [ true, false ]
 ```
 
-#### Default value
+### Default value
 `false`
 
-#### Example
+### Example
 ```xml
 <color-input v-model="color" disable-text-inputs />
 ```
@@ -275,25 +275,25 @@ You can also override default transition classes from css. More details [below](
 
 >More information about Vue enter/leave transitions [here](https://v3.vuejs.org/guide/transitions-enterleave.html).
 
-#### Type
+### Type
 String
 
-#### Default value
+### Default value
 `"picker"`
 
-#### Example
+### Example
 ```xml
 <color-input v-model="color" transition="my-cool-transition" />
 ```
 ```css
 .my-cool-transition-enter-from,
 .my-cool-transition-leave-to {
-	transform: rotate(240) scale(.5);
-	opacity: 0;
+    transform: rotate(240) scale(.5);
+    opacity: 0;
 }
 .my-cool-transition-enter-active,
 .my-cool-transition-leave-active {
-	transition: transform .3s, opacity .3s;
+    transition: transform .3s, opacity .3s;
 }
 ```
 
@@ -326,15 +326,15 @@ This can be done in the same manner as with the other classes, e.g:
 
 ```css
 .color-input .picker-popup-enter-from {
-	transform: translateY(-100%) scale(.1);
+    transform: translateY(-100%) scale(.1);
 }
 .color-input .picker-popup-leave-to {
-	transform: scale(3);
+    transform: scale(3);
 }
 /* and if you want to change the durations as well */
 .color-input .picker-popup-enter-active,
 .color-input .picker-popup-leave-active {
-	transition: all .5s;
+    transition: all .5s;
 }
 ```
 
@@ -344,49 +344,49 @@ This can be done in the same manner as with the other classes, e.g:
 
 ```css
 .color-input .box {
-	/* make clickable box a 100x100 circle */
-	width: 100px;
-	height: 100px;
-	border-radius: 50px;
+    /* make clickable box a 100x100 circle */
+    width: 100px;
+    height: 100px;
+    border-radius: 50px;
 }
 .color-input .picker-popup {
-	/* dark mode for popup window */
-	background: #000;
-	color: #fbfbfb;
-	/* and make it wide */
-	width: 400px;
+    /* dark mode for popup window */
+    background: #000;
+    color: #fbfbfb;
+    /* and make it wide */
+    width: 400px;
 }
 .color-input .slider {
-	/* thin out the sliders and make them wider */
-	height: 2px;
-	width: 92%;
+    /* thin out the sliders and make them wider */
+    height: 2px;
+    width: 92%;
 }
 .color-input .saturation-area {
-	/* bigger picking area */
-	height: 150px;
+    /* bigger picking area */
+    height: 150px;
 }
 .color-input .slider-pointer {
-	/* make slider pointers square-ish and 10x10 */
-	border-radius: 4px;
-	width: 10px;
-	height: 10px;
+    /* make slider pointers square-ish and 10x10 */
+    border-radius: 4px;
+    width: 10px;
+    height: 10px;
 }
 .color-input .saturation-pointer {
-	/* increase saturation picker size */
-	width: 40px;
-	height: 40px;
+    /* increase saturation picker size */
+    width: 40px;
+    height: 40px;
 }
 ```
 
 ### Styling guidelines
 
-#### Root element is _not_ the `.box`
+### Root element is _not_ the `.box`
 
 Here's the base structure of the component:
 ```xml
 <div class="color-input">
-	<div class="box [active] [disabled]"></div>
-	<div class="picker-popup"></div> <!-- position: absolute -->
+    <div class="box [active] [disabled]"></div>
+    <div class="picker-popup"></div> <!-- position: absolute -->
 </div>
 ```
 Root element wraps arond the clickable box, but if you want to change box styles, you should select it like this: `.color-input .box`.
@@ -394,23 +394,23 @@ Generally, you should attempt to style the root element only if you want to cust
 
 _Changing size of the root element independently from the box will mess with how the popup is positioned._
 
-#### Use stylesheets, no need to pass inline styles (unless that's your intention)
+### Use stylesheets, no need to pass inline styles (unless that's your intention)
 
 Inline styles will only let you style the root element, which is typically not what you want to style very often.
 
-#### Use `.color-input` to override default styles
+### Use `.color-input` to override default styles
 
 There is absolutely no need to use `!important`. Default styles are easily overridable by adding specificity to the selectors with `.color-input .[classname]`.
 And if you use scss that's even more natural with nesting:
 ```scss
 .color-input {
-	.box {}
-	.picker-popup {}
-	// etc
+    .box {}
+    .picker-popup {}
+    // etc
 }
 ```
 
-#### Set margin on the root element
+### Set margin on the root element
 
 `margin` is one of the few properties that should belong to the `.color-input` itself.
 Setting margin on the `.box` instead will increase the space around it _inside_ the root element, and that _will mess with how the popup is positioned._
@@ -422,21 +422,21 @@ The instance provides hooks for custom handling of key events.
 
 ### Event names
 
-| event                | description                                                                                                                                                                         | payload                                                        |
-|----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------|
-| mounted              | lifecycle hook, emitted from root component's mounted()                                                                                                                             |                                                                |
-| beforeUnmount        | lifecycle hook, emitted from root component's beforeUnmount()                                                                                                                       |                                                                |
-| pickStart            | color picking process is initiated, popup is opening                                                                                                                                |                                                                |
-| pickEnd              | color picking process is finished, popup will close now                                                                                                                             |                                                                |
-| saturationInputStart | saturation-brightness adjustment has begun. This is only emitted when pointerdown inside saturation-brightness area is registered. This will _not_ emit when text inputs are edited | current state of saturation & value (hsv) `{ s: 0.5, v: 0.5 }` |
-| saturationInputEnd   | saturation-brightness adjustment has ended. This is only emitted when pointerdown inside saturation-brightness area is registered. This will _not_ emit when text inputs are edited | current state of saturation & value (hsv) `{ s: 0.5, v: 0.5 }` |
-| saturationInput      | saturation-brightness is being adjusted. This will emit every time saturation-brightness is changed, including text inputs                                                          | current state of saturation & value (hsv) `{ s: 0.5, v: 0.5 }` |
-| hueInputStart        | hue adjustment has begun. This is only emitted when pointerdown over the hue slider is registered. This will _not_ emit when hue is changed from text inputs                        | current state of hue `{ h: 180 }`                              |
-| hueInputEnd          | hue adjustment has ended. This is only emitted when pointerdown over the hue slider is registered. This will _not_ emit when hue is changed from text inputs                        | current state of hue `{ h: 180 }`                              |
-| hueInput             | hue is being adjusted. This will emit every time hue is changed, including text inputs                                                                                              | current state of hue `{ h: 180 }`                              |
-| alphaInputStart      | alpha adjustment has begun. This is only emitted when pointerdown over the alpha slider is registered. This will _not_ emit when alpha is changed from text inputs                  | current state of alpha `{ a: 0.5 }`                            |
-| alphaInputEnd        | alpha adjustment has ended. This is only emitted when pointerdown over the alpha slider is registered. This will _not_ emit when alpha is changed from text inputs                  | current state of alpha `{ a: 0.5 }`                            |
-| alphaInput           | alpha is being adjusted. This will emit every time alpha is changed, including text inputs                                                                                          | current state of alpha `{ a: 0.5 }`                            |
+| event                | description                                                                                                                                                                                   | payload                                                             |
+|----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
+| pickEnd              | color picking process is finished, popup will close now                                                                                                                                       |                                                                     |
+| mounted              | lifecycle hook, emitted from root component's mounted()                                                                                                                                       |                                                                     |
+| beforeUnmount        | lifecycle hook, emitted from root component's beforeUnmount()                                                                                                                                 |                                                                     |
+| pickStart            | color picking process is initiated, popup is opening                                                                                                                                          |                                                                     |
+| saturationInputStart | saturation-brightness adjustment has begun.<br />This is only emitted when pointerdown inside saturation-brightness area is registered.<br />This will _not_ emit when text inputs are edited | current state of saturation & value (hsv)<br />`{ s: 0.5, v: 0.5 }` |
+| saturationInputEnd   | saturation-brightness adjustment has ended.<br />This is only emitted when pointerdown inside saturation-brightness area is registered.<br />This will _not_ emit when text inputs are edited | current state of saturation & value (hsv)<br />`{ s: 0.5, v: 0.5 }` |
+| saturationInput      | saturation-brightness is being adjusted.<br />This will emit every time saturation-brightness is changed, including text inputs                                                               | current state of saturation & value (hsv)<br />`{ s: 0.5, v: 0.5 }` |
+| hueInputStart        | hue adjustment has begun.<br />This is only emitted when pointerdown over the hue slider is registered.<br />This will _not_ emit when hue is changed from text inputs                        | current state of hue<br />`{ h: 180 }`                              |
+| hueInputEnd          | hue adjustment has ended.<br />This is only emitted when pointerdown over the hue slider is registered.<br />This will _not_ emit when hue is changed from text inputs                        | current state of hue<br />`{ h: 180 }`                              |
+| hueInput             | hue is being adjusted.<br />This will emit every time hue is changed, including text inputs                                                                                                   | current state of hue<br />`{ h: 180 }`                              |
+| alphaInputStart      | alpha adjustment has begun.<br />This is only emitted when pointerdown over the alpha slider is registered.<br />This will _not_ emit when alpha is changed from text inputs                  | current state of alpha<br />`{ a: 0.5 }`                            |
+| alphaInputEnd        | alpha adjustment has ended.<br />This is only emitted when pointerdown over the alpha slider is registered.<br />This will _not_ emit when alpha is changed from text inputs                  | current state of alpha<br />`{ a: 0.5 }`                            |
+| alphaInput           | alpha is being adjusted.<br />This will emit every time alpha is changed, including text inputs                                                                                               | current state of alpha<br />`{ a: 0.5 }`                            |
 
 ### Example
 
