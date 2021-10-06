@@ -350,7 +350,32 @@ This can be done in the same manner as with the other classes, e.g:
 
 >More information about Vue enter/leave transitions [here](https://v3.vuejs.org/guide/transitions-enterleave.html).
 
-### Example
+### Box active transition
+
+When clicked on, the box gets what looks like an outline, but in reality its content is scaled down and background is revealed.
+
+Here's what the box element html looks like:
+```xml
+<div class="box [active] [disabled]"> <!-- This has a background -->
+    <div class="inner transparent"> <!-- This scales down to reveal it -->
+        <div class="color"></div>
+    </div>
+</div>
+```
+To customize this transition, you can use `.box.active` in combination with `.box.active .inner`.  
+For example:
+```css
+.color-input .box.active {
+    /* "outline" color */
+    background: #0f0f0f;
+}
+.color-input .box.active .inner {
+    /* different transition effect */
+    transform: scale(.6) rotate(90deg);
+}
+```
+
+### Example css
 
 ```css
 .color-input .box {
@@ -468,7 +493,7 @@ The following section implies you have a vue-color-input instance with a `ref` p
 <color-input ref="colorInput" />
 ```
 
-_To be continued..._
+_To be written..._
 
 # License
 

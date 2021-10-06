@@ -5,9 +5,9 @@
 		<div :class="['box', { active, disabled }]"
 		@click.stop="pickStart"
 		ref="box">
-			<div class="box-transparent">
-				<div class="box-color" :style="boxColorStyles"></div>
-			</div>
+				<div class="inner transparent">
+					<div class="color" :style="boxColorStyles"></div>
+				</div>
 		</div>
 		<transition :name="transition">
 			<color-picker
@@ -303,37 +303,46 @@
 	});
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+	%fill-100 {
+		width: 100%;
+		height: 100%;
+	}
 	.color-input {
 		position: relative;
 		display: inline-block;
-		color: #0f0f0f;
 	}
 	.box {
 		width: 40px;
 		height: 40px;
 		cursor: pointer;
-		border-radius: 5px;
-		box-sizing: border-box;
-		border: 2px transparent solid;
-		transition: all .2s, background 0s;
+		border-radius: 20%;
 		overflow: hidden;
-	}
-	.box.active {
-		border-color: #fbfbfb;
-	}
-	.box.disabled {
-		cursor: not-allowed;
-	}
-	.box-transparent {
-		width: 100%;
-		height: 100%;
-		background-image: var(--transparent-pattern);
-		background-size: 50%;
-	}
-	.box-color {
-		width: 100%;
-		height: 100%;
+		transition: all .2s, background-color 0.05s .15s;
+		.inner {
+			border-radius: inherit;
+			overflow: hidden;
+			transition: inherit;
+		}
+		.transparent {
+			@extend %fill-100;
+			background-image: var(--transparent-pattern);
+			background-color: #fff;
+			background-size: 50%;
+		}
+		.color {
+			@extend %fill-100;
+		}
+		&.active {
+			background: #fbfbfb;
+			transition: all .2s, background-color 0.05s;
+			.inner {
+				transform: scale(.85);
+			}
+		}
+		&.disabled {
+			cursor: not-allowed;
+		}
 	}
 	.picker-popup {
 		position: absolute;

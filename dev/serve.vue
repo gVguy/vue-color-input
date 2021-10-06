@@ -106,7 +106,10 @@
 	border-radius: 50px;
 }
 .color-input .box.active {
-	border-color: #0f0f0f;
+	background: #0f0f0f;
+}
+.color-input .box.active .inner {
+	transform: scale(.9);
 }
 .color-input .box.disabled {}
 .color-input .picker-popup {}
