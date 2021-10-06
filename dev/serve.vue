@@ -1,7 +1,10 @@
 <template>
 	<div id="app">
 		<h1>vue-color-input demo</h1>
-		<h3><a class="docsLink" href="https://github.com/gVguy/vue-color-input#vue-color-input">Docs</a></h3>
+		<h3>
+			<a class="docsLink" href="https://github.com/gVguy/vue-color-input#vue-color-input"
+			:style="{ color: hexColor }">Docs</a>
+		</h3>
 		<div class="setup">
 			<div class="setup-block main">
 				<h3>v-model</h3>
@@ -63,28 +66,18 @@
 			<div class="detailsBlock">
 				<h2>Style it</h2>
 				<textarea
-				@focus="textareaFocusHandler"
 				@input="updateStyles"
 				@keydown="textareaKeyHandler"
 				ref="textarea"
 				v-model="styles"
 				spellcheck="false">
 				</textarea>
-				<button
-				@pointerdown.prevent.stop
-				@click="resetDemoStyles"
-				style="display:block">Reset</button>
-				<p>
-					By default the component renders a 40x40 square inline-block.<br>
-					Root element has class `.color-input`,<br>
-					The 'input' box has class `.box`,<br>
-					Once clicked on, it gets an `.active` class,<br>
-					If `disabled` property is set to `true`, it gets a `.disabled` class,<br>
-					Color picker popup has class `.picker-popup`.
-				</p>
-				<p>
-					You can override default styles by using `.color-input ` in the selector.
-				</p>
+				<div class="log-buttons">
+					<button
+					@pointerdown.prevent.stop
+					@click="resetDemoStyles"
+					style="display:block">Reset</button>
+				</div>
 			</div>
 			<div class="detailsBlock">
 				<h2>Event Log</h2>
@@ -98,23 +91,6 @@
 					<button @pointerdown.prevent.stop @click="log = ''">Clear</button>
 					<button @pointerdown.prevent.stop @click="logEnabled = !logEnabled">{{ logEnabled ? 'Disable' : 'Enable' }}</button>
 				</div>
-				<p class="small">NB: for perfomance purposes, this log is limited to recording events of the <i>same type</i> not more often than once in 100ms</p>
-				<p>
-					Vue-color-input instance emits events on every interaction.<br>
-					When color pick procces is initiated (color box is clicked and the popup comes on) `pickStart` event is fired,<br>
-					And the other way around, when popup is closed the instance emits `pickEnd`.<br>
-					These two events don't carry any payload.
-				</p>
-				<p>
-					All other events can be categorized in three groups by color components they're associated with.<br>
-					These are:<br>
-					- hue events: (`hueInputStart` | `hueInput` | `hueInputEnd`)<br>
-					- alpha events: (`alphaInputStart` | `alphaInput` | `alphaInputEnd`)<br>
-					- saturation events: (`saturationInputStart` | `saturationInput` | `saturationInputEnd`)
-				</p>
-				<p>
-					All these provide current state of their respective color components.
-				</p>
 			</div>
 		</div>
 	</div>
@@ -136,7 +112,11 @@
 .color-input .picker-popup {}
 .color-input .slider {}
 .color-input .slider-pointer {}
-.color-input .saturation-pointer {}`;
+.color-input .saturation-pointer {}
+.color-input .picker-popup-enter-from,
+.color-input .picker-popup-leave-to {}
+.color-input .picker-popup-enter-active,
+.color-input .picker-popup-leave-active {}`;
 
 	export default defineComponent({
 		name: 'ServeDev',
@@ -209,9 +189,6 @@
 			},
 			typeSelect(t) {
 				this.type = (this.type === t) ? '' : t; 
-			},
-			textareaFocusHandler() {
-				// this.$refs.colorInput.pickStart();
 			},
 			textareaKeyHandler(e) {
 				const textarea = e.target;
@@ -289,6 +266,8 @@
 
 			// textarea size
 			this.resizeTextarea();
+			// log initial size to match textarea
+			this.$refs.eventLog.style.height = this.$refs.textarea.style.height;
 
 			//add code spans instead of `` in description blocks
 			document.querySelectorAll('.detailsBlock p').forEach(p => {
@@ -418,13 +397,12 @@
 	}
 	.event-log-wrapper {
 		position: relative;
-		height: 95px;
 	}
 	.event-log {
-		height: 100%;
 		overflow-y: auto;
 		overflow-x: hidden;
 		resize: none;
+		text-align: right;
 	}
 	.log-overlay {
 		display: flex;

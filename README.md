@@ -1,12 +1,14 @@
 # vue-color-input
 Slick and perfomant Vue 3 color picker component whose goal is to replace `<input type=color>`
 
-<center><b>[Live demo](#)</b></center>
+<p style="text-align: center; font-size: 1.3em">
+    <a href="#">Live demo</a>
+</p>
 
 ## Why
 
 ### Multi-format
-Forget about color conversions: vue-color-input does it for you. Unlike input type=color (which only understands hex) vue-color-input supports all commonly used color models, and by default will output color in the same format that was passed as input. It also has support for alpha channel, unless you specifically disable it. More information below.
+Forget about color conversions: vue-color-input does it for you. Unlike `<input type=color>` (which only understands hex) vue-color-input supports all commonly used color models, and by default will output color in the same format that was passed as input. It also has support for alpha channel, unless you specifically disable it. More information below.
 
 ### Customizable
 Html's native color input is annoying to style. Most likely you'll have to get tricky hiding the original input & binding click event to a presentable-looking div. But it only gets you halfway there cause the color picker popup window is still out of reach and it might look way different in different browsers.  
@@ -58,7 +60,7 @@ When first initialized and every time v-model value updates _from outside the co
 
 ### Input (initial value)
 
-Under the hood vue-color-input uses tinycolor for color conversion. So everything tinycolor [accepts as input](https://github.com/bgrins/TinyColor#accepted-string-input), is valid here as well (both string and object).
+Under the hood vue-color-input uses [`tinycolor2`](https://www.npmjs.com/package/tinycolor2) for color conversion. So everything tinycolor [accepts as input](https://github.com/bgrins/TinyColor#accepted-string-input), is valid here as well (both string and object).
 
 ### Output (return value)
 
@@ -314,16 +316,16 @@ To override factory styles, you should address elemets through `.color-input` pa
 
 ### Class names
 
-| class               | description                                             |
-|---------------------|---------------------------------------------------------|
-| .color-input        | Root element                                            |
-| .box                | Initial clickable box                                   |
-| .picker-popup       | Popup color picker window                               |
-| .saturation-area    | Picking area where you select saturation and brightness |
-| .slider             | Hue and opacity sliders (track)                         |
-| .saturation-pointer | Pointer in the saturation-brightness area               |
-| .slider-pointer     | Pointer on a slider                                     |
-| .text-input         | Text inputs of the color picker                         |
+| class                   | description                                             |
+|-------------------------|---------------------------------------------------------|
+| __.color-input__        | Root element                                            |
+| __.box__                | Initial clickable box                                   |
+| __.picker-popup__       | Popup color picker window                               |
+| __.saturation-area__    | Picking area where you select saturation and brightness |
+| __.slider__             | Hue and opacity sliders (track)                         |
+| __.saturation-pointer__ | Pointer in the saturation-brightness area               |
+| __.slider-pointer__     | Pointer on a slider                                     |
+| __.text-input__         | Text inputs of the color picker                         |
 
 Feel free to scout the HTML for more class names if theese don't cut it.
 
@@ -426,25 +428,25 @@ Setting margin on the `.box` instead will increase the space around it _inside_ 
 
 # Events
 
-The instance provides hooks for custom handling of key events.
+The instance provides hooks for custom event handling.
 
 ### Event names
 
-| event                | description                                                                                                                                                                                   | payload                                                             |
-|----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
-| pickEnd              | color picking process is finished, popup will close now                                                                                                                                       |                                                                     |
-| mounted              | lifecycle hook, emitted from root component's mounted()                                                                                                                                       |                                                                     |
-| beforeUnmount        | lifecycle hook, emitted from root component's beforeUnmount()                                                                                                                                 |                                                                     |
-| pickStart            | color picking process is initiated, popup is opening                                                                                                                                          |                                                                     |
-| saturationInputStart | saturation-brightness adjustment has begun.<br />This is only emitted when pointerdown inside saturation-brightness area is registered.<br />This will _not_ emit when text inputs are edited | current state of saturation & value (hsv)<br />`{ s: 0.5, v: 0.5 }` |
-| saturationInputEnd   | saturation-brightness adjustment has ended.<br />This is only emitted when pointerdown inside saturation-brightness area is registered.<br />This will _not_ emit when text inputs are edited | current state of saturation & value (hsv)<br />`{ s: 0.5, v: 0.5 }` |
-| saturationInput      | saturation-brightness is being adjusted.<br />This will emit every time saturation-brightness is changed, including text inputs                                                               | current state of saturation & value (hsv)<br />`{ s: 0.5, v: 0.5 }` |
-| hueInputStart        | hue adjustment has begun.<br />This is only emitted when pointerdown over the hue slider is registered.<br />This will _not_ emit when hue is changed from text inputs                        | current state of hue<br />`{ h: 180 }`                              |
-| hueInputEnd          | hue adjustment has ended.<br />This is only emitted when pointerdown over the hue slider is registered.<br />This will _not_ emit when hue is changed from text inputs                        | current state of hue<br />`{ h: 180 }`                              |
-| hueInput             | hue is being adjusted.<br />This will emit every time hue is changed, including text inputs                                                                                                   | current state of hue<br />`{ h: 180 }`                              |
-| alphaInputStart      | alpha adjustment has begun.<br />This is only emitted when pointerdown over the alpha slider is registered.<br />This will _not_ emit when alpha is changed from text inputs                  | current state of alpha<br />`{ a: 0.5 }`                            |
-| alphaInputEnd        | alpha adjustment has ended.<br />This is only emitted when pointerdown over the alpha slider is registered.<br />This will _not_ emit when alpha is changed from text inputs                  | current state of alpha<br />`{ a: 0.5 }`                            |
-| alphaInput           | alpha is being adjusted.<br />This will emit every time alpha is changed, including text inputs                                                                                               | current state of alpha<br />`{ a: 0.5 }`                            |
+| event                    | description                                                                                                                                                                                   | payload                                                             |
+|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
+| __pickEnd__              | color picking process is finished, popup will close now                                                                                                                                       |                                                                     |
+| __mounted__              | lifecycle hook, emitted from root component's mounted()                                                                                                                                       |                                                                     |
+| __beforeUnmount__        | lifecycle hook, emitted from root component's beforeUnmount()                                                                                                                                 |                                                                     |
+| __pickStart__            | color picking process is initiated, popup is opening                                                                                                                                          |                                                                     |
+| __saturationInputStart__ | saturation-brightness adjustment has begun.<br />This is only emitted when pointerdown inside saturation-brightness area is registered.<br />This will _not_ emit when text inputs are edited | current state of saturation & value (hsv)<br />`{ s: 0.5, v: 0.5 }` |
+| __saturationInputEnd__   | saturation-brightness adjustment has ended.<br />This is only emitted when pointerdown inside saturation-brightness area is registered.<br />This will _not_ emit when text inputs are edited | current state of saturation & value (hsv)<br />`{ s: 0.5, v: 0.5 }` |
+| __saturationInput__      | saturation-brightness is being adjusted.<br />This will emit every time saturation-brightness is changed, including text inputs                                                               | current state of saturation & value (hsv)<br />`{ s: 0.5, v: 0.5 }` |
+| __hueInputStart__        | hue adjustment has begun.<br />This is only emitted when pointerdown over the hue slider is registered.<br />This will _not_ emit when hue is changed from text inputs                        | current state of hue<br />`{ h: 180 }`                              |
+| __hueInputEnd__          | hue adjustment has ended.<br />This is only emitted when pointerdown over the hue slider is registered.<br />This will _not_ emit when hue is changed from text inputs                        | current state of hue<br />`{ h: 180 }`                              |
+| __hueInput__             | hue is being adjusted.<br />This will emit every time hue is changed, including text inputs                                                                                                   | current state of hue<br />`{ h: 180 }`                              |
+| __alphaInputStart__      | alpha adjustment has begun.<br />This is only emitted when pointerdown over the alpha slider is registered.<br />This will _not_ emit when alpha is changed from text inputs                  | current state of alpha<br />`{ a: 0.5 }`                            |
+| __alphaInputEnd__        | alpha adjustment has ended.<br />This is only emitted when pointerdown over the alpha slider is registered.<br />This will _not_ emit when alpha is changed from text inputs                  | current state of alpha<br />`{ a: 0.5 }`                            |
+| __alphaInput__           | alpha is being adjusted.<br />This will emit every time alpha is changed, including text inputs                                                                                               | current state of alpha<br />`{ a: 0.5 }`                            |
 
 ### Example
 
@@ -455,7 +457,7 @@ The instance provides hooks for custom handling of key events.
 
 # $refs & methods
 
-You shouldn't need to manually access instance elements or methods, but if you feel like it, you can.  
+You shouldn't _need_ to manually access instance elements or methods, but if you feel like it, you can.  
 This can be done by specifying a ref property on the instance.
 
 The following section implies you have a vue-color-input instance with a `ref` property set to `"colorInput"`:
