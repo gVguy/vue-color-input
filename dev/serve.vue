@@ -3,7 +3,7 @@
 		<h1>vue-color-input demo</h1>
 		<h3>
 			<a class="docsLink" href="https://github.com/gVguy/vue-color-input#vue-color-input"
-			:style="{ color: hexColor }">Docs</a>
+			:style="{ color: 'black' }">Docs</a>
 		</h3>
 		<div class="setup">
 			<div class="setup-block main">
@@ -125,7 +125,7 @@
 		},
 		data() {
 			return {
-				color: 'pink',
+				color: 'hsl(182, 41%, 75%)',
 				styles: demoStyles,
 				position: 'bottom',
 				disableAlpha: false,
@@ -165,7 +165,7 @@
 					if (typeof color === 'object') {
 						color = JSON.parse(JSON.stringify(color));
 						for (let [k,v] of Object.entries(color)) {
-							color[k] = Number(v.toFixed(3));
+							if (typeof v ==='number') color[k] = Number(v.toFixed(3));
 						}
 						color = JSON.stringify(color)
 					}

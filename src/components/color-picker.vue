@@ -26,7 +26,7 @@
 		</div>
 		<div class="text-inputs-area" v-if="!disableTextInputs" :style="{'--outline-color': hexString}">
 			<div class="text-inputs-wrapper">
-				<div v-for="value, key in (textInputActive) ? textInputsFreeze : processedTextInputs" 
+				<div v-for="value, key in (textInputActive) ? textInputsFreeze : textInputs" 
 				:key="'text-input-' + key"
 				class="text-input-container">
 					<label :for="'text-input-' + key">{{key}}</label>
@@ -59,7 +59,6 @@ export default {
 		'position',
 		'boxRect',
 		'disableAlpha',
-		'textInputs',
 		'disableTextInputs'
 	],
 	emits: [
@@ -73,7 +72,6 @@ export default {
 		'saturationInputStart',
 		'saturationInputEnd',
 		'saturationInput',
-		'textInputFormatChange',
 		'ready'
 	],
 	inject: [ 'tinycolor' ],
@@ -100,6 +98,7 @@ export default {
 			},
 			pickerWidth: 0,
 			pickerHeight: 0,
+			textInputsFormat: 'rgb',
 			textInputActive: null,
 			textInputsFreeze: {},
 			arrowColor: '#0f0f0f',
@@ -190,21 +189,63 @@ export default {
 
 			return pickerPosition;
 		},
-		processedTextInputs() {
-			const textInputs = { ...this.textInputs };
+		textInputs() {
+			const format = this.textInputsFormat;
+			const textInputs = {};
+			if (['name','hex'].includes(format)) {
+				textInputs.hex = this.color.toString('hex');
+			} else {
+				const stringSplit = this.color.toString(format).split('(')[1].slice(0,-1).split(', ');
+				format.split('').forEach((k, i) => textInputs[k] = stringSplit[i]);
+			}
+			if (!this.disableAlpha) {
+				textInputs.a = Number(this.color.getAlpha().toFixed(2));
+			}
+
 			// if textInputs has hue, add it from this.h
 			if (textInputs.hasOwnProperty('h')) {
-				// editing in mode with hue
-				textInputs.h = parseInt(this.h);
-				if (textInputs.hasOwnProperty('v')) {
-					// editing in hsv
-					textInputs.s = Math.round(this.s * 100) + '%';
+				// in mode with hue, use this.h
+				textInputs.h = Math.round(this.h);
+				if (textInputs.hasOwnProperty('l')) {
+					// we're in hsl, use this.s
+
+					//convert s(hsv) to s(hsl)
+					let s = this.s;
+					const v = this.v || 0.001;
+					const l = (2 - s) * v / 2;
+					if (l < 0.5) {
+						s *= v / (l * 2);
+						// convert to % and use
+						textInputs.s = Math.round(s * 100) + '%';
+					}
 				}
 			}
 			return textInputs;
 		}
 	},
 	methods: {
+		saturationPickStart(e) {
+			this.getCanvasRects();
+			document.addEventListener('pointerup', this.saturationPickEnd);
+			document.addEventListener('pointermove', this.saturationPickMove);
+			this.saturationPickMove(e);
+			this.emitHook('saturationInputStart', { s: this.s, v: this.v });
+		},
+		saturationPickEnd(e) {
+			document.removeEventListener('pointerup', this.saturationPickEnd);
+			document.removeEventListener('pointermove', this.saturationPickMove);
+			this.emitHook('saturationInputEnd', { s: this.s, v: this.v });
+		},
+		saturationPickMove(e) {
+			if (e.clientX >= this.saturationCanvasRect.x && e.clientX <= this.saturationCanvasRect.right) {
+				this.s = ((e.clientX - this.saturationCanvasRect.x) / this.saturationCanvasRect.width);
+			} else if (e.clientX < this.saturationCanvasRect.x) this.s = 0;
+			else this.s = 1;
+			if (e.clientY >= this.saturationCanvasRect.y && e.clientY <= this.saturationCanvasRect.bottom) {
+				this.v = (1 - ((e.clientY - this.saturationCanvasRect.y) / this.saturationCanvasRect.height));
+			} else if (e.clientY < this.saturationCanvasRect.y) this.v = 1;
+			else this.v = 0;
+		},
 		huePickStart(e) {
 			this.getCanvasRects();
 			document.addEventListener('pointerup', this.huePickEnd);
@@ -241,28 +282,6 @@ export default {
 			} else if (e.clientX < this.alphaCanvasRect.x) this.a = 0;
 			else this.a = 1;
 		},
-		saturationPickStart(e) {
-			this.getCanvasRects();
-			document.addEventListener('pointerup', this.saturationPickEnd);
-			document.addEventListener('pointermove', this.saturationPickMove);
-			this.saturationPickMove(e);
-			this.emitHook('saturationInputStart', { s: this.s, v: this.v });
-		},
-		saturationPickEnd(e) {
-			document.removeEventListener('pointerup', this.saturationPickEnd);
-			document.removeEventListener('pointermove', this.saturationPickMove);
-			this.emitHook('saturationInputEnd', { s: this.s, v: this.v });
-		},
-		saturationPickMove(e) {
-			if (e.clientX >= this.saturationCanvasRect.x && e.clientX <= this.saturationCanvasRect.right) {
-				this.s = ((e.clientX - this.saturationCanvasRect.x) / this.saturationCanvasRect.width);
-			} else if (e.clientX < this.saturationCanvasRect.x) this.s = 0;
-			else this.s = 1;
-			if (e.clientY >= this.saturationCanvasRect.y && e.clientY <= this.saturationCanvasRect.bottom) {
-				this.v = (1 - ((e.clientY - this.saturationCanvasRect.y) / this.saturationCanvasRect.height));
-			} else if (e.clientY < this.saturationCanvasRect.y) this.v = 1;
-			else this.v = 0;
-		},
 		emitUpdate(output) {
 			output = output || { h: this.h, s: this.s, v: this.v, a: this.a };
 			this.$emit('updateColor', output);
@@ -295,14 +314,14 @@ export default {
 
 			const hsv = output.toHsv();
 
-			if (this.textInputsFreeze.hasOwnProperty('h')) {
-				// editing in mode with hue
+			if (this.textInputsFormat === 'hsl') {
+				// editing in hsl
 				if (hsv.h === 0) {
-					// hue is set to 0, use previous value
+					// hue got converted to 0, use previous value
 					hsv.h = parseInt(this.textInputsFreeze.h);
 				}
-				if (this.textInputsFreeze.hasOwnProperty('s') && this.textInputsFreeze.hasOwnProperty('v') && hsv.v === 0) {
-					// fix for editing sat but v is 0, so it converts to 0
+				if (hsv.v === 0) {
+					// fix for editing s but l is 0, so it converts to 0
 					let s = this.textInputsFreeze.s;
 					const isPercent = (s.indexOf('%') !== -1);
 					s = parseFloat(s);
@@ -310,6 +329,12 @@ export default {
 					else if (isPercent || s > 1) {
 						s = Math.min(s * 0.01, 1);
 					}
+
+					// convert to hsv
+					const l = 0.001;
+					const v = s * l + l;
+					s = 2 - 2 * l / v;
+
 					hsv.s = s;
 				}
 			}
@@ -336,9 +361,7 @@ export default {
 					if (!this.disableAlpha) {
 						// alpha enabled, update it too
 						this.a = hsv.a;
-						this.$nextTick(function() {
-							this.textInputsFreeze.a = this.textInputs.a;
-						});
+						this.textInputsFreeze.a = Number(this.a.toFixed(2));
 					} else {
 						// alpha disabled, treat the color as invalid
 						Object.assign(this.$data, { h: 0, s: 0, v: 0 });
@@ -352,7 +375,7 @@ export default {
 		textInputFocusHandler(e) {
 			// if focused from blur, freeze current color
 			// if focused from another text input, don't update
-			if (!this.textInputActive) this.textInputsFreeze = { ...this.processedTextInputs };
+			if (!this.textInputActive) this.textInputsFreeze = { ...this.textInputs };
 			this.textInputActive = e.target.dataset.component;
 		},
 		textInputBlurHandler(e) {
@@ -365,7 +388,13 @@ export default {
 			}, 0);
 		},
 		textInputFormatChange(dir) {
-			this.$emit('textInputFormatChange', dir);
+			const formats = ['rgb','name','hsl'];
+			let currentFormat = this.textInputsFormat;
+			if (currentFormat === 'hex') currentFormat = 'name'; // use name because name falls back to hex
+			let i = formats.indexOf(this.textInputsFormat) + dir;
+			if (i < 0) i = formats.length - 1;
+			else if (i === formats.length) i = 0;
+			this.textInputsFormat = formats[i];
 		},
 		getCanvasRects() {
 			this.saturationCanvasRect = this.$refs.saturationCanvas.getBoundingClientRect();

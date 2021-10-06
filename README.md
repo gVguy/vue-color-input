@@ -430,6 +430,9 @@ Setting margin on the `.box` instead will increase the space around it _inside_ 
 
 The instance provides hooks for custom event handling.
 
+Most events carry payload with current state of the corresponding color component.  
+Notice that event data is always passed in __hsv__ format.
+
 ### Event names
 
 | event                    | description                                                                                                                                                                                   | payload                                                             |

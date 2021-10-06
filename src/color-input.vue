@@ -16,12 +16,10 @@
 			:position="processedPosition"
 			:disable-alpha="processedDisableAlpha"
 			:boxRect="boxRect"
-			:text-inputs="textInputs"
 			:disable-text-inputs="disableTextInputs"
 			v-show="active && ready"
 			@ready="ready = true"
 			@updateColor="emitUpdate"
-			@textInputFormatChange="textInputFormatChange"
 			@hueInputStart="$emit('hueInputStart', $event)"
 			@hueInputEnd="$emit('hueInputEnd', $event)"
 			@hueInput="$emit('hueInput', $event)"
@@ -99,7 +97,7 @@
 				ready: false,
 				boxRect: {},
 				innerBoxRect: {},
-				textInputsFormat: null,
+				textInputsFormat: 'rgb',
 				originalFormat: 'rgb',
 				originalType: null,
 			}
@@ -182,20 +180,6 @@
 					return this.disableAlpha;
 				}
 			},
-			textInputs() {
-				let format = this.textInputsFormat;
-				let values = {};
-				if (['name','hex'].includes(format)) {
-					values.hex = this.color.toString('hex');
-				} else {
-					const stringSplit = this.color.toString(format).split('(')[1].slice(0,-1).split(', ');
-					format.split('').forEach((k, i) => values[k] = stringSplit[i]);
-				}
-				if (!this.processedDisableAlpha) {
-					values.a = Number(this.color.getAlpha().toFixed(2));
-				}
-				return values;
-			},
 			cssVars() {
 				return {
 					'--transparent-pattern': 'url(' + transparentPattern + ')'
@@ -221,15 +205,6 @@
 				this.active = false;
 				this.$emit('pickEnd');
 			},
-			textInputFormatChange(dir) {
-				const formats = ['rgb','name','hsv'];
-				let currentFormat = this.textInputsFormat;
-				if (currentFormat === 'hex') currentFormat = 'name'; // use name because name falls back to hex
-				let i = formats.indexOf(this.textInputsFormat) + dir;
-				if (i < 0) i = formats.length - 1;
-				else if (i === formats.length) i = 0;
-				this.textInputsFormat = formats[i];
-			},
 			init() {
 				// get color
 				this.color = tinycolor(this.modelValue);
@@ -244,12 +219,11 @@
 				// for storing output value (to react to external modelValue changes)
 				this.output = null;
 
-				// initial format for text inputs
-				let textInputsFormat = this.originalFormat;
-				// remove digit eg hex8 & if invalid or hsv go with rgb
-				textInputsFormat = (!textInputsFormat || textInputsFormat === 'hsv') ? 'rgb' : textInputsFormat.replace(/\d/,'');
-				this.textInputsFormat = textInputsFormat;
-
+				// // initial format for text inputs
+				// let textInputsFormat = this.originalFormat;
+				// // remove digit eg hex8 & if invalid or hsv go with rgb
+				// textInputsFormat = (!textInputsFormat || textInputsFormat === 'hsv') ? 'rgb' : textInputsFormat.replace(/\d/,'');
+				// this.textInputsFormat = textInputsFormat;
 
 				// warn of invalid color
 				if (!this.color.isValid()) {
