@@ -1,9 +1,7 @@
 # vue-color-input
 Slick and perfomant Vue 3 color picker component whose goal is to replace `<input type=color>`
 
-<p style="text-align: center; font-size: 1.3em">
-    <a href="#">Live demo</a>
-</p>
+<center><a href="#">Live demo</a></center>
 
 ## Why
 
@@ -490,7 +488,7 @@ This can be done by specifying a ref property on the instance.
 
 The following section implies you have a vue-color-input instance with a `ref` property set to `"colorInput"`:
 ```xml
-<color-input ref="colorInput" />
+<color-input v-model="color" ref="colorInput" />
 ```
 
 _To be written..._
