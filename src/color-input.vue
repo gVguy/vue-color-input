@@ -1,6 +1,6 @@
 <template>
 	<div class="color-input"
-	ref="boxRoot"
+	ref="root"
 	:style="cssVars">
 		<div :class="['box', { active, disabled }]"
 		@click.stop="pickStart"
@@ -214,12 +214,6 @@
 				// for storing output value (to react to external modelValue changes)
 				this.output = null;
 
-				// // initial format for text inputs
-				// let textInputsFormat = this.originalFormat;
-				// // remove digit eg hex8 & if invalid or hsv go with rgb
-				// textInputsFormat = (!textInputsFormat || textInputsFormat === 'hsv') ? 'rgb' : textInputsFormat.replace(/\d/,'');
-				// this.textInputsFormat = textInputsFormat;
-
 				// warn of invalid color
 				if (!this.color.isValid()) {
 					console.warn('[vue-color-input]: invalid color -> ' + this.color.getOriginalInput());
@@ -248,7 +242,7 @@
 				this.$emit('update:modelValue', this.output);
 			},
 			getBoxRect() {
-				this.boxRect = this.$refs.boxRoot.getBoundingClientRect();
+				this.boxRect = this.$refs.root.getBoundingClientRect();
 			}
 		},
 		created() {

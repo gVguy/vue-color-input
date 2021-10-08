@@ -456,7 +456,7 @@ The instance provides hooks for custom event handling.
 Most events carry payload with current state of the corresponding color component.  
 Notice that event data is always passed in __hsv__ format.
 
-### Event names
+## Event names
 
 | event                    | description                                                                                                                                                                                   | payload                                                             |
 |--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
@@ -474,7 +474,7 @@ Notice that event data is always passed in __hsv__ format.
 | __alphaInputEnd__        | alpha adjustment has ended.<br />This is only emitted when pointerdown over the alpha slider is registered.<br />This will _not_ emit when alpha is changed from text inputs                  | current state of alpha<br />`{ a: 0.5 }`                            |
 | __alphaInput__           | alpha is being adjusted.<br />This will emit every time alpha is changed, including text inputs                                                                                               | current state of alpha<br />`{ a: 0.5 }`                            |
 
-### Example
+## Example
 
 ```xml
 <color-input v-model="color" @mounted="colorInputMountedHandler" @pickStart="colorPickerShowHandler" />
@@ -491,7 +491,34 @@ The following section implies you have a vue-color-input instance with a `ref` p
 <color-input v-model="color" ref="colorInput" />
 ```
 
-_To be written..._
+## Instances
+
+```javascript
+const colorInput = this.$refs.colorInput // root instance
+const picker = colorInput.$refs.picker // popup color picker instance
+```
+
+## Elements
+
+```javascript
+colorInput.$refs.root // root element
+colorInput.$refs.box // box root element
+picker.$refs.rootPicker // color picker root element
+```
+
+## Methods
+
+```javascript
+colorInput.pickStart() // begin color selection (show popup)
+colorInput.pickEnd() // end color selection (hide popup)
+```
+
+## `color` property
+
+```javascript
+colorInput.color // tinycolor instance
+```
+
 
 # License
 
