@@ -3,7 +3,7 @@
 		<h1>vue-color-input demo</h1>
 		<h3>
 			<a class="docsLink" href="https://github.com/gVguy/vue-color-input#vue-color-input"
-			:style="{ color: 'black' }">Docs</a>
+			:style="{ color: linkColor }">Docs</a>
 		</h3>
 		<div class="setup">
 			<div class="setup-block main">
@@ -65,6 +65,10 @@
 		<div class="detailsSection">
 			<div class="detailsBlock">
 				<h2>Style it</h2>
+				<div class="textarea-buttons">
+					<button @click="resetDemoStyles">Reset</button>
+					<button @click="clearDemoStyles">Clear</button>
+				</div>
 				<textarea
 				@input="updateStyles"
 				@keydown="textareaKeyHandler"
@@ -72,22 +76,18 @@
 				v-model="styles"
 				spellcheck="false">
 				</textarea>
-				<div class="log-buttons">
-					<button @click="resetDemoStyles">Reset</button>
-					<button @click="clearDemoStyles">Clear</button>
-				</div>
 			</div>
 			<div class="detailsBlock">
 				<h2>Event Log</h2>
+				<div class="textarea-buttons right">
+					<button @pointerdown.prevent.stop @click="log = ''">Clear</button>
+					<button @pointerdown.prevent.stop @click="logEnabled = !logEnabled">{{ logEnabled ? 'Disable' : 'Enable' }}</button>
+				</div>
 				<div class="event-log-wrapper">
 					<textarea ref="eventLog" class="event-log" readonly v-text="log"></textarea>
 					<div :class="['log-overlay', { disabled: !logEnabled }]">
 						<h2 v-if="!logEnabled">Log disabled</h2>
 					</div>
-				</div>
-				<div class="log-buttons">
-					<button @pointerdown.prevent.stop @click="log = ''">Clear</button>
-					<button @pointerdown.prevent.stop @click="logEnabled = !logEnabled">{{ logEnabled ? 'Disable' : 'Enable' }}</button>
 				</div>
 			</div>
 		</div>
@@ -108,6 +108,7 @@
 		data() {
 			return {
 				color: 'hsl(182, 41%, 75%)',
+				linkColor: 'hsl(182, 41%, 52%)', // limited
 				styles: demoStyles,
 				position: 'bottom',
 				disableAlpha: false,
@@ -163,7 +164,7 @@
 					}
 					this.color = v;
 				}
-			}
+			},
 		},
 		methods: {
 			formatSelect(f) {
@@ -261,7 +262,14 @@
 				p.innerHTML = result;
 			});
 		},
-		beforeUnmount() {
+		watch: {
+			color() {
+				let hsl = this.$refs.colorInput.color.clone().setAlpha(1).toHslString();
+				let [h,s,l] = hsl.match(/\d+/g);
+				const limit = 60 - 0.2 * s; // (0 => 60), (100 => 40)
+				l = Math.min(limit, l); // limit l to calculated limit
+				this.linkColor = `hsl(${h}, ${s}%, ${l}%)`
+			}
 		}
 	});
 </script>
@@ -404,8 +412,11 @@
 			background: rgba(250,250,250,.8)
 		}
 	}
-	.log-buttons {
-		margin-top: 5px;
+	.textarea-buttons {
+		margin: 5px 0;
+		&.right {
+			text-align: right;
+		}
 	}
 	.small {
 		font-size: .8em;
