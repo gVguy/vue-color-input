@@ -1,0 +1,20 @@
+.color-input .box {
+	width: 100px;
+	height: 100px;
+	border-radius: 50px;
+}
+.color-input .box.active {
+	background: #0f0f0f;
+}
+.color-input .box.active .inner {
+	transform: scale(.9) rotate(90deg);
+}
+.color-input .box.disabled {}
+.color-input .picker-popup {}
+.color-input .slider {}
+.color-input .slider-pointer {}
+.color-input .saturation-pointer {}
+.color-input .picker-popup-enter-from,
+.color-input .picker-popup-leave-to {}
+.color-input .picker-popup-enter-active,
+.color-input .picker-popup-leave-active {}

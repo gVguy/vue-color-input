@@ -12,6 +12,7 @@ import { terser } from 'rollup-plugin-terser';
 import minimist from 'minimist';
 import Sass from 'rollup-plugin-sass'; // added this for using scss
 import svg from 'rollup-plugin-svg'; // added this to inline svg
+import autoprefixer from 'autoprefixer';
 
 
 // Get browserslist config and remove ie from es build targets
@@ -60,9 +61,13 @@ const baseConfig = {
           generateScopedName: '[local]___[hash:base64:5]',
         },
         include: /&module=.*\.css$/,
+        plugins: [ autoprefixer() ],
       }),
       // Process all `<style>` blocks except `<style module>`.
-      PostCSS({ include: /(?<!&module=.*)\.css$/ }),
+      PostCSS({
+        include: /(?<!&module=.*)\.css$/,
+        plugins: [ autoprefixer() ],
+      }),
       Sass(), // added this
       commonjs(),
     ],

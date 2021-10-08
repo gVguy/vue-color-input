@@ -73,10 +73,8 @@
 				spellcheck="false">
 				</textarea>
 				<div class="log-buttons">
-					<button
-					@pointerdown.prevent.stop
-					@click="resetDemoStyles"
-					style="display:block">Reset</button>
+					<button @click="resetDemoStyles">Reset</button>
+					<button @click="clearDemoStyles">Clear</button>
 				</div>
 			</div>
 			<div class="detailsBlock">
@@ -100,26 +98,7 @@
 	import { defineComponent } from 'vue';
 	import ColorInput from '@/color-input.vue';
 
-	const demoStyles = `.color-input .box {
-	width: 100px;
-	height: 100px;
-	border-radius: 50px;
-}
-.color-input .box.active {
-	background: #0f0f0f;
-}
-.color-input .box.active .inner {
-	transform: scale(.9);
-}
-.color-input .box.disabled {}
-.color-input .picker-popup {}
-.color-input .slider {}
-.color-input .slider-pointer {}
-.color-input .saturation-pointer {}
-.color-input .picker-popup-enter-from,
-.color-input .picker-popup-leave-to {}
-.color-input .picker-popup-enter-active,
-.color-input .picker-popup-leave-active {}`;
+	import demoStyles from '!!raw-loader!./demo-styles.css';
 
 	export default defineComponent({
 		name: 'ServeDev',
@@ -247,6 +226,10 @@
 				this.styles = demoStyles;
 				this.updateStyles();
 			},
+			clearDemoStyles() {
+				this.styles = demoStyles.replace(/{[^{]*}/gm, '{}');
+				this.updateStyles();
+			}
 		},
 		created() {
 			//create options for position dropdown

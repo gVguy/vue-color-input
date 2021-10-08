@@ -369,7 +369,7 @@ For example:
 }
 .color-input .box.active .inner {
     /* different transition effect */
-    transform: scale(.6) rotate(90deg);
+    transform: scale(.9) rotate(90deg);
 }
 ```
 

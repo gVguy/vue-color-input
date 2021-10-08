@@ -39,7 +39,7 @@
 	import ColorPicker from './components/color-picker.vue'
 	const tinycolor = require("tinycolor2");
 
-	import transparentPattern from '@/assets/method-transparent-pattern.svg';
+	import transparentPattern from '@/assets/transparent-pattern.svg';
 
 	const isSameNodeRecursive = (elA, elB) => {
 		while (!/^(body|html)$/i.test(elA.tagName)) {
@@ -180,11 +180,6 @@
 					return this.disableAlpha;
 				}
 			},
-			cssVars() {
-				return {
-					'--transparent-pattern': 'url(' + transparentPattern + ')'
-				}
-			},
 		},
 		methods: {
 			pickStart(e) {
@@ -258,6 +253,9 @@
 		},
 		created() {
 			this.init();
+			this.cssVars = {
+				'--transparent-pattern': 'url(' + transparentPattern + ')'
+			};
 		},
 		mounted() {
 			this.$emit('mounted');
@@ -328,7 +326,7 @@
 			@extend %fill-100;
 			background-image: var(--transparent-pattern);
 			background-color: #fff;
-			background-size: 50%;
+			background-size: 100%;
 		}
 		.color {
 			@extend %fill-100;
@@ -337,7 +335,7 @@
 			background: #fbfbfb;
 			transition: all .2s, background-color 0.05s;
 			.inner {
-				transform: scale(.85);
+				transform: scale(.9);
 			}
 		}
 		&.disabled {
