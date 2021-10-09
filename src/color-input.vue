@@ -54,7 +54,10 @@
 		name: 'ColorInput',
 		props: {
 			modelValue: [String, Object],
-			position: String,
+			position: {
+				type: String,
+				default: 'bottom'
+			},
 			transition: {
 				type: String,
 				default: 'picker-popup'

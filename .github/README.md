@@ -4,6 +4,9 @@ Slick and perfomant Vue 3 color picker component whose goal is to replace `<inpu
 <p align="center">
     🚀&nbsp;&nbsp;<b><a href="https://gvguy.github.io/vue-color-input/">Live demo</a></b>&nbsp;&nbsp;🚀
 </p>
+<p align="center">
+    <a href="https://codepen.io/vanechka222/pen/oNeNXrr">Codepen template</a>
+</p>
 
 ## Why
 
