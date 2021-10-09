@@ -349,6 +349,7 @@
 		box-shadow: 0px 5px 10px rgba(15,15,15,.4);
 		margin: 10px;
 		user-select: none;
+		color: #0f0f0f;
 	}
 	.picker-popup-enter-from,
 	.picker-popup-leave-to {

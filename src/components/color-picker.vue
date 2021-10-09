@@ -605,6 +605,7 @@ export default {
 		}
 		.text-input {
 			font-family: inherit;
+			color: inherit;
 			width: 4ch;
 			text-align: center;
 			margin: 0 5px;
