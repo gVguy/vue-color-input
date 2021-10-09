@@ -37,7 +37,8 @@
 <script>
 	import { defineComponent } from 'vue';
 	import ColorPicker from './components/color-picker.vue'
-	const tinycolor = require("tinycolor2");
+
+	import tinycolor from 'tinycolor2';
 
 	import transparentPattern from '@/assets/transparent-pattern.svg';
 

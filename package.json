@@ -17,7 +17,9 @@
   "module": "dist/color-input.esm.js",
   "unpkg": "dist/color-input.min.js",
   "files": [
-    "dist/*"
+    "dist/*",
+    "src/**/*.vue",
+    "src/assets/*.svg"
   ],
   "scripts": {
     "serve": "vue-cli-service serve dev/serve.js",
