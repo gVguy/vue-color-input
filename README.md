@@ -2,7 +2,7 @@
 Slick and perfomant Vue 3 color picker component whose goal is to replace `<input type=color>`
 
 <p align="center">
-    🚀 <b><a href="https://gvguy.github.io/vue-color-input/">Live demo</a></b> 🚀
+    🚀&nbsp;&nbsp;<b><a href="https://gvguy.github.io/vue-color-input/">Live demo</a></b>&nbsp;&nbsp;🚀
 </p>
 
 ## Why
@@ -54,24 +54,16 @@ export.default {
 
 
 # Table of contents
-- [Properties](#properties)
-  - [v-model](#v-model)
-  - [format](#format-subsup_optional_supsub)
-  - [position](#position-subsup_optional_supsub)
-  - [disabled](#disabled-subsup_optional_supsub)
-  - [disable-alpha](#disable-alpha-subsup_optional_supsub)
-  - [disable-text-inputs](#disable-text-inputs-subsup_optional_supsub)
-  - [transition](#transition-subsup_optional_supsub)
-- [Styling](#styling)
-  - [Styling guidelines](#styling-guidelines)
-- [Events](#events)
-  - [Event names](#event-names)
-  - [Example](#example)
-- [$refs & methods](#refs--methods)
-  - [Instances](#instances)
-  - [Elements](#elements)
-  - [Methods](#methods)
-  - [`color` property](#color-property)
+
+| [Properties](#properties)                            | [Styling](#styling)                             | [Events](#events)           | [$refs & methods](#refs--methods)   |
+|------------------------------------------------------|-------------------------------------------------|-----------------------------|-------------------------------------|
+| [v-model](#v-model)                                  | [Transitions](#transitions)                     | [Event names](#event-names) | [Instances](#instances)             |
+| [format](#format-optional)                           | [Box active transition](#box-active-transition) |                             | [Elements](#elements)               |
+| [position](#position-optional)                       | [Example CSS](#example-css)                     |                             | [Methods](#methods)                 |
+| [disabled](#disabled-optional)                       | [Styling guidelines](#styling-guidelines)       |                             | [`color` property](#color-property) |
+| [disable-alpha](#disable-alpha-optional)             |                                                 |                             |                                     |
+| [disable-text-inputs](#disable-text-inputs-optional) |                                                 |                             |                                     |
+| [transition](#transition-optional)                   |                                                 |                             |                                     |
 
 
 # Properties
@@ -361,7 +353,7 @@ To override factory styles, you should address elemets through `.color-input` pa
 
 Feel free to scout the HTML for more class names.
 
-### Transitions
+## Transitions
 
 Instead of using `transition` property with a custom transition name, you can simply override default transition styles.  
 This can be done in the same manner as with the other classes, e.g:
@@ -382,7 +374,7 @@ This can be done in the same manner as with the other classes, e.g:
 
 >More information about Vue enter/leave transitions [here](https://v3.vuejs.org/guide/transitions-enterleave.html).
 
-### Box active transition
+## Box active transition
 
 When clicked on, the box gets what looks like an outline, but in reality its content is scaled down and background is revealed.
 
@@ -407,7 +399,7 @@ For example:
 }
 ```
 
-### Example css
+## Example CSS
 
 ```css
 .color-input .box {
