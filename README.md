@@ -2,7 +2,7 @@
 Slick and perfomant Vue 3 color picker component whose goal is to replace `<input type=color>`
 
 <p align="center">
-    <a href="https://gvguy.github.io/vue-color-input/">Live demo</a>
+    🚀 <b><a href="https://gvguy.github.io/vue-color-input/">Live demo</a></b> 🚀
 </p>
 
 ## Why
@@ -12,7 +12,7 @@ Forget about color conversions: vue-color-input does it for you. Unlike `<input 
 
 ### Customizable
 HTML's native color input is annoying to style. Most likely you'll have to get tricky hiding the original input & binding click event to a presentable-looking div. But it only gets you halfway there cause the color picker popup window is still out of reach and it might look way different in different browsers.  
-With vue-color-input this poblem is solved. It looks pretty out of the box with the default styles, but it's also intuitive & straight-forward to customize from css. [Keep reading](#styling) for detailed instructions on how.
+With vue-color-input this poblem is solved. It looks pretty out of the box with the default styles, but it's also intuitive & straight-forward to customize from css.
 
 ### Uniform
 Not only that native color input looks different in different browsers, it also operates differently, and in some cases it's just not what you expect it to be. Yes, I'm looking at you, Safari. vue-color-input delivers a color picker that looks and performs the same regardless of browser.
@@ -26,6 +26,7 @@ vue-color-input combines minimalist approach with comprehensive functionality. Y
 ```
 npm i vue-color-input
 ```
+
 ### Import
 ```javascript
 import ColorInput from 'vue-color-input'
@@ -45,10 +46,32 @@ export.default {
     components: { ColorInput }
 }
 ```
+
 ### Use
 ```xml
 <color-input v-model="color" />
 ```
+
+
+# Table of contents
+- [Properties](#properties)
+  - [v-model](#v-model)
+  - [format](#format-subsup_optional_supsub)
+  - [position](#position-subsup_optional_supsub)
+  - [disabled](#disabled-subsup_optional_supsub)
+  - [disable-alpha](#disable-alpha-subsup_optional_supsub)
+  - [disable-text-inputs](#disable-text-inputs-subsup_optional_supsub)
+  - [transition](#transition-subsup_optional_supsub)
+- [Styling](#styling)
+  - [Styling guidelines](#styling-guidelines)
+- [Events](#events)
+  - [Event names](#event-names)
+  - [Example](#example)
+- [$refs & methods](#refs--methods)
+  - [Instances](#instances)
+  - [Elements](#elements)
+  - [Methods](#methods)
+  - [`color` property](#color-property)
 
 
 # Properties
@@ -73,7 +96,7 @@ For example:
 
 export.default {
     data() {
-    color: "rgb(50, 150, 150)"
+        color: "rgb(50, 150, 150)"
     }
 }
 ```
@@ -150,8 +173,11 @@ Invalid color initialy diasplays as black. Default output format will be set to 
 Here you can supply the color format you want the output to be in.
 
 The value consists of two arguments: format & type. The order of two is inconsequential, e.g. both `"hsl object"` & `"object hsl"` are valid values.  
-__Format__ is the target color model that the return value is converted to. `[ "rgb", "hsv", "hsl", "hex", "name" ]`  
+
+__Format__ is the target color model that the return value is converted to. `[ "rgb", "hsv", "hsl", "hex", "hex8", "name" ]`  
+
 __Type__ is data type of the return value. `[ "string", "object" ]`  
+
 If you want to use v-model value for styling, `"string"` type should do the job. On the other hand, if you want to continue processing the data, `"object"` is probably more useful.  
 
 Hsv & hsl color component values are presented differently in different output types:
@@ -162,7 +188,7 @@ Hsv & hsl color component values are presented differently in different output t
 ```
 Notice how strings contain percent-based values, and object 0-1 floats.
 
->Note that name & hex formats dont support alpha channel. Specifying either of them as target format will prevent vue-color-input from falling back to rgba. Instead, it will disable alpha slider and always return full opacity color.  
+>Note that name & hex formats don't support alpha channel. Specifying either of them as target format will prevent vue-color-input from falling back to rgba. Instead, it will disable alpha slider and always return full opacity color.  
 >If this is not the behavior that you want, and you'd rather it fall back to rgba to support alpha, you should not specify the format.
 
 ### Type
@@ -249,7 +275,7 @@ Boolean
 ```
 
 ### Default value
-`false`,
+`false`,  
 `true` if target format is hex or name
 
 ### Example
@@ -311,9 +337,14 @@ String
 
 # Styling
 
-As previously mentioned, applying styles to vue-color-input is a breeze. Default CSS is written with custumizability in mind, so anything you want to style will likely work as expected, and the whole component's layout will not get screwed up by that.
+As previously mentioned, applying styles to vue-color-input is a breeze.
 
-To override factory styles, you should address elemets through `.color-input` parent selector, e.g. `.color input .box { }`.
+Default CSS is written with custumizability in mind, so anything you want to style will likely work as expected, and the whole component's layout will not get screwed up by that.
+
+To override factory styles, you should address elemets through `.color-input` parent selector, e.g:
+```css
+.color input .box { }
+```
 
 ### Class names
 
@@ -328,7 +359,7 @@ To override factory styles, you should address elemets through `.color-input` pa
 | __.slider-pointer__     | Pointer on a slider                                     |
 | __.text-input__         | Text inputs of the color picker                         |
 
-Feel free to scout the HTML for more class names if theese don't cut it.
+Feel free to scout the HTML for more class names.
 
 ### Transitions
 
@@ -408,7 +439,7 @@ For example:
     height: 10px;
 }
 .color-input .saturation-pointer {
-    /* increase saturation picker size */
+    /* increase saturation pointer size */
     width: 40px;
     height: 40px;
 }
@@ -425,18 +456,20 @@ Here's the base structure of the component:
     <div class="picker-popup"></div> <!-- position: absolute -->
 </div>
 ```
-Root element wraps arond the clickable box, but if you want to change box styles, you should select it like this: `.color-input .box`.  
+Root element wraps arond the clickable box, but if you want to change box styles, you should select it like this: `.color-input .box`.
+
 Generally, you should attempt to style the root element only if you want to customize the flow: properties like `margin`, `position`, `display`.
 
 _Changing size of the root element independently from the box will mess with how the popup is positioned._
 
-### Use stylesheets, no need to pass inline styles (unless that's your intention)
+### Use stylesheets, no need to pass inline styles
 
 Inline styles will only let you style the root element, which is typically not what you want to style very often.
 
 ### Use `.color-input` to override default styles
 
-There is absolutely no need to use `!important`. Default styles are easily overridable by adding specificity to the selectors with `.color-input .[classname]`.  
+There is absolutely no need to use `!important`. Default styles are easily overridable by adding specificity to the selectors with `.color-input .<classname>`.
+
 And if you use scss that's even more natural with nesting:
 ```scss
 .color-input {
@@ -456,7 +489,8 @@ Setting margin on the `.box` instead will increase the space around it _inside_ 
 
 The instance provides hooks for custom event handling.
 
-Most events carry payload with current state of the corresponding color component.  
+Most events carry payload with current state of the corresponding color component.
+
 Notice that event data is always passed in __hsv__ format.
 
 ## Event names
@@ -487,7 +521,7 @@ Notice that event data is always passed in __hsv__ format.
 # $refs & methods
 
 You shouldn't _need_ to manually access instance elements or methods, but if you feel like it, you can.  
-This can be done by specifying a ref property on the instance.
+This can be done by specifying a `ref` property on the instance.
 
 The following section implies you have a vue-color-input instance with a `ref` property set to `"colorInput"`:
 ```xml
