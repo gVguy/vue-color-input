@@ -9,13 +9,13 @@ Slick and perfomant Vue 3 color picker component whose goal is to replace `<inpu
 </p>
 
 <p align="center">
-    <img src="https://media.giphy.com/media/jNTl8TPY4K4PZzlZV9/source.gif">
+    <img src="https://media.giphy.com/media/GTjRMqSvEPHdlzCG1n/source.gif">
 </p>
 
 ## Why
 
 ### Multi-format
-Forget about color conversions: vue-color-input does it for you. Unlike `<input type=color>` (which only understands hex) vue-color-input supports all commonly used color models, and by default __will output color in the same format that was passed as input__. It also has support for alpha channel, unless you specifically disable it.
+Forget about color conversions: vue-color-input does it for you. Unlike `<input type="color">` (which only understands hex) vue-color-input supports all commonly used color models, and by default __will output color in the same format that was passed as input__. It also has support for alpha channel, unless you specifically disable it.
 
 ### Customizable
 HTML's native color input is annoying to style. Most likely you'll have to get tricky hiding the original input & binding click event to a presentable-looking div. But it only gets you halfway there cause the color picker popup window is still out of reach and it might look way different in different browsers.  
