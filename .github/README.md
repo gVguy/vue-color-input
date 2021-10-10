@@ -340,9 +340,9 @@ As previously mentioned, applying styles to vue-color-input is a breeze.
 
 Default CSS is written with custumizability in mind, so anything you want to style will likely work as expected, and the whole component's layout will not get screwed up by that.
 
-To override factory styles, you should address elemets through `.color-input` parent selector, e.g:
+To override factory styles, you should address elemets through `.color-input.user` parent selector, e.g:
 ```css
-.color-input .box { }
+.color-input.user .box { }
 ```
 
 ### Class names
@@ -366,15 +366,15 @@ Instead of using `transition` property with a custom transition name, you can si
 This can be done in the same manner as with the other classes, e.g:
 
 ```css
-.color-input .picker-popup-enter-from {
+.color-input.user .picker-popup-enter-from {
     transform: translateY(-100%) scale(.1);
 }
-.color-input .picker-popup-leave-to {
+.color-input.user .picker-popup-leave-to {
     transform: scale(3);
 }
 /* and if you want to change the durations as well */
-.color-input .picker-popup-enter-active,
-.color-input .picker-popup-leave-active {
+.color-input.user .picker-popup-enter-active,
+.color-input.user .picker-popup-leave-active {
     transition: all .5s;
 }
 ```
@@ -396,11 +396,11 @@ Here's what the box element html looks like:
 To customize this transition, you can use `.box.active` in combination with `.box.active .inner`.  
 For example:
 ```css
-.color-input .box.active {
+.color-input.user .box.active {
     /* "outline" color */
     background: #0f0f0f;
 }
-.color-input .box.active .inner {
+.color-input.user .box.active .inner {
     /* different transition effect */
     transform: scale(.9) rotate(90deg);
 }
@@ -409,35 +409,35 @@ For example:
 ## Example CSS
 
 ```css
-.color-input .box {
+.color-input.user .box {
     /* make clickable box a 100x100 circle */
     width: 100px;
     height: 100px;
     border-radius: 50px;
 }
-.color-input .picker-popup {
+.color-input.user .picker-popup {
     /* dark mode for popup window */
     background: #000;
     color: #fbfbfb;
     /* and make it wide */
     width: 400px;
 }
-.color-input .slider {
+.color-input.user .slider {
     /* thin out the sliders and make them wider */
     height: 2px;
     width: 92%;
 }
-.color-input .saturation-area {
+.color-input.user .saturation-area {
     /* bigger picking area */
     height: 150px;
 }
-.color-input .slider-pointer {
+.color-input.user .slider-pointer {
     /* make slider pointers square-ish and 10x10 */
     border-radius: 4px;
     width: 10px;
     height: 10px;
 }
-.color-input .saturation-pointer {
+.color-input.user .saturation-pointer {
     /* increase saturation pointer size */
     width: 40px;
     height: 40px;
@@ -455,7 +455,7 @@ Here's the base structure of the component:
     <div class="picker-popup"></div> <!-- position: absolute -->
 </div>
 ```
-Root element wraps arond the clickable box, but if you want to change box styles, you should select it like this: `.color-input .box`.
+Root element wraps arond the clickable box, but if you want to change box styles, you should select it like this: `.color-input.user .box`.
 
 Generally, you should attempt to style the root element only if you want to customize the flow: properties like `margin`, `position`, `display`.
 
@@ -465,13 +465,13 @@ _Changing size of the root element independently from the box will mess with how
 
 Inline styles will only let you style the root element, which is typically not what you want to style very often.
 
-### Use `.color-input` to override default styles
+### Use `.color-input.user` to override default styles
 
-There is absolutely no need to use `!important`. Default styles are easily overridable by adding specificity to the selectors with `.color-input .<classname>`.
+There is no need to use `!important`. Default styles are easily overridable by adding specificity to the selectors with `.color-input.user .<classname>`.
 
 And if you use scss that's even more natural with nesting:
 ```scss
-.color-input {
+.color-input.user {
     .box {}
     .picker-popup {}
     // etc

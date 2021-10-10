@@ -13,7 +13,6 @@ import minimist from 'minimist';
 import Sass from 'rollup-plugin-sass'; // added this for using scss
 import svg from 'rollup-plugin-svg'; // added this to inline svg
 import autoprefixer from 'autoprefixer';
-import css from 'rollup-plugin-css-only'; // added this to extract css
 
 
 // Get browserslist config and remove ie from es build targets
@@ -44,28 +43,24 @@ const baseConfig = {
       }),
       svg({ // added this
         base64: true
-      })
+      }),
     ],
     replace: {
       'process.env.NODE_ENV': JSON.stringify('production'),
     },
     vue: {
       preprocessStyles: true,
-      css: false, // convert style blocks to import statements
+      // css: false, // convert style blocks to import statements
     },
     postVue: [
       resolve({
         extensions: ['.js', '.jsx', '.ts', '.tsx', '.vue'],
       }),
-      // Process all `<style>` blocks except `<style module>`.
+      Sass(), // added this
       PostCSS({
-        include: /(?<!&module=.*)\.css$/,
+        include: /.css$/,
         plugins: [ autoprefixer() ], // added autoprefixer
       }),
-      Sass(), // added this
-      css({
-        output: 'bundle.css'
-      }), // extract css
       commonjs(),
     ],
     babel: {

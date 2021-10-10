@@ -1,5 +1,5 @@
 <template>
-	<div class="color-input"
+	<div class="color-input user"
 	ref="root"
 	:style="cssVars">
 		<div :class="['box', { active, disabled }]"
@@ -299,7 +299,7 @@
 	});
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 	%fill-100 {
 		width: 100%;
 		height: 100%;
@@ -307,57 +307,60 @@
 	.color-input {
 		position: relative;
 		display: inline-block;
-	}
-	.box {
-		width: 40px;
-		height: 40px;
-		cursor: pointer;
-		border-radius: 20%;
-		overflow: hidden;
-		transition: all .2s, background-color 0.05s .15s;
-		.inner {
-			border-radius: inherit;
+
+		.box {
+			width: 40px;
+			height: 40px;
+			cursor: pointer;
+			border-radius: 20%;
 			overflow: hidden;
-			transition: inherit;
-		}
-		.transparent {
-			@extend %fill-100;
-			background-image: var(--transparent-pattern);
-			background-color: #fff;
-			background-size: 100%;
-		}
-		.color {
-			@extend %fill-100;
-		}
-		&.active {
-			background: #fbfbfb;
-			transition: all .2s, background-color 0.05s;
+			transition: all .2s, background-color 0.05s .15s;
 			.inner {
-				transform: scale(.9);
+				border-radius: inherit;
+				overflow: hidden;
+				transition: inherit;
+			}
+			.transparent {
+				@extend %fill-100;
+				background-image: var(--transparent-pattern);
+				background-color: #fff;
+				background-size: 100%;
+			}
+			.color {
+				@extend %fill-100;
+			}
+			&.active {
+				background: #fbfbfb;
+				transition: all .2s, background-color 0.05s;
+				.inner {
+					transform: scale(.9);
+				}
+			}
+			&.disabled {
+				cursor: not-allowed;
 			}
 		}
-		&.disabled {
-			cursor: not-allowed;
+
+		.picker-popup {
+			position: absolute;
+			z-index: 9999;
+			width: auto;
+			min-width: 280px;
+			background-color: #fbfbfb;
+			box-shadow: 0px 5px 10px rgba(15,15,15,.4);
+			margin: 10px;
+			user-select: none;
+			color: #0f0f0f;
 		}
-	}
-	.picker-popup {
-		position: absolute;
-		z-index: 9999;
-		width: auto;
-		min-width: 280px;
-		background-color: #fbfbfb;
-		box-shadow: 0px 5px 10px rgba(15,15,15,.4);
-		margin: 10px;
-		user-select: none;
-		color: #0f0f0f;
-	}
-	.picker-popup-enter-from,
-	.picker-popup-leave-to {
-		transform: translateY(-10px);
-		opacity: 0;
-	}
-	.picker-popup-enter-active,
-	.picker-popup-leave-active {
-		transition: transform .3s, opacity .3s;
+
+		.picker-popup-enter-from,
+		.picker-popup-leave-to {
+			transform: translateY(-10px);
+			opacity: 0;
+		}
+		.picker-popup-enter-active,
+		.picker-popup-leave-active {
+			transition: transform .3s, opacity .3s;
+		}
 	}
 </style>

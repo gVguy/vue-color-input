@@ -522,7 +522,7 @@ export default {
 
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 	%fill-100 {
 		width: 100%;
 		height: 100%;
@@ -532,120 +532,123 @@ export default {
 		justify-content: center;
 		align-items: center;
 	}
-	.slider {
-		width: 85%;
-		height: 6px;
-		margin: 18px auto;
-		position: relative;
-	}
-	.slider-container {
-		display: block;
-		@extend %fill-100;
-		top: 50%;
-		border-radius: 3px;
-		overflow: hidden;
-		background-size: contain;
-	}
-	.slider-canvas {
-		@extend %fill-100;
-		display: block;
-	}
-	.slider-active-area {
-		position: absolute;
-		top: 50%;
-		transform: translateY(-50%);
-		left: 0;
-		width: 100%;
-	}
-	.slider-pointer {
-		width: 12px;
-		height: 12px;
-		border-radius: 50%;
-		background: #fbfbfb;
-		overflow: hidden;
-		border: 2px #fbfbfb solid;
-		box-shadow: 0 0 5px rgba(15,15,15,.3);
-	}
-	.transparency-pattern {
-		background-image: var(--transparent-pattern);
-	}
-	.pointer-color {
-		@extend %fill-100;
-	}
-	.pointer-transparent {
-		@extend %fill-100;
-		@extend .transparency-pattern;
-		background-size: auto 100%;
-	}
-	.saturation-area {
-		width: 100%;
-		height: 125px;
-		position: relative;
-	}
-	.saturation-pointer {
-		@extend .slider-pointer;
-		top: auto;
-		width: 20px;
-		height: 20px;
-		position: absolute;
-		bottom: 0;
-		left: 0;
-		z-index: 10001;
-	}
-	.text-inputs-area {
-		display: flex;
-		margin: 0 7px 10px;
-	}
-	.text-inputs-wrapper {
-		flex: 1 0;
-		@extend %flex-center;
-		flex-wrap: wrap;
-		.text-input-container {
-			white-space: nowrap;
-		}
-		.text-input {
-			font-family: inherit;
-			color: inherit;
-			width: 4ch;
-			text-align: center;
-			margin: 0 5px;
-			&:focus {
-				outline-color: var(--outline-color);
-			}
-			&#text-input-hex {
-				width: 8ch;
-			}
-		}
-	}
-	.text-format-arrows {
-		flex: 0 1;
-		@extend %flex-center;
-		flex-direction: column;
-		.arrow {
-			width: 12px;
-			height: 10px;
-			opacity: .4;
-			transition: .3s;
+	.color-input {
+		.slider {
+			width: 85%;
+			height: 6px;
+			margin: 18px auto;
 			position: relative;
+		}
+		.slider-container {
+			display: block;
+			@extend %fill-100;
+			top: 50%;
+			border-radius: 3px;
+			overflow: hidden;
+			background-size: contain;
+		}
+		.slider-canvas {
+			@extend %fill-100;
+			display: block;
+		}
+		.slider-active-area {
+			position: absolute;
+			top: 50%;
+			transform: translateY(-50%);
+			left: 0;
+			width: 100%;
+		}
+		.slider-pointer {
+			width: 12px;
+			height: 12px;
+			border-radius: 50%;
+			background: #fbfbfb;
+			overflow: hidden;
+			border: 2px #fbfbfb solid;
+			box-shadow: 0 0 5px rgba(15,15,15,.3);
+		}
+		.transparency-pattern {
+			background-image: var(--transparent-pattern);
+		}
+		.pointer-color {
+			@extend %fill-100;
+		}
+		.pointer-transparent {
+			@extend %fill-100;
+			@extend .transparency-pattern;
+			background-size: auto 100%;
+		}
+		.saturation-area {
+			width: 100%;
+			height: 125px;
+			position: relative;
+		}
+		.saturation-pointer {
+			@extend .slider-pointer;
+			top: auto;
+			width: 20px;
+			height: 20px;
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			z-index: 10001;
+		}
+		.text-inputs-area {
+			display: flex;
+			margin: 0 7px 10px;
+		}
+		.text-inputs-wrapper {
+			flex: 1 0;
 			@extend %flex-center;
-			&::before {
-				display: block;
-				content: '';
-				width: 0;
-				height: 0;
-				border-left: 5px solid transparent;
-				border-right: 5px solid transparent;
+			flex-wrap: wrap;
+			.text-input-container {
+				white-space: nowrap;
 			}
-			&.up::before {
-				border-bottom: 5px solid var(--arrow-color);
+			.text-input {
+				font-family: inherit;
+				color: inherit;
+				width: 4ch;
+				text-align: center;
+				margin: 0 5px;
+				&:focus {
+					outline-color: var(--outline-color);
+				}
+				&#text-input-hex {
+					width: 8ch;
+				}
 			}
-			&.down::before {
-				border-top: 5px solid var(--arrow-color);
-			}
-			&:hover {
-				opacity: .8;
+		}
+		.text-format-arrows {
+			flex: 0 1;
+			@extend %flex-center;
+			flex-direction: column;
+			.arrow {
+				width: 12px;
+				height: 10px;
+				opacity: .4;
+				transition: .3s;
+				position: relative;
+				@extend %flex-center;
+				&::before {
+					display: block;
+					content: '';
+					width: 0;
+					height: 0;
+					border-left: 5px solid transparent;
+					border-right: 5px solid transparent;
+				}
+				&.up::before {
+					border-bottom: 5px solid var(--arrow-color);
+				}
+				&.down::before {
+					border-top: 5px solid var(--arrow-color);
+				}
+				&:hover {
+					opacity: .8;
+				}
 			}
 		}
 	}
+
 
 </style>
