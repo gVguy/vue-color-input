@@ -8,6 +8,10 @@ Slick and perfomant Vue 3 color picker component whose goal is to replace `<inpu
     <a href="https://codepen.io/vanechka222/pen/oNeNXrr">Codepen template</a>
 </p>
 
+<p align="center">
+    <img src="https://media.giphy.com/media/jNTl8TPY4K4PZzlZV9/source.gif">
+</p>
+
 ## Why
 
 ### Multi-format
