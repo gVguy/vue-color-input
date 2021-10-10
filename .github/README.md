@@ -342,7 +342,7 @@ Default CSS is written with custumizability in mind, so anything you want to sty
 
 To override factory styles, you should address elemets through `.color-input` parent selector, e.g:
 ```css
-.color input .box { }
+.color-input .box { }
 ```
 
 ### Class names
