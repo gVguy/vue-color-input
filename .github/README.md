@@ -1,5 +1,5 @@
 # vue-color-input
-Slick and perfomant Vue 3 color picker component whose goal is to replace `<input type=color>`
+Slick and perfomant Vue 3 color picker component whose goal is to replace `<input type="color">`
 
 <p align="center">
     🚀&nbsp;&nbsp;<b><a href="https://gvguy.github.io/vue-color-input/">Live demo</a></b>&nbsp;&nbsp;🚀
@@ -9,7 +9,7 @@ Slick and perfomant Vue 3 color picker component whose goal is to replace `<inpu
 </p>
 
 <p align="center">
-    <img src="https://media.giphy.com/media/GTjRMqSvEPHdlzCG1n/source.gif">
+    <img src="https://media.giphy.com/media/OgHm9pl9TdBBeVVgq6/source.gif">
 </p>
 
 ## Why

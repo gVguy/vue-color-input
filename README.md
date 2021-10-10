@@ -1,7 +1,7 @@
 <!-- short readme for npm. full readme .github/README.md -->
 
 # vue-color-input
-Slick and perfomant Vue 3 color picker component whose goal is to replace `<input type=color>`
+Slick and perfomant Vue 3 color picker component whose goal is to replace `<input type="color">`
 
 <p align="center">
     🚀&nbsp;&nbsp;<b><a href="https://gvguy.github.io/vue-color-input/">Live demo</a></b>&nbsp;&nbsp;🚀
@@ -13,7 +13,7 @@ Slick and perfomant Vue 3 color picker component whose goal is to replace `<inpu
 ## Why
 
 ### Multi-format
-Forget about color conversions: vue-color-input does it for you. Unlike `<input type=color>` (which only understands hex) vue-color-input supports all commonly used color models, and by default __will output color in the same format that was passed as input__. It also has support for alpha channel, unless you specifically disable it.
+Forget about color conversions: vue-color-input does it for you. Unlike `<input type="color">` (which only understands hex) vue-color-input supports all commonly used color models, and by default __will output color in the same format that was passed as input__. It also has support for alpha channel, unless you specifically disable it.
 
 ### Customizable
 HTML's native color input is annoying to style. Most likely you'll have to get tricky hiding the original input & binding click event to a presentable-looking div. But it only gets you halfway there cause the color picker popup window is still out of reach and it might look way different in different browsers.  
