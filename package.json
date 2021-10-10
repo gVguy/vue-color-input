@@ -1,6 +1,6 @@
 {
   "name": "vue-color-input",
-  "version": "1.0.5-beta.1",
+  "version": "1.0.5",
   "description": "Slick and perfomant vue 3 color picker component whose goal is to replace <input type=color>",
   "keywords": [
     "vue",
