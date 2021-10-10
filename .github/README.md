@@ -9,7 +9,7 @@ Slick and perfomant Vue 3 color picker component whose goal is to replace `<inpu
 </p>
 
 <p align="center">
-    <img src="https://media.giphy.com/media/OgHm9pl9TdBBeVVgq6/source.gif">
+    <img src="https://media.giphy.com/media/wyURgcSzyHlJcsOovd/source.gif">
 </p>
 
 ## Why
