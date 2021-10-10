@@ -13,6 +13,7 @@ import minimist from 'minimist';
 import Sass from 'rollup-plugin-sass'; // added this for using scss
 import svg from 'rollup-plugin-svg'; // added this to inline svg
 import autoprefixer from 'autoprefixer';
+import css from 'rollup-plugin-css-only'; // added this to extract css
 
 
 // Get browserslist config and remove ie from es build targets
@@ -50,25 +51,21 @@ const baseConfig = {
     },
     vue: {
       preprocessStyles: true,
+      css: false, // convert style blocks to import statements
     },
     postVue: [
       resolve({
         extensions: ['.js', '.jsx', '.ts', '.tsx', '.vue'],
       }),
-      // Process only `<style module>` blocks.
-      PostCSS({
-        modules: {
-          generateScopedName: '[local]___[hash:base64:5]',
-        },
-        include: /&module=.*\.css$/,
-        plugins: [ autoprefixer() ],
-      }),
       // Process all `<style>` blocks except `<style module>`.
       PostCSS({
         include: /(?<!&module=.*)\.css$/,
-        plugins: [ autoprefixer() ],
+        plugins: [ autoprefixer() ], // added autoprefixer
       }),
       Sass(), // added this
+      css({
+        output: 'bundle.css'
+      }), // extract css
       commonjs(),
     ],
     babel: {
@@ -85,6 +82,7 @@ const external = [
   // list external dependencies, exactly the way it is written in the import statement.
   // eg. 'jquery'
   'vue',
+  'tinycolor2' // externalize tinycolor dependency
 ];
 
 // UMD/IIFE shared settings: output.globals
@@ -155,7 +153,7 @@ if (!argv.format || argv.format === 'cjs') {
 if (!argv.format || argv.format === 'iife') {
   const unpkgConfig = {
     ...baseConfig,
-    external,
+    external: [ 'vue' ], // include tinycolor in unpkg version
     output: {
       compact: true,
       file: 'dist/color-input.min.js',
