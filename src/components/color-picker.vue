@@ -72,7 +72,8 @@ export default {
 		'saturationInputStart',
 		'saturationInputEnd',
 		'saturationInput',
-		'ready'
+		'ready',
+		'change'
 	],
 	inject: [ 'tinycolor' ],
 	data() {
@@ -235,6 +236,7 @@ export default {
 			document.removeEventListener('pointerup', this.saturationPickEnd);
 			document.removeEventListener('pointermove', this.saturationPickMove);
 			this.emitHook('saturationInputEnd', { s: this.s, v: this.v });
+			this.emitHook('change', { h: this.h, s: this.s, v: this.v, a: this.a });
 		},
 		saturationPickMove(e) {
 			if (e.clientX >= this.saturationCanvasRect.x && e.clientX <= this.saturationCanvasRect.right) {
@@ -257,6 +259,7 @@ export default {
 			document.removeEventListener('pointerup', this.huePickEnd);
 			document.removeEventListener('pointermove', this.huePickMove);
 			this.emitHook('hueInputEnd', { h: this.h });
+			this.emitHook('change', { h: this.h, s: this.s, v: this.v, a: this.a });
 		},
 		huePickMove(e) {
 			if (e.clientX >= this.hueCanvasRect.x && e.clientX <= this.hueCanvasRect.right) {
@@ -275,6 +278,7 @@ export default {
 			document.removeEventListener('pointerup', this.alphaPickEnd);
 			document.removeEventListener('pointermove', this.alphaPickMove);
 			this.emitHook('alphaInputEnd', { a: this.a });
+			this.emitHook('change', { h: this.h, s: this.s, v: this.v, a: this.a });
 		},
 		alphaPickMove(e) {
 			if (e.clientX >= this.alphaCanvasRect.x && e.clientX <= this.alphaCanvasRect.right) {
@@ -384,6 +388,7 @@ export default {
 					// actually blurred, not just focused another
 					this.textInputsFreeze = {};
 					this.textInputActive = null;
+					this.emitHook('change', { h: this.h, s: this.s, v: this.v, a: this.a });
 				}
 			}, 0);
 		},

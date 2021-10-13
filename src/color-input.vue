@@ -29,6 +29,7 @@
 			@saturationInputStart="$emit('saturationInputStart', $event)"
 			@saturationInputEnd="$emit('saturationInputEnd', $event)"
 			@saturationInput="$emit('saturationInput', $event)"
+			@change="$emit('change', $event)"
 			ref="picker" />
 		</transition>
 	</div>
@@ -90,7 +91,8 @@
 			'alphaInput',
 			'saturationInputStart',
 			'saturationInputEnd',
-			'saturationInput'
+			'saturationInput',
+			'change'
   		],
   		components: { ColorPicker },
   		provide: { tinycolor },

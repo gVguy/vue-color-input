@@ -61,6 +61,7 @@
 		@saturationInputStart="logEvent('saturationInputStart', $event)"
 		@saturationInputEnd="logEvent('saturationInputEnd', $event)"
 		@saturationInput="logEvent('saturationInput', $event)"
+		@change="logEvent('change', $event)"
 		ref="colorInput" />
 		<div class="detailsSection">
 			<div class="detailsBlock">
