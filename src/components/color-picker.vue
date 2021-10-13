@@ -231,12 +231,17 @@ export default {
 			document.addEventListener('pointermove', this.saturationPickMove);
 			this.saturationPickMove(e);
 			this.emitHook('saturationInputStart', { s: this.s, v: this.v });
+			this.colorSnapshot = this.color.toRgbString(); // this to track change
 		},
 		saturationPickEnd(e) {
+			console.log('end');
 			document.removeEventListener('pointerup', this.saturationPickEnd);
 			document.removeEventListener('pointermove', this.saturationPickMove);
 			this.emitHook('saturationInputEnd', { s: this.s, v: this.v });
-			this.emitHook('change', { h: this.h, s: this.s, v: this.v, a: this.a });
+			if (this.colorSnapshot !== this.color.toRgbString()) {
+				// something changed, emit change hook
+				this.emitHook('change', { h: this.h, s: this.s, v: this.v, a: this.a });
+			}
 		},
 		saturationPickMove(e) {
 			if (e.clientX >= this.saturationCanvasRect.x && e.clientX <= this.saturationCanvasRect.right) {
@@ -254,12 +259,16 @@ export default {
 			document.addEventListener('pointermove', this.huePickMove);
 			this.huePickMove(e);
 			this.emitHook('hueInputStart', { h: this.h });
+			this.colorSnapshot = this.color.toRgbString(); // this to track change
 		},
 		huePickEnd(e) {
 			document.removeEventListener('pointerup', this.huePickEnd);
 			document.removeEventListener('pointermove', this.huePickMove);
 			this.emitHook('hueInputEnd', { h: this.h });
-			this.emitHook('change', { h: this.h, s: this.s, v: this.v, a: this.a });
+			if (this.colorSnapshot !== this.color.toRgbString()) {
+				// something changed, emit change hook
+				this.emitHook('change', { h: this.h, s: this.s, v: this.v, a: this.a });
+			}
 		},
 		huePickMove(e) {
 			if (e.clientX >= this.hueCanvasRect.x && e.clientX <= this.hueCanvasRect.right) {
@@ -273,12 +282,16 @@ export default {
 			document.addEventListener('pointermove', this.alphaPickMove);
 			this.alphaPickMove(e);
 			this.emitHook('alphaInputStart', { a: this.a });
+			this.colorSnapshot = this.color.toRgbString(); // this to track change
 		},
 		alphaPickEnd(e) {
 			document.removeEventListener('pointerup', this.alphaPickEnd);
 			document.removeEventListener('pointermove', this.alphaPickMove);
 			this.emitHook('alphaInputEnd', { a: this.a });
-			this.emitHook('change', { h: this.h, s: this.s, v: this.v, a: this.a });
+			if (this.colorSnapshot !== this.color.toRgbString()) {
+				// something changed, emit change hook
+				this.emitHook('change', { h: this.h, s: this.s, v: this.v, a: this.a });
+			}
 		},
 		alphaPickMove(e) {
 			if (e.clientX >= this.alphaCanvasRect.x && e.clientX <= this.alphaCanvasRect.right) {
@@ -297,6 +310,7 @@ export default {
 				value = Number(value.toFixed(3));
 			}
 			this.$emit(eventName, value);
+			// if (eventName=='change') console.log('change')
 		},
 		textInputInputHandler(e) {
 			const component = e.target.dataset.component;
@@ -379,16 +393,25 @@ export default {
 		textInputFocusHandler(e) {
 			// if focused from blur, freeze current color
 			// if focused from another text input, don't update
-			if (!this.textInputActive) this.textInputsFreeze = { ...this.textInputs };
+			if (!this.textInputActive) {
+				this.textInputsFreeze = { ...this.textInputs };
+				this.colorSnapshot = this.color.toRgbString(); // this to track change
+			}
 			this.textInputActive = e.target.dataset.component;
 		},
 		textInputBlurHandler(e) {
 			setTimeout(() => {
 				if (this.textInputActive === e.target.dataset.component) {
 					// actually blurred, not just focused another
+
+					// check if something actually changed
+					if (this.colorSnapshot !== this.color.toRgbString()) {
+						// something changed, emit change hook
+						this.emitHook('change', { h: this.h, s: this.s, v: this.v, a: this.a });
+					}
+
 					this.textInputsFreeze = {};
 					this.textInputActive = null;
-					this.emitHook('change', { h: this.h, s: this.s, v: this.v, a: this.a });
 				}
 			}, 0);
 		},

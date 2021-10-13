@@ -509,7 +509,7 @@ Notice that event data is always passed in __hsv__ format.
 | __alphaInputStart__      | alpha adjustment has begun.<br />This is only emitted when pointerdown over the alpha slider is registered.<br />This will _not_ emit when alpha is changed from text inputs                  | current state of alpha<br />`{ a: 0.5 }`                                        |
 | __alphaInputEnd__        | alpha adjustment has ended.<br />This is only emitted when pointerup of the alpha slider is registered.<br />This will _not_ emit when alpha is changed from text inputs                      | current state of alpha<br />`{ a: 0.5 }`                                        |
 | __alphaInput__           | alpha is being adjusted.<br />This will emit every time alpha is changed, including text inputs                                                                                               | current state of alpha<br />`{ a: 0.5 }`                                        |
-| __change__               | the adjustment of some parameter has ended. <br />This will emit every time _any_ parameter is changed. <br />This _will_ emit when color is changed from text inputs as well, on blur        | current state of all color components<br />`{ h: 180, s: 0.5, v: 0.5, a: 0.5 }` |
+| __change__               | the color has changed by user interaction.<br />This will emit every time _any_ parameter is changed. <br />This _will_ emit when color is changed from text inputs as well, on blur          | current state of all color components<br />`{ h: 180, s: 0.5, v: 0.5, a: 0.5 }` |
 
 ## Example
 
