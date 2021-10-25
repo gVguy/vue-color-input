@@ -5,7 +5,7 @@ Slick and perfomant Vue 3 color picker component whose goal is to replace `<inpu
     🚀&nbsp;&nbsp;<b><a href="https://gvguy.github.io/vue-color-input/">Live demo</a></b>&nbsp;&nbsp;🚀
 </p>
 <p align="center">
-    <a href="https://codepen.io/vanechka222/pen/oNeNXrr">Codepen template</a>
+    <a href="https://codepen.io/vanechka222/pen/oNeNXrr">Codepen</a>
 </p>
 
 <p align="center">
@@ -27,34 +27,34 @@ Not only that native color input looks different in different browsers, it also 
 ### It just works
 vue-color-input combines minimalist approach with comprehensive functionality. You *can* customize and extend it to your liking, set it up with additional properties, but you _don't have to_. It works as expected out of the box just as well, with only `v-model` provided.
 
-## Usage
+## Installation 
 
-### Install
-```
+### npm
+```shell
 npm i vue-color-input
 ```
-
-### Import
 ```javascript
 import ColorInput from 'vue-color-input'
+```
 
+### CDN
+```xml
+<script src="https://unpkg.com/vue-color-input@latest"></script>
+```
 
+## Usage
+```javascript
 // install it with use()
-
 app.use(ColorInput)
 
 // OR register component globally
-
 app.component('ColorInput', ColorInput)
 
 // OR locally
-
 export.default {
     components: { ColorInput }
 }
 ```
-
-### Use
 ```xml
 <color-input v-model="color" />
 ```
