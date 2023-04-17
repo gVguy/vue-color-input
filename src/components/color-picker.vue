@@ -234,7 +234,6 @@ export default {
 			this.colorSnapshot = this.color.toRgbString(); // this to track change
 		},
 		saturationPickEnd(e) {
-			console.log('end');
 			document.removeEventListener('pointerup', this.saturationPickEnd);
 			document.removeEventListener('pointermove', this.saturationPickMove);
 			this.emitHook('saturationInputEnd', { s: this.s, v: this.v });
