@@ -17,8 +17,9 @@
 			:disable-alpha="processedDisableAlpha"
 			:boxRect="boxRect"
 			:disable-text-inputs="disableTextInputs"
-			v-show="active && ready"
-			@ready="ready = true"
+			v-show="active"
+			:style="{ visibility: hidePicker ? 'hidden' : '' }"
+			@ready="hidePicker = false"
 			@updateColor="emitUpdate"
 			@hueInputStart="$emit('hueInputStart', $event)"
 			@hueInputEnd="$emit('hueInputEnd', $event)"
@@ -101,6 +102,7 @@
 				color: null,
 				active: false,
 				ready: false,
+				hidePicker: false,
 				boxRect: {},
 				innerBoxRect: {},
 				textInputsFormat: 'rgb',
@@ -195,6 +197,7 @@
 
 				// init the picker before showing in case there were some changes to its layout
 				this.ready = false; // picker will emit 'ready' at the end of init
+				this.hidePicker = true;
 				this.$refs.picker.init();
 
 				document.body.addEventListener('pointerdown', this.pickEnd);
