@@ -435,14 +435,6 @@ export default {
 			// get color values from model value
 			Object.assign(this.$data, this.color.toHsv());
 
-			const display = computedStyle.getPropertyValue('display');
-			if (display === 'none') {
-				// picker is currently hidden
-				// stealth display
-				pickerRoot.style.display = 'block';
-				pickerRoot.style.visibility = 'hidden';
-			}
-
 			// wait for picker to render (stealthy)
 			// and then get all the necessary values that rely on element being displayed
 			window.requestAnimationFrame(() => {
@@ -460,11 +452,6 @@ export default {
 				this.sliderPointerWidth = this.$refs.huePointer.offsetWidth;
 				this.saturationPointerWidth = this.$refs.saturationPointer.offsetWidth;
 				this.saturationPointerHeight = this.$refs.saturationPointer.offsetHeight;
-
-				// all the values collected
-				// hide it back (assuming it was hidden)
-				pickerRoot.style.visibility = null;
-				pickerRoot.style.display = display;
 
 				// wait for it to hide
 				// and then let the parent know picker is ready
