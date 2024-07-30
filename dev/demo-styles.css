@@ -9,12 +9,14 @@
 .color-input.user .box.active .inner {
 	transform: scale(.9) rotate(90deg);
 }
-.color-input.user .box.disabled {}
-.color-input.user .picker-popup {}
-.color-input.user .slider {}
-.color-input.user .slider-pointer {}
-.color-input.user .saturation-pointer {}
-.color-input.user .picker-popup-enter-from,
-.color-input.user .picker-popup-leave-to {}
-.color-input.user .picker-popup-enter-active,
-.color-input.user .picker-popup-leave-active {}
+
+.picker-popup-enter-from,
+.picker-popup-leave-to {}
+.picker-popup-enter-active,
+.picker-popup-leave-active {}
+
+.picker-popup.user {}
+.picker-popup.user .box.disabled {}
+.picker-popup.user .slider {}
+.picker-popup.user .slider-pointer {}
+.picker-popup.user .saturation-pointer {}

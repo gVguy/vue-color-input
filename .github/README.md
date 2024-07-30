@@ -366,15 +366,15 @@ Instead of using `transition` property with a custom transition name, you can si
 This can be done in the same manner as with the other classes, e.g:
 
 ```css
-.color-input.user .picker-popup-enter-from {
+.picker-popup-enter-from {
     transform: translateY(-100%) scale(.1);
 }
-.color-input.user .picker-popup-leave-to {
+.picker-popup-leave-to {
     transform: scale(3);
 }
 /* and if you want to change the durations as well */
-.color-input.user .picker-popup-enter-active,
-.color-input.user .picker-popup-leave-active {
+.picker-popup-enter-active,
+.picker-popup-leave-active {
     transition: all .5s;
 }
 ```
@@ -415,29 +415,29 @@ For example:
     height: 100px;
     border-radius: 50px;
 }
-.color-input.user .picker-popup {
+.picker-popup.user {
     /* dark mode for popup window */
     background: #000;
     color: #fbfbfb;
     /* and make it wide */
     width: 400px;
 }
-.color-input.user .slider {
+.picker-popup .slider {
     /* thin out the sliders and make them wider */
     height: 2px;
     width: 92%;
 }
-.color-input.user .saturation-area {
+.picker-popup .saturation-area {
     /* bigger picking area */
     height: 150px;
 }
-.color-input.user .slider-pointer {
+.picker-popup .slider-pointer {
     /* make slider pointers square-ish and 10x10 */
     border-radius: 4px;
     width: 10px;
     height: 10px;
 }
-.color-input.user .saturation-pointer {
+.picker-popup .saturation-pointer {
     /* increase saturation pointer size */
     width: 40px;
     height: 40px;
@@ -450,8 +450,17 @@ For example:
 
 Here's the base structure of the component:
 ```xml
+<!-- When there is no appendTo set up -->
 <div class="color-input">
     <div class="box [active] [disabled]"></div>
+    <div class="picker-popup"></div> <!-- position: absolute -->
+</div>
+
+<!-- When there is appendTo set up -->
+<div class="color-input">
+    <div class="box [active] [disabled]"></div>
+</div>
+<div id="appendToId">
     <div class="picker-popup"></div> <!-- position: absolute -->
 </div>
 ```
@@ -465,17 +474,16 @@ _Changing size of the root element independently from the box will mess with how
 
 Inline styles will only let you style the root element, which is typically not what you want to style very often.
 
-### Use `.color-input.user` to override default styles
+### Use `.user` to override default styles
 
-There is no need to use `!important`. Default styles are easily overridable by adding specificity to the selectors with `.color-input.user .<classname>`.
+There is no need to use `!important`. Default styles are easily overridable by adding specificity to the selectors with `.color-input.user .box` or `.picker-popup.user`.
 
 And if you use scss that's even more natural with nesting:
 ```scss
 .color-input.user {
     .box {}
-    .picker-popup {}
-    // etc
 }
+.picker-popup.user {}
 ```
 
 ### Set margin on the root element
