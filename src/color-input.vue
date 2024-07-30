@@ -9,30 +9,33 @@
 					<div class="color" :style="boxColorStyles"></div>
 				</div>
 		</div>
-		<transition :name="transition">
-			<color-picker
-			class="picker-popup"
-			:color="this.color"
-			:position="processedPosition"
-			:disable-alpha="processedDisableAlpha"
-			:boxRect="boxRect"
-			:disable-text-inputs="disableTextInputs"
-			v-show="active"
-			:style="{ visibility: hidePicker ? 'hidden' : '' }"
-			@ready="hidePicker = false"
-			@updateColor="emitUpdate"
-			@hueInputStart="$emit('hueInputStart', $event)"
-			@hueInputEnd="$emit('hueInputEnd', $event)"
-			@hueInput="$emit('hueInput', $event)"
-			@alphaInputStart="$emit('alphaInputStart', $event)"
-			@alphaInputEnd="$emit('alphaInputEnd', $event)"
-			@alphaInput="$emit('alphaInput', $event)"
-			@saturationInputStart="$emit('saturationInputStart', $event)"
-			@saturationInputEnd="$emit('saturationInputEnd', $event)"
-			@saturationInput="$emit('saturationInput', $event)"
-			@change="$emit('change', $event)"
-			ref="picker" />
-		</transition>
+
+		<Teleport :to="parent" v-if="parent">
+			<transition :name="transition">
+				<color-picker
+				class="picker-popup user"
+				:color="this.color"
+				:position="processedPosition"
+				:disable-alpha="processedDisableAlpha"
+				:boxRect="boxRect"
+				:disable-text-inputs="disableTextInputs"
+				v-show="active"
+				:style="{ visibility: hidePicker ? 'hidden' : '' }"
+				@ready="hidePicker = false"
+				@updateColor="emitUpdate"
+				@hueInputStart="$emit('hueInputStart', $event)"
+				@hueInputEnd="$emit('hueInputEnd', $event)"
+				@hueInput="$emit('hueInput', $event)"
+				@alphaInputStart="$emit('alphaInputStart', $event)"
+				@alphaInputEnd="$emit('alphaInputEnd', $event)"
+				@alphaInput="$emit('alphaInput', $event)"
+				@saturationInputStart="$emit('saturationInputStart', $event)"
+				@saturationInputEnd="$emit('saturationInputEnd', $event)"
+				@saturationInput="$emit('saturationInput', $event)"
+				@change="$emit('change', $event)"
+				ref="picker" />
+			</transition>
+		</Teleport>
 	</div>
 </template>
 
@@ -77,6 +80,7 @@
 				default: false
 			},
 			format: String,
+			appendTo: [String, HTMLElement]
 		},
   		emits: [
   			'mounted',
@@ -84,16 +88,16 @@
   			'update:modelValue',
   			'pickStart',
   			'pickEnd',
-			'hueInputStart',
-			'hueInputEnd',
-			'hueInput',
-			'alphaInputStart',
-			'alphaInputEnd',
-			'alphaInput',
-			'saturationInputStart',
-			'saturationInputEnd',
-			'saturationInput',
-			'change'
+				'hueInputStart',
+				'hueInputEnd',
+				'hueInput',
+				'alphaInputStart',
+				'alphaInputEnd',
+				'alphaInput',
+				'saturationInputStart',
+				'saturationInputEnd',
+				'saturationInput',
+				'change'
   		],
   		components: { ColorPicker },
   		provide: { tinycolor },
@@ -103,6 +107,7 @@
 				active: false,
 				ready: false,
 				hidePicker: false,
+				parent: null,
 				boxRect: {},
 				innerBoxRect: {},
 				textInputsFormat: 'rgb',
@@ -250,8 +255,22 @@
 				}
 				this.$emit('update:modelValue', this.output);
 			},
+			getParent() {
+				let parent;
+				if (this.appendTo) {
+					if (typeof this.appendTo === 'string') {
+						parent = document.querySelector(this.appendTo)
+					} else {
+						parent = this.appendTo
+					}
+				}
+
+				
+				this.parent = parent || this.$refs.root
+				console.log(this.parent);
+			},
 			getBoxRect() {
-				this.boxRect = this.$refs.root.getBoundingClientRect();
+				this.boxRect = this.parent.getBoundingClientRect();
 			}
 		},
 		created() {
@@ -261,6 +280,7 @@
 			};
 		},
 		mounted() {
+			this.getParent();
 			this.$emit('mounted');
 		},
 		beforeUnmount() {
@@ -345,27 +365,26 @@
 				cursor: not-allowed;
 			}
 		}
+	}
+	.picker-popup {
+		position: absolute;
+		z-index: 9999;
+		width: auto;
+		min-width: 280px;
+		background-color: #fbfbfb;
+		box-shadow: 0px 5px 10px rgba(15,15,15,.4);
+		margin: 10px;
+		user-select: none;
+		color: #0f0f0f;
+	}
 
-		.picker-popup {
-			position: absolute;
-			z-index: 9999;
-			width: auto;
-			min-width: 280px;
-			background-color: #fbfbfb;
-			box-shadow: 0px 5px 10px rgba(15,15,15,.4);
-			margin: 10px;
-			user-select: none;
-			color: #0f0f0f;
-		}
-
-		.picker-popup-enter-from,
-		.picker-popup-leave-to {
-			transform: translateY(-10px);
-			opacity: 0;
-		}
-		.picker-popup-enter-active,
-		.picker-popup-leave-active {
-			transition: transform .3s, opacity .3s;
-		}
+	.picker-popup-enter-from,
+	.picker-popup-leave-to {
+		transform: translateY(-10px);
+		opacity: 0;
+	}
+	.picker-popup-enter-active,
+	.picker-popup-leave-active {
+		transition: transform .3s, opacity .3s;
 	}
 </style>
