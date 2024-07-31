@@ -1,5 +1,6 @@
 {
   "name": "vue-color-input",
+  "type": "module",
   "version": "1.0.9",
   "description": "Slick and perfomant vue 3 color picker component whose goal is to replace <input type=color>",
   "keywords": [
@@ -12,16 +13,22 @@
   "author": "Ivan Che <ivan.chepurin@gmail.com>",
   "license": "MIT",
   "repository": "gVguy/vue-color-input",
-  "main": "dist/color-input.ssr.js",
-  "browser": "dist/color-input.esm.js",
-  "module": "dist/color-input.esm.js",
-  "unpkg": "dist/color-input.min.js",
   "files": [
     "dist/*",
     "src/**/*.vue",
     "src/assets/*.svg"
   ],
-  "sideEffects": ["**/*.css"],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "main": "./dist/color-input.umd.js",
+  "module": "./dist/color-input.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/color-input.mjs",
+      "require": "./dist/color-input.umd.cjs"
+    }
+  },
   "scripts": {
     "dev": "vite dev",
     "prebuild": "rimraf ./dist",
@@ -40,12 +47,10 @@
     "postcss": "^8.2.10",
     "sass": "^1.42.1",
     "vite": "^5.3.5",
+    "vite-plugin-lib-inject-css": "^2.1.1",
     "vue": "^3.4.26"
   },
   "peerDependencies": {
     "vue": "^3.0.5"
-  },
-  "engines": {
-    "node": ">=14"
   }
 }

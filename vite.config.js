@@ -1,4 +1,5 @@
 import vue from '@vitejs/plugin-vue'
+import { libInjectCss } from 'vite-plugin-lib-inject-css'
 /** @type {import('vite').UserConfig} */
 export default {
   build: {
@@ -8,8 +9,11 @@ export default {
       name: 'ColorInput'
     },
     rollupOptions: {
-      external: ['vue']
+      external: ['vue'],
+      output: {
+        globals: { vue: 'Vue' },
+      },
     },
   },
-  plugins: [vue()]
+  plugins: [vue(), libInjectCss()]
 }
