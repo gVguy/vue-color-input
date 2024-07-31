@@ -107,9 +107,9 @@
 
 <script>
 	import { defineComponent } from 'vue';
-	import ColorInput from '@/color-input.vue';
+	import ColorInput from '../src/color-input.vue';
 
-	import demoStyles from '!!raw-loader!./demo-styles.css';
+	import demoStyles from './demo-styles.css?raw';
 
 	export default defineComponent({
 		name: 'ServeDev',

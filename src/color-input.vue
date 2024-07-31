@@ -46,7 +46,7 @@ import ColorPicker from "./components/color-picker.vue";
 
 import tinycolor from "tinycolor2";
 
-import transparentPattern from "@/assets/transparent-pattern.svg";
+import transparentPattern from "./assets/transparent-pattern.svg";
 
 const isSameNodeRecursive = (elA, elB) => {
   while (!/^(body|html)$/i.test(elA.tagName)) {
