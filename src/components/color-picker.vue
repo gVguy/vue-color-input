@@ -546,7 +546,7 @@ export default {
 		justify-content: center;
 		align-items: center;
 	}
-	.color-input {
+	.picker-popup {
 		.slider {
 			width: 85%;
 			height: 6px;

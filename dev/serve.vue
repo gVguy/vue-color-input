@@ -1,5 +1,8 @@
 <template>
 	<div id="app">
+		<div class="box-parent" v-if="appendToActive">
+			HERE WILL BE THE BOX (ALWAYS <i>POSITION:RELATIVE</i>)
+		</div>
 		<h1>vue-color-input demo</h1>
 		<h3>
 			<a class="docsLink" href="https://github.com/gVguy/vue-color-input#vue-color-input"
@@ -41,28 +44,35 @@
 				<h3>disable-text-inputs</h3>
 				<input type="checkbox" class="chx" v-model="disableTextInputs" @pointerdown.stop>
 			</div>
+			<div class="setup-block">
+				<h3>appendTo external div</h3>
+				<input type="checkbox" class="chx" v-model="appendToActive" @pointerdown.stop>
+			</div>
 		</div>
-		<color-input v-model="color"
-		:format="format + (type ? ' ' + type : '')"
-		:position="position"
-		:disable-alpha="disableAlpha"
-		:disabled="disabled"
-		:disable-text-inputs="disableTextInputs"
-		@mounted="logEvent('mounted');"
-		@beforeUnmount="logEvent('beforeUnmount');"
-		@pickStart="logEvent('pickStart')"
-		@pickEnd="logEvent('pickEnd')"
-		@hueInputStart="logEvent('hueInputStart', $event)"
-		@hueInputEnd="logEvent('hueInputEnd', $event)"
-		@hueInput="logEvent('hueInput', $event)"
-		@alphaInputStart="logEvent('alphaInputStart', $event)"
-		@alphaInputEnd="logEvent('alphaInputEnd', $event)"
-		@alphaInput="logEvent('alphaInput', $event)"
-		@saturationInputStart="logEvent('saturationInputStart', $event)"
-		@saturationInputEnd="logEvent('saturationInputEnd', $event)"
-		@saturationInput="logEvent('saturationInput', $event)"
-		@change="logEvent('change', $event)"
-		ref="colorInput" />
+		<color-input 
+			:appendTo="appendToActive ? appendTo : null"
+			v-model="color"
+			:format="format + (type ? ' ' + type : '')"
+			:position="position"
+			:disable-alpha="disableAlpha"
+			:disabled="disabled"
+			:disable-text-inputs="disableTextInputs"
+			@mounted="logEvent('mounted');"
+			@beforeUnmount="logEvent('beforeUnmount');"
+			@pickStart="logEvent('pickStart')"
+			@pickEnd="logEvent('pickEnd')"
+			@hueInputStart="logEvent('hueInputStart', $event)"
+			@hueInputEnd="logEvent('hueInputEnd', $event)"
+			@hueInput="logEvent('hueInput', $event)"
+			@alphaInputStart="logEvent('alphaInputStart', $event)"
+			@alphaInputEnd="logEvent('alphaInputEnd', $event)"
+			@alphaInput="logEvent('alphaInput', $event)"
+			@saturationInputStart="logEvent('saturationInputStart', $event)"
+			@saturationInputEnd="logEvent('saturationInputEnd', $event)"
+			@saturationInput="logEvent('saturationInput', $event)"
+			@change="logEvent('change', $event)"
+			ref="colorInput" 
+		/>
 		<div class="detailsSection">
 			<div class="detailsBlock">
 				<h2>Style it</h2>
@@ -120,6 +130,8 @@
 				format: '',
 				type: '',
 				formatOptions: ['rgb', 'hex', 'hex8', 'name', 'hsl', 'hsv'],
+				appendToActive: null,
+				appendTo: '.box-parent',
 			}
 		},
 		computed: {
@@ -264,6 +276,12 @@
 			});
 		},
 		watch: {
+			appendToActive() {
+				this.$refs.colorInput.pickEnd()
+				setTimeout(() => {
+					this.$refs.colorInput.getParent()
+				}, 100)
+			},
 			color() {
 				let hsl = this.$refs.colorInput.color.clone().setAlpha(1).toHslString();
 				let [h,s,l] = hsl.match(/\d+/g);
@@ -424,5 +442,8 @@
 	}
 	button {
 		margin-right: 5px;
+	}
+	.box-parent {
+		position: relative;
 	}
 </style>
