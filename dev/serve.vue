@@ -1,11 +1,8 @@
 <template>
 	<div id="app">
-		<div class="box-parent" v-if="appendToActive">
-			HERE WILL BE THE BOX (ALWAYS <i>POSITION:RELATIVE</i>)
-		</div>
 		<h1>vue-color-input demo</h1>
 		<h3>
-			<a class="docsLink" href="https://github.com/gVguy/vue-color-input#vue-color-input"
+			<a class="docs-link" href="https://github.com/gVguy/vue-color-input#vue-color-input"
 			:style="{ color: linkColor }">Docs</a>
 		</h3>
 		<div class="setup">
@@ -43,10 +40,6 @@
 			<div class="setup-block">
 				<h3>disable-text-inputs</h3>
 				<input type="checkbox" class="chx" v-model="disableTextInputs" @pointerdown.stop>
-			</div>
-			<div class="setup-block">
-				<h3>appendTo external div</h3>
-				<input type="checkbox" class="chx" v-model="appendToActive" @pointerdown.stop>
 			</div>
 		</div>
 		<color-input 
@@ -298,10 +291,10 @@
 	@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@300&display=swap');
 	body {
 		background: #fbfbfb;
-	}
-	#app {
 		font-family: 'Montserrat', sans-serif;
 		font-size: 16px;
+	}
+	#app {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -311,7 +304,7 @@
 	h1 {
 		margin-bottom: 0;
 	}
-	.docsLink {
+	.docs-link {
 		margin-bottom: 20px;
 		text-decoration: underline;
 	}

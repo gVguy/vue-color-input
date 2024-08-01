@@ -1,56 +1,84 @@
 <template>
-	<div ref="pickerRoot" :style="[pickerPosition]">
-		<div class="saturation-area" :style="pureHueBackground" @pointerdown="saturationPickStart">
-			<canvas class="slider-canvas" ref="saturationCanvas"></canvas>
-			<div class="saturation-pointer" ref="saturationPointer" :style="[saturationPointerStyles, {background: hexString}]"></div>
+	<div
+		ref="pickerRoot"
+		:style="[
+			pickerPosition,
+			{
+				'--box-width': boxRect.width + 'px',
+				'--box-height': boxRect.height + 'px'
+			}
+		]"
+		:class="bem('popup', {
+			[position[0]]: true,
+			[position[1]]: true,
+			[position.join('-')]: true
+		})"
+	>
+		<div :class="bem('saturation-area')" :style="pureHueBackground" @pointerdown="saturationPickStart">
+			<canvas :class="bem('slider-canvas')" ref="saturationCanvas"></canvas>
+			<div :class="bem('saturation-pointer')" ref="saturationPointer" :style="[saturationPointerStyles, {background: hexString}]"></div>
 		</div>
-		<div class="slider" @pointerdown="huePickStart">
-			<div class="slider-container">
-				<canvas class="slider-canvas" ref="hueCanvas"></canvas>
+		<div :class="bem('slider')" @pointerdown="huePickStart">
+			<div :class="bem('slider-container')">
+				<canvas :class="bem('slider-canvas')" ref="hueCanvas"></canvas>
 			</div>
-			<div class="slider-active-area">
-				<div class="slider-pointer" ref="huePointer" :style="[ huePointerStyles, pureHueBackground ]"></div>
+			<div :class="bem('slider-active-area')">
+				<div :class="bem('slider-pointer')" ref="huePointer" :style="[ huePointerStyles, pureHueBackground ]"></div>
 			</div>
 		</div>
-		<div v-if="!disableAlpha" class="slider" @pointerdown="alphaPickStart">
-			<div class="slider-container transparency-pattern">
-				<div class="slider-canvas" ref="alphaCanvas" :style="alphaCanvasStyles"></div>
+		<div v-if="!disableAlpha" :class="bem('slider')" @pointerdown="alphaPickStart">
+			<div
+				:class="bem('slider-container')"
+				:style="transparentPatternBg"
+			>
+				<div :class="bem('slider-canvas')" ref="alphaCanvas" :style="alphaCanvasStyles"></div>
 			</div>
-			<div class="slider-active-area">
-				<div class="slider-pointer" ref="alphaPointer" :style="alphaPointerStyles">
-					<div class="pointer-transparent" :style="alphaPointerTransparentStyles">
-						<div class="pointer-color" :style="[alphaPointerColorStyles, {background: hexString}]"></div>
+			<div :class="bem('slider-active-area')">
+				<div :class="bem('slider-pointer')" ref="alphaPointer" :style="alphaPointerStyles">
+					<div
+						:class="bem('pointer-transparent')"
+						:style="[alphaPointerTransparentStyles, transparentPatternBg]"
+					>
+						<div
+							:class="bem('pointer-color')"
+							:style="[alphaPointerColorStyles, {background: hexString}]" />
 					</div>
 				</div>
 			</div>
 		</div>
-		<div class="text-inputs-area" v-if="!disableTextInputs" :style="{'--outline-color': hexString}">
-			<div class="text-inputs-wrapper">
-				<div v-for="value, key in (textInputActive) ? textInputsFreeze : textInputs" 
-				:key="'text-input-' + key"
-				class="text-input-container">
+		<div :class="bem('text-inputs-area')" v-if="!disableTextInputs" :style="{'--outline-color': hexString}">
+			<div :class="bem('text-inputs-wrapper')">
+				<div
+					v-for="value, key in (textInputActive) ? textInputsFreeze : textInputs" 
+					:key="'text-input-' + key"
+					:class="bem('text-input-container')"
+				>
 					<label :for="'text-input-' + key">{{key}}</label>
-					<input :value="value"
-					class="text-input"
-					autocomplete="off"
-					spellcheck="false" 
-					:id="'text-input-' + key"
-					:data-component="key"
-					@input.prevent="textInputInputHandler"
-					@focus="textInputFocusHandler"
-					@blur="textInputBlurHandler"
-					@keypress.enter="$event.target.blur()">
+					<input
+						:value="value"
+						:class="bem('text-input', { [key]: true })"
+						autocomplete="off"
+						spellcheck="false" 
+						:id="'text-input-' + key"
+						:data-component="key"
+						@input.prevent="textInputInputHandler"
+						@focus="textInputFocusHandler"
+						@blur="textInputBlurHandler"
+						@keypress.enter="$event.target.blur()"
+					>
 				</div>
 			</div>
-			<div class="text-format-arrows" :style="arrowsStyles">
-				<div class="arrow up" @click="textInputFormatChange(-1)"></div>
-				<div class="arrow down" @click="textInputFormatChange(1)"></div>
+			<div :class="bem('text-format-arrows')" :style="arrowsStyles">
+				<div :class="bem('arrow-up')" @click="textInputFormatChange(-1)"></div>
+				<div :class="bem('arrow-down')" @click="textInputFormatChange(1)"></div>
 			</div>
 		</div>
 	</div>
 </template>
 
 <script>
+import transparentPattern from '../assets/transparent-pattern.svg'
+import {bem} from '../bem'
 
 export default {
 	name: 'ColorPicker',
@@ -153,42 +181,34 @@ export default {
 			}
 		},
 		pickerPosition() {
-			const pickerPosition = {};
-			const invertMap = { top: 'bottom', bottom: 'top', left: 'right', right: 'left' };
-
-			let offset;
-
-			if (['top','bottom'].includes(this.position[0])) {
-				pickerPosition.marginLeft = 0;
-				pickerPosition.marginRight = 0;
-				offset = this.boxRect.height;
-			} else {
-				pickerPosition.marginTop = 0;
-				pickerPosition.marginBottom = 0;
-				offset = this.boxRect.width;
+			let { top, left } = this.boxRect
+			top += window.scrollY
+			left += window.scrollX
+			const [yAlign, xAlign] = this.position
+			if (yAlign == 'bottom') {
+				top += this.boxRect.height
+			} else if (yAlign == 'top') {
+				top -= this.pickerHeight
+			} else { // y center
+				top += this.boxRect.height * .5
+				top -= this.pickerHeight * .5
 			}
-			let anchor = invertMap[this.position[0]];
-			pickerPosition[anchor] = offset + 'px';
-
-			if (this.position[1] === 'center') {
-				// second position argument is 'center'
-				if (['left','right'].includes(anchor)) {
-					// centering on x-aixs
-					anchor = 'top';
-					offset = this.pickerHeight - this.boxRect.height;
-				} else {
-					// centering on y-aixs
-					anchor = 'left';
-					offset = this.pickerWidth - this.boxRect.width;
+			if (xAlign == 'right') {
+				if (yAlign == 'center') {
+					left += this.boxRect.width
 				}
-				offset *= 0.5;
-			} else {
-				anchor = invertMap[this.position[1]];
-				offset = 0;
+			} else if (xAlign == 'left') {
+				left -= this.pickerWidth
+				if (yAlign != 'center')
+					left += this.boxRect.width
+			} else { // x center
+				left += this.boxRect.width * .5
+				left -= this.pickerWidth * .5
 			}
-			pickerPosition[anchor] = -offset + 'px';
-
-			return pickerPosition;
+			return {
+				top: top + 'px',
+				left: left + 'px'
+			};
 		},
 		textInputs() {
 			const format = this.textInputsFormat;
@@ -222,9 +242,13 @@ export default {
 				}
 			}
 			return textInputs;
+		},
+		transparentPatternBg() {
+			return { backgroundImage: `url(${transparentPattern})` }
 		}
 	},
 	methods: {
+		bem,
 		saturationPickStart(e) {
 			this.getCanvasRects();
 			document.addEventListener('pointerup', this.saturationPickEnd);
@@ -546,14 +570,72 @@ export default {
 		justify-content: center;
 		align-items: center;
 	}
-	.picker-popup {
-		.slider {
+	%slider-pointer {
+		border-radius: 50%;
+		background: #fbfbfb;
+		overflow: hidden;
+		border: 2px #fbfbfb solid;
+		box-shadow: 0 0 5px rgba(15,15,15,.3);
+	}
+	%arrow {
+		width: 12px;
+		height: 10px;
+		opacity: .4;
+		transition: .3s;
+		position: relative;
+		@extend %flex-center;
+		&::before {
+			display: block;
+			content: '';
+			width: 0;
+			height: 0;
+			border-left: 5px solid transparent;
+			border-right: 5px solid transparent;
+		}
+		&:hover {
+			opacity: .8;
+		}
+	}
+	.color-input {
+		&__popup {
+			position: absolute;
+			z-index: 9999;
+			width: auto;
+			min-width: 280px;
+			background-color: #fbfbfb;
+			box-shadow: 0px 5px 10px rgba(15, 15, 15, 0.4);
+			user-select: none;
+			color: #0f0f0f;
+			--popup-offset: 10px;
+			&--top {
+			  translate: 0 calc(var(--popup-offset) * -1);
+			}
+			&--bottom {
+			  translate: 0 var(--popup-offset);
+			}
+			&--center-right {
+				translate: var(--popup-offset) 0;
+			}
+			&--center-left {
+				translate: calc(var(--popup-offset) * -1) 0;
+			}
+			&--enter-from,
+			&--leave-to {
+				transform: translateY(-10px);
+				opacity: 0;
+			}
+			&--enter-active,
+			&--leave-active {
+				transition: transform 0.3s, opacity 0.3s;
+			}
+		}
+		&__slider {
 			width: 85%;
 			height: 6px;
 			margin: 18px auto;
 			position: relative;
 		}
-		.slider-container {
+		&__slider-container {
 			display: block;
 			@extend %fill-100;
 			top: 50%;
@@ -561,44 +643,36 @@ export default {
 			overflow: hidden;
 			background-size: contain;
 		}
-		.slider-canvas {
+		&__slider-canvas {
 			@extend %fill-100;
 			display: block;
 		}
-		.slider-active-area {
+		&__slider-active-area {
 			position: absolute;
 			top: 50%;
 			transform: translateY(-50%);
 			left: 0;
 			width: 100%;
 		}
-		.slider-pointer {
+		&__slider-pointer {
+			@extend %slider-pointer;
 			width: 12px;
 			height: 12px;
-			border-radius: 50%;
-			background: #fbfbfb;
-			overflow: hidden;
-			border: 2px #fbfbfb solid;
-			box-shadow: 0 0 5px rgba(15,15,15,.3);
 		}
-		.transparency-pattern {
-			background-image: var(--transparent-pattern);
-		}
-		.pointer-color {
+		&__pointer-color {
 			@extend %fill-100;
 		}
-		.pointer-transparent {
+		&__pointer-transparent {
 			@extend %fill-100;
-			@extend .transparency-pattern;
 			background-size: auto 100%;
 		}
-		.saturation-area {
+		&__saturation-area {
 			width: 100%;
 			height: 125px;
 			position: relative;
 		}
-		.saturation-pointer {
-			@extend .slider-pointer;
+		&__saturation-pointer {
+			@extend %slider-pointer;
 			top: auto;
 			width: 20px;
 			height: 20px;
@@ -607,62 +681,51 @@ export default {
 			left: 0;
 			z-index: 10001;
 		}
-		.text-inputs-area {
+		&__text-inputs-area {
 			display: flex;
 			margin: 0 7px 10px;
 		}
-		.text-inputs-wrapper {
+		&__text-inputs-wrapper {
 			flex: 1 0;
 			@extend %flex-center;
 			flex-wrap: wrap;
-			.text-input-container {
-				white-space: nowrap;
+		}
+		&__text-input-container {
+			white-space: nowrap;
+		}
+		&__text-input {
+			font-family: inherit;
+			color: inherit;
+			width: 4ch;
+			text-align: center;
+			margin: 0 5px;
+			background: transparent;
+			border-style: solid;
+			border-width: 1px;
+			border-radius: 3px;
+			&:focus {
+				outline-color: var(--outline-color);
 			}
-			.text-input {
-				font-family: inherit;
-				color: inherit;
-				width: 4ch;
-				text-align: center;
-				margin: 0 5px;
-				&:focus {
-					outline-color: var(--outline-color);
-				}
-				&#text-input-hex {
-					width: 8ch;
-				}
+			&--hex {
+				width: 8ch;
 			}
 		}
-		.text-format-arrows {
+		&__text-format-arrows {
 			flex: 0 1;
 			@extend %flex-center;
 			flex-direction: column;
-			.arrow {
-				width: 12px;
-				height: 10px;
-				opacity: .4;
-				transition: .3s;
-				position: relative;
-				@extend %flex-center;
-				&::before {
-					display: block;
-					content: '';
-					width: 0;
-					height: 0;
-					border-left: 5px solid transparent;
-					border-right: 5px solid transparent;
-				}
-				&.up::before {
-					border-bottom: 5px solid var(--arrow-color);
-				}
-				&.down::before {
-					border-top: 5px solid var(--arrow-color);
-				}
-				&:hover {
-					opacity: .8;
-				}
+		}
+		&__arrow-up {
+			@extend %arrow;
+			&::before {
+				border-bottom: 5px solid var(--arrow-color);
+			}
+		}
+		&__arrow-down {
+			@extend %arrow;
+			&::before {
+				border-top: 5px solid var(--arrow-color);
 			}
 		}
 	}
-
-
 </style>

@@ -1,22 +1,21 @@
-.color-input.user .box {
+div.color-input__box {
 	width: 100px;
 	height: 100px;
-	border-radius: 50px;
 }
-.color-input.user .box.active {
+div.color-input__box--active {
 	background: #0f0f0f;
 }
-.color-input.user .box.active .inner {
-	transform: scale(.9) rotate(90deg);
+div.color-input__box-inner--active {
+	transform: scale(.88);
 }
+div.color-input__box--disabled {}
 
-.picker-popup-enter-from,
-.picker-popup-leave-to {}
-.picker-popup-enter-active,
-.picker-popup-leave-active {}
+div.color-input__popup {}
+div.color-input__popup .slider {}
+div.color-input__popup .slider-pointer {}
+div.color-input__popup .saturation-pointer {}
 
-.picker-popup.user {}
-.picker-popup.user .box.disabled {}
-.picker-popup.user .slider {}
-.picker-popup.user .slider-pointer {}
-.picker-popup.user .saturation-pointer {}
+div.color-input__popup--enter-from,
+div.color-input__popup--leave-to {}
+div.color-input__popup--enter-active,
+div.color-input__popup--leave-active {}
