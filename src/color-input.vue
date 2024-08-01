@@ -15,6 +15,7 @@
     <Teleport to="body">
       <transition :name="transition">
         <color-picker
+	  v-if="color"
 	  :class="$attrs.class"
           :color="color"
           :position="processedPosition"
@@ -41,315 +42,276 @@
     </Teleport>
 </template>
 
-<script>
-import { defineComponent } from "vue";
-import ColorPicker from "./components/color-picker.vue";
-
+<script setup lang="ts">
+import { ref, shallowRef, computed, watch, onMounted, onBeforeUnmount, nextTick } from "vue";
+import type { ColorInputWithoutInstance } from 'tinycolor2'
 import tinycolor from "tinycolor2";
 import { bem } from './bem'
-
+import { allowedPosition, allowedFormat, Format, Position, FormatCategory, FormatType } from './types'
 import transparentPattern from "./assets/transparent-pattern.svg";
+import ColorPicker from "./components/color-picker.vue";
 
-const isSameNodeRecursive = (elA, elB) => {
+
+const isSameNodeRecursive = (elA: HTMLElement, elB: HTMLElement) => {
   while (!/^(body|html)$/i.test(elA.tagName)) {
     if (elA === elB) return true;
-    elA = elA.parentNode;
+    elA = elA.parentNode as HTMLElement;
   }
   return false;
 };
 
-export default defineComponent({
-  name: "ColorInput",
-  expose: ['pickStart', 'pickEnd', 'color', 'active'],
-  props: {
-    modelValue: [String, Object],
-    position: {
-      type: String,
-      default: "bottom",
-    },
-    transition: {
-      type: String,
-      default: 'color-input__popup-',
-    },
-    disableAlpha: {
-      type: Boolean,
-      default: false,
-    },
-    disabled: {
-      type: Boolean,
-      default: false,
-    },
-    disableTextInputs: {
-      type: Boolean,
-      default: false,
-    },
-    format: String,
-  },
-  emits: [
-    "mounted",
-    "beforeUnmount",
-    "update:modelValue",
-    "pickStart",
-    "pickEnd",
-    "hueInputStart",
-    "hueInputEnd",
-    "hueInput",
-    "alphaInputStart",
-    "alphaInputEnd",
-    "alphaInput",
-    "saturationInputStart",
-    "saturationInputEnd",
-    "saturationInput",
-    "change",
-  ],
-  components: { ColorPicker },
-  provide: { tinycolor },
-  data() {
-    return {
-      color: null,
-      active: false,
-      ready: false,
-      hidePicker: false,
-      boxRect: {},
-      innerBoxRect: {},
-      textInputsFormat: "rgb",
-      originalFormat: "rgb",
-      originalType: null,
-    };
-  },
-  computed: {
-    transparentPatternBg() {
-	    return { backgroundImage: `url(${transparentPattern})` }
-    },
-    boxColorStyles() {
-      return {
-        background: this.color.toRgbString(),
-      };
-    },
-    processedPosition() {
-      // array of all valid position combination
-      const values = ["top", "right", "bottom", "left", "center"];
-      const conflicts = {
-        top: "bottom",
-        right: "left",
-        bottom: "top",
-        left: "right",
-      };
-      const combinations = values
-        .slice(0, 4)
-        .flatMap((v, i) =>
-          values.map((q) => {
-            if (conflicts[v] === q) return false;
-            return v === q ? v : v + " " + q;
-          })
-        )
-        .filter((v) => v);
 
-      let position = this.position.toLowerCase(); // allow 'bOtToM RiGHt'
-      if (!combinations.includes(position)) {
-        if (position) {
-          // position is defined but invalid
-          console.warn("[vue-color-input]: invalid position -> " + position);
-        }
-        position = "bottom center";
-      }
-      position = position.split(" ");
-      position[1] = position[1] || "center";
 
-      // reorder [Y, X]
-      if (
-        ['top','bottom'].includes(position[0]) ||
-        ['right', 'left'].includes(position[1])
-      )
-        return position; // already correct order
-      position.reverse();
-      return position;
-    },
-    processedFormat() {
-      let formats = ["rgb", "hsv", "hsl"];
-      formats = formats.concat(
-        formats.flatMap((f) => {
-          return [f + " object", "object " + f, f + " string", "string " + f];
-        })
-      );
-      formats = formats.concat(
-        ["name", "hex", "hex8"].flatMap((f) => {
-          return [f, f + " string", "string " + f];
-        })
-      );
-
-      // validate and fallback to default
-      let format = this.format;
-      let force = false; // this will represent whether the resulting format is coming from the input or forced by user
-      if (format) {
-        // format is defined
-        format = format.toLowerCase(); // allow 'rGb StRinG'
-        if (!formats.includes(format)) {
-          // format is defined but invalid
-          console.warn("[vue-color-input]: invalid format -> " + format);
-          format = this.originalFormat;
-        } else {
-          // user-defined format is valid
-          force = true;
-        }
-      } else {
-        // format is undefined
-        format = this.originalFormat;
-      }
-
-      // extract type and format separately
-      format = format.split(" ");
-      let type = format.findIndex((f) => ["string", "object"].includes(f));
-      if (type < 0) {
-        // type not specified use type from input
-        type = ["rgb", "hsv", "hsl"].includes(format[0])
-          ? this.originalType
-          : "string";
-      } else {
-        // type specified
-        type = format.splice(type, 1)[0];
-      }
-      format = format[0];
-
-      return { type, format, force };
-    },
-    processedDisableAlpha() {
-      const format = this.processedFormat;
-      if (format.force && ["hex", "name"].includes(format.format)) {
-        return true;
-      } else {
-        return this.disableAlpha;
-      }
-    },
-  },
-  methods: {
-    bem,
-    pickStart(e) {
-      if (this.active || this.disabled) return;
-      this.getBoxRect();
-      this.active = true;
-
-      // init the picker before showing in case there were some changes to its layout
-      this.ready = false; // picker will emit 'ready' at the end of init
-      this.hidePicker = true;
-      this.$refs.picker.init();
-
-      document.addEventListener("pointerdown", this.pickEnd);
-      window.addEventListener('resize', this.getBoxRect);
-      this.$emit("pickStart");
-    },
-    pickEnd(e) {
-      if (
-        !this.active ||
-        (e && isSameNodeRecursive(e.target, this.$refs.picker.$refs.pickerRoot))
-      )
-        return;
-      document.removeEventListener("pointerdown", this.pickEnd);
-      window.removeEventListener('resize', this.getBoxRect)
-      this.active = false;
-      this.$emit("pickEnd");
-    },
-    init() {
-      // get color
-      this.color = tinycolor(this.modelValue);
-
-      // original format (this is the format modelValue will be converted to)
-      let format = this.color.getFormat();
-      this.originalFormat = format ? format : "rgb";
-      let type = typeof this.modelValue;
-      this.originalType = ["string", "object"].includes(type) ? type : "string";
-      this.processedFormat; // trigger computed processedFormat()
-
-      // for storing output value (to react to external modelValue changes)
-      this.output = null;
-
-      // warn of invalid color
-      if (!this.color.isValid()) {
-        console.warn(
-          "[vue-color-input]: invalid color -> " + this.color.getOriginalInput()
-        );
-      }
-    },
-    emitUpdate(hsv) {
-      // if new value specified, update color, otherwise emit update with existing color
-      if (hsv) this.color = tinycolor(hsv);
-
-      let format = this.processedFormat.format;
-      if (this.color.getAlpha() < 1 && ["hex", "name"].includes(format)) {
-        // alpha < 1 but output format lacks alpha channel
-        if (this.processedFormat.force) {
-          // format is user defined, output it anyway
-          this.color.setAlpha(1);
-        } else {
-          // format is calculate from input, output rgb instead
-          format = "rgb";
-        }
-      }
-      if (this.processedFormat.type === "object") {
-        this.output = this.color[
-          "to" + format.charAt(0).toUpperCase() + format.slice(1)
-        ]();
-      } else {
-        this.output = this.color.toString(format);
-      }
-      this.$emit("update:modelValue", this.output);
-    },
-    getBoxRect() {
-      this.boxRect = this.$refs.root.getBoundingClientRect();
-    },
-  },
-  created() {
-    this.init();
-  },
-  mounted() {
-    this.$emit("mounted");
-  },
-  beforeUnmount() {
-    this.pickEnd();
-    this.$emit("beforeUnmount");
-  },
-  watch: {
-    modelValue() {
-      let input =
-        typeof this.modelValue === "object"
-          ? JSON.stringify(this.modelValue)
-          : this.modelValue;
-      let output =
-        typeof this.output === "object"
-          ? JSON.stringify(this.output)
-          : this.output;
-      if (input !== output) {
-        // modelValue updated from elsewhere
-        // update color data
-        this.init();
-        // if active at the moment, update picker as well
-        if (this.active) {
-          this.$nextTick(function() {
-            this.$refs.picker.init();
-          });
-        }
-      }
-    },
-    disabled() {
-      this.pickEnd();
-    },
-    processedDisableAlpha(newVal) {
-      if (newVal) {
-        // alpha disabled
-        // update model value to no alpha
-        this.color.setAlpha(1);
-        this.emitUpdate();
-      }
-      if (this.active)
-        this.$nextTick(function() {
-          this.$refs.picker.init();
-        });
-    },
-    format() {
-      this.emitUpdate();
-    },
-  },
+const props = withDefaults(defineProps<{
+  format?: Format;
+  position?: Position;
+  transition?: string;
+  disableAlpha?: boolean;
+  disabled?: boolean;
+  disableTextInputs?: boolean;
+}>(), {
+  format: 'rgb',
+  position: 'bottom',
+  transition: 'color-input__popup-',
 });
+
+
+const modelValue = defineModel<string|Record<string, number>>({ required: true })
+
+
+const emit = defineEmits([
+  'mounted',
+  'beforeUnmount',
+  'update:modelValue',
+  'pickStart',
+  'pickEnd',
+  'hueInputStart',
+  'hueInputEnd',
+  'hueInput',
+  'alphaInputStart',
+  'alphaInputEnd',
+  'alphaInput',
+  'saturationInputStart',
+  'saturationInputEnd',
+  'saturationInput',
+  'change',
+])
+
+
+const color = shallowRef<ReturnType<typeof tinycolor> | null>(null);
+const active = ref(false);
+const ready = ref(false);
+const hidePicker = ref(false);
+const boxRect = ref({} as DOMRect);
+const originalFormatCategory = ref<FormatCategory>('rgb');
+const originalFormatType = ref<FormatType>('string');
+
+const output = ref<string|object|null>(null);
+const root = ref<HTMLElement|null>(null);
+const picker = ref<any>(null); // picker instance
+
+const transparentPatternBg = computed(() => ({
+  backgroundImage: `url(${transparentPattern})`,
+}));
+
+const boxColorStyles = computed(() => ({
+  background: color.value?.toRgbString(),
+}));
+
+const processedPosition = computed(() => {
+  let position = props.position.toLowerCase() as Position;
+  if (!allowedPosition.includes(position)) {
+    if (position) {
+      console.warn('[vue-color-input]: invalid position -> ' + position);
+    }
+    position = 'bottom center';
+  }
+  const positionArr = position.split(' ') as ('top'|'right'|'bottom'|'left'|'center')[];
+  positionArr[1] = positionArr[1] || 'center';
+
+  if (
+    ['top', 'bottom'].includes(positionArr[0]) ||
+    ['right', 'left'].includes(positionArr[1])
+  )
+    return positionArr;
+  positionArr.reverse();
+  return positionArr;
+});
+
+const processedFormat = computed(() => {
+  let propsFormat = props.format;
+  let formatCategory: FormatCategory
+  let force = false;
+  if (propsFormat) {
+    propsFormat = propsFormat.toLowerCase() as FormatCategory;
+    if (!allowedFormat.includes(propsFormat)) {
+      console.warn('[vue-color-input]: invalid format -> ' + propsFormat);
+      formatCategory = originalFormatCategory.value;
+    } else {
+      force = true;
+    }
+  } else {
+    formatCategory = originalFormatCategory.value;
+  }
+
+  const formatArr = propsFormat.split(' ');
+  let type: FormatType;
+  const idx = formatArr.findIndex((f) => ['string', 'object'].includes(f));
+  if (idx < 0) {
+    type = ['rgb', 'hsv', 'hsl'].includes(propsFormat[0]) ? originalFormatType.value : 'string';
+  } else {
+    type = formatArr.splice(idx, 1)[0] as FormatType;
+  }
+  formatCategory = formatArr[0] as FormatCategory;
+
+  return { type, format: formatCategory, force };
+});
+
+const processedDisableAlpha = computed(() => {
+  const format = processedFormat.value;
+  if (format.force && ['hex', 'name'].includes(format.format)) {
+    return true;
+  } else {
+    return props.disableAlpha;
+  }
+});
+
+const pickStart = () => {
+  if (active.value || props.disabled) return;
+  getBoxRect();
+  active.value = true;
+
+  ready.value = false;
+  hidePicker.value = true;
+  picker.value.init();
+
+  document.addEventListener('pointerdown', pickEnd);
+  window.addEventListener('resize', getBoxRect);
+  emit('pickStart');
+};
+
+const pickEnd = (e?: Event) => {
+  if (
+    !active.value ||
+    (e && isSameNodeRecursive(e.target as HTMLElement, picker.value.$refs.pickerRoot))
+  )
+    return;
+  document.removeEventListener('pointerdown', pickEnd);
+  window.removeEventListener('resize', getBoxRect);
+  active.value = false;
+  emit('pickEnd');
+};
+
+const init = () => {
+  color.value = tinycolor(modelValue.value as ColorInputWithoutInstance);
+
+  let format = color.value.getFormat() as FormatCategory|undefined;
+  originalFormatCategory.value = format ? format : 'rgb';
+  let type = typeof modelValue.value;
+  originalFormatType.value = ['string', 'object'].includes(type) ? type as FormatType : 'string';
+  processedFormat.value;
+
+  output.value = null;
+
+  if (!color.value.isValid()) {
+    console.warn('[vue-color-input]: invalid color -> ' + color.value.getOriginalInput());
+  }
+};
+
+const emitUpdate = (hsv?: {h:number;s:number;v:number;a?:number}) => {
+  if (hsv) color.value = tinycolor(hsv);
+
+  let format = processedFormat.value.format;
+  if (color.value!.getAlpha() < 1 && ['hex', 'name'].includes(format)) {
+    if (processedFormat.value.force) {
+      color.value!.setAlpha(1);
+    } else {
+      format = 'rgb';
+    }
+  }
+  if (processedFormat.value.type === 'object') {
+    output.value = color.value?.[
+      'to' + format.charAt(0).toUpperCase() + format.slice(1) as 'toRgb'
+    ]() || null;
+  } else {
+    output.value = color.value!.toString(processedFormat.value.format);
+  }
+  emit('update:modelValue', output.value);
+};
+
+const getBoxRect = () => {
+  boxRect.value = root.value!.getBoundingClientRect();
+};
+
+
+onMounted(() => {
+  init();
+  emit('mounted');
+});
+
+onBeforeUnmount(() => {
+  pickEnd();
+  emit('beforeUnmount');
+});
+
+watch(
+  () => modelValue.value,
+  () => {
+    let input =
+      typeof modelValue.value === 'object'
+        ? JSON.stringify(modelValue.value)
+        : modelValue.value;
+    let outputStr =
+      typeof output.value === 'object'
+        ? JSON.stringify(output.value)
+        : output.value;
+    if (input !== outputStr) {
+      init();
+      if (active.value) {
+        nextTick(() => {
+          picker.value.init();
+        });
+      }
+    }
+  }
+);
+
+watch(
+  () => props.disabled,
+  () => {
+    pickEnd();
+  }
+);
+
+watch(
+  () => processedDisableAlpha.value,
+  (newVal) => {
+    if (newVal) {
+      color.value!.setAlpha(1);
+      emitUpdate();
+    }
+    if (active.value)
+      nextTick(() => {
+        picker.value.init();
+      });
+  }
+);
+
+watch(
+  () => props.format,
+  () => {
+    emitUpdate();
+  }
+);
+
+
+defineExpose({
+  pickStart,
+  pickEnd,
+  color,
+  active
+})
+
 </script>
 
 <style lang="scss">

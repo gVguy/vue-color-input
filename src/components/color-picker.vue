@@ -79,6 +79,7 @@
 <script>
 import transparentPattern from '../assets/transparent-pattern.svg'
 import {bem} from '../bem'
+import tinycolor from 'tinycolor2'
 
 export default {
 	name: 'ColorPicker',
@@ -103,7 +104,6 @@ export default {
 		'ready',
 		'change'
 	],
-	inject: [ 'tinycolor' ],
 	data() {
 		return {
 			h: undefined,
@@ -344,13 +344,13 @@ export default {
 			if (output.hasOwnProperty('hex')) {
 				// editing hex
 				const a = output.a;
-				output = this.tinycolor(output.hex);
+				output = tinycolor(output.hex);
 				if (output.getFormat() !== 'hex8') {
 					// unless hex8 is entered use existing alpha
 					output.setAlpha(a);
 				}
 			} else {
-				output = this.tinycolor(output);
+				output = tinycolor(output);
 			}
 
 			const hsv = output.toHsv();
@@ -486,7 +486,7 @@ export default {
 
 			// get background-color to color the arrows
 			const background = computedStyle.getPropertyValue('background-color');
-			if (this.tinycolor(background).isDark()) {
+			if (tinycolor(background).isDark()) {
 				this.arrowColor = '#fbfbfb';
 			}
 
