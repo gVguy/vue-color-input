@@ -31,7 +31,6 @@
   },
   "scripts": {
     "dev": "vite dev",
-    "prebuild": "rimraf ./dist",
     "build": "vite build",
     "build:demo": "vite build --config vite.config-demo.js",
     "publish:demo": "gh-pages -d demo",
