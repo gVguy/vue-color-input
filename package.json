@@ -35,20 +35,25 @@
     "build": "vite build",
     "build:demo": "vite build --config vite.config-demo.js",
     "publish:demo": "gh-pages -d demo",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "prepublish:demo": "npm run build:demo"
   },
   "dependencies": {
     "tinycolor2": "^1.4.2"
   },
   "devDependencies": {
+    "@types/tinycolor2": "^1.4.6",
     "@vitejs/plugin-vue": "^5.1.1",
     "autoprefixer": "^10.3.7",
     "gh-pages": "^3.2.3",
     "postcss": "^8.2.10",
     "sass": "^1.42.1",
+    "typescript": "^5.5.4",
     "vite": "^5.3.5",
+    "vite-plugin-dts": "3.9.1",
     "vite-plugin-lib-inject-css": "^2.1.1",
-    "vue": "^3.4.26"
+    "vue": "^3.4.26",
+    "vue-tsc": "^2.0.29"
   },
   "peerDependencies": {
     "vue": "^3.0.5"

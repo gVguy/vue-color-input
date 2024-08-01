@@ -43,7 +43,6 @@
 			</div>
 		</div>
 		<color-input 
-			:appendTo="appendToActive ? appendTo : null"
 			v-model="color"
 			:format="format + (type ? ' ' + type : '')"
 			:position="position"
@@ -123,8 +122,6 @@
 				format: '',
 				type: '',
 				formatOptions: ['rgb', 'hex', 'hex8', 'name', 'hsl', 'hsv'],
-				appendToActive: null,
-				appendTo: '.box-parent',
 			}
 		},
 		computed: {
@@ -269,12 +266,6 @@
 			});
 		},
 		watch: {
-			appendToActive() {
-				this.$refs.colorInput.pickEnd()
-				setTimeout(() => {
-					this.$refs.colorInput.getParent()
-				}, 100)
-			},
 			color() {
 				let hsl = this.$refs.colorInput.color.clone().setAlpha(1).toHslString();
 				let [h,s,l] = hsl.match(/\d+/g);
