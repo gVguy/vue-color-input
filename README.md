@@ -35,26 +35,11 @@ npm i vue-color-input
 ### Import
 ```javascript
 import ColorInput from 'vue-color-input'
-
-
-// install it with use()
-
-app.use(ColorInput)
-
-// OR register component globally
-
-app.component('ColorInput', ColorInput)
-
-// OR locally
-
-export.default {
-    components: { ColorInput }
-}
 ```
 
 ### Use
 ```xml
-<color-input v-model="color" />
+<ColorInput v-model="color" />
 ```
 
 

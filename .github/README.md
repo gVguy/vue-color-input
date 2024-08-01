@@ -27,53 +27,40 @@ Not only that native color input looks different in different browsers, it also 
 ### It just works
 vue-color-input combines minimalist approach with comprehensive functionality. You *can* customize and extend it to your liking, set it up with additional properties, but you _don't have to_. It works as expected out of the box just as well, with only `v-model` provided.
 
-## Installation 
 
-### npm
-```shell
+## Usage
+
+### Install
+```
 npm i vue-color-input
 ```
+
+### Import
 ```javascript
 import ColorInput from 'vue-color-input'
 ```
 
-### CDN
+### Use
 ```xml
-<script src="https://unpkg.com/vue-color-input@latest"></script>
-```
-
-## Usage
-```javascript
-// install it with use()
-app.use(ColorInput)
-
-// OR register component globally
-app.component('ColorInput', ColorInput)
-
-// OR locally
-export.default {
-    components: { ColorInput }
-}
-```
-```xml
-<color-input v-model="color" />
+<ColorInput v-model="color" />
 ```
 
 
 # Table of contents
 
-| [Properties](#properties)                            | [Styling](#styling)                             | [Events](#events)           | [$refs & methods](#refs--methods)   |
-|------------------------------------------------------|-------------------------------------------------|-----------------------------|-------------------------------------|
-| [v-model](#v-model)                                  | [Transitions](#transitions)                     | [Event names](#event-names) | [Instances](#instances)             |
-| [format](#format-optional)                           | [Box active transition](#box-active-transition) |                             | [Elements](#elements)               |
-| [position](#position-optional)                       | [Example CSS](#example-css)                     |                             | [Methods](#methods)                 |
-| [disabled](#disabled-optional)                       | [Styling guidelines](#styling-guidelines)       |                             | [`color` property](#color-property) |
-| [disable-alpha](#disable-alpha-optional)             |                                                 |                             |                                     |
-| [disable-text-inputs](#disable-text-inputs-optional) |                                                 |                             |                                     |
-| [transition](#transition-optional)                   |                                                 |                             |                                     |
+| [Props](#props)                                      | [Styling](#styling)                             | [Events](#events)           | [Exposed](#exposed-methods-and-properties)         |
+|------------------------------------------------------|-------------------------------------------------|-----------------------------|----------------------------------------------------|
+| [v-model](#v-model)                                  | [Class names](#class-names)                     | [Event names](#event-names) | [Methods](#exposed-methods)                        |
+| [format](#format-optional)                           | [Customization](#customizing-factory-styles)    |                             | [Properties](#exposed-properties)                  |
+| [position](#position-optional)                       | [Transitions](#transitions)                     |                             |                                                    |
+| [disabled](#disabled-optional)                       | [Box active transition](#box-active-transition) |                             |                                                    |
+| [disable-alpha](#disable-alpha-optional)             | [Example CSS](#example-css)                     |                             |                                                    |
+| [disable-text-inputs](#disable-text-inputs-optional) | [Styling guidelines](#styling-guidelines)       |                             |                                                    |
+| [transition](#transition-optional)                   |                                                 |                             |                                                    |
+| [class](#class-optional)                             |                                                 |                             |                                                    |
 
 
-# Properties
+# Props
 
 ## v-model
 
@@ -93,16 +80,12 @@ For example:
 ```javascript
 // in parent component
 
-export.default {
-    data() {
-        color: "rgb(50, 150, 150)"
-    }
-}
+const color = ref('rgb(50, 150, 150)')
 ```
 ```xml
 <!-- in template -->
 
-<color-input v-model="color" />
+<ColorInput v-model="color" />
 ```
 User adjusts hue to `0`, now `color` becomes
 ```javascript
@@ -117,11 +100,7 @@ Let's say `color` property was initialy set to be an object:
 ```javascript
 // in parent component
 
-export.default {
-    data() {
-    color: { "h": 350, "s": 1, "l": 0.8 }
-    }
-}
+const color = ref({ "h": 350, "s": 1, "l": 0.8 })
 ```
 In the same scenario the resulting output would be
 ```javascript
@@ -210,7 +189,7 @@ Calculated to match the input.
 
 ### Example
 ```xml
-<color-input v-model="color" format="rgb object" />
+<ColorInput v-model="color" format="rgb object" />
 ```
 
 ## position <sub><sup>_`optional`_</sup></sub>
@@ -235,7 +214,7 @@ _Note: Omitting the second parameter results in center alignment, making `"top"`
 
 ### Example
 ```xml
-<color-input v-model="color" position="right top" />
+<ColorInput v-model="color" position="right top" />
 ```
 
 ## disabled <sub><sup>_`optional`_</sup></sub>
@@ -256,7 +235,7 @@ Boolean
 
 ### Example
 ```xml
-<color-input v-model="color" :disabled="!allowColorAdjustment" />
+<ColorInput v-model="color" :disabled="!allowColorAdjustment" />
 ```
 
 ## disable-alpha <sub><sup>_`optional`_</sup></sub>
@@ -279,7 +258,7 @@ Boolean
 
 ### Example
 ```xml
-<color-input v-model="color" disable-alpha />
+<ColorInput v-model="color" disable-alpha />
 ```
 
 ## disable-text-inputs <sub><sup>_`optional`_</sup></sub>
@@ -299,7 +278,7 @@ Boolean
 
 ### Example
 ```xml
-<color-input v-model="color" disable-text-inputs />
+<ColorInput v-model="color" disable-text-inputs />
 ```
 
 ## transition <sub><sup>_`optional`_</sup></sub>
@@ -315,11 +294,11 @@ You can also override default transition classes from css. More details [below](
 String
 
 ### Default value
-`"picker"`
+`"color-input__popup-"`
 
 ### Example
 ```xml
-<color-input v-model="color" transition="my-cool-transition" />
+<ColorInput v-model="color" transition="my-cool-transition" />
 ```
 ```css
 .my-cool-transition-enter-from,
@@ -333,6 +312,17 @@ String
 }
 ```
 
+## class <sub><sup>_`optional`_</sup></sub>
+
+With this you can provide a custom class that will get applied both to the root element and the popup elemnt. You can use this class later for styling.
+
+### Type
+String
+
+### Example
+```xml
+<ColorInput v-model="color" class="custom" />
+```
 
 # Styling
 
@@ -340,25 +330,57 @@ As previously mentioned, applying styles to vue-color-input is a breeze.
 
 Default CSS is written with custumizability in mind, so anything you want to style will likely work as expected, and the whole component's layout will not get screwed up by that.
 
-To override factory styles, you should address elemets through `.color-input.user` parent selector, e.g:
-```css
-.color-input.user .box { }
-```
+Starting with v2, vue-color-input now uses bem class-naming approach instead of nested selectors and scoped styles to simplify customization while providing a namespaced classname isolation across the DOM.
 
-### Class names
+## Class names
 
-| class                   | description                                             |
-|-------------------------|---------------------------------------------------------|
-| __.color-input__        | Root element                                            |
-| __.box__                | Initial clickable box                                   |
-| __.picker-popup__       | Popup color picker window                               |
-| __.saturation-area__    | Picking area where you select saturation and brightness |
-| __.slider__             | Hue and opacity sliders (track)                         |
-| __.saturation-pointer__ | Pointer in the saturation-brightness area               |
-| __.slider-pointer__     | Pointer on a slider                                     |
-| __.text-input__         | Text inputs of the color picker                         |
+| class                                | description                                             |
+|--------------------------------------|---------------------------------------------------------|
+| `.color-input__box [class]`          | Root clickable box                                      |
+| `.color-input__popup [class]`        | Popup color picker window (teleported to body)          |
+| `.color-input__saturation-area`      | Picking area where you select saturation and brightness |
+| `.color-input__slider`               | Hue and opacity sliders (track)                         |
+| `.color-input__saturation-pointer`   | Pointer in the saturation-brightness area               |
+| `.color-input__slider-pointer`       | Pointer on a slider                                     |
 
 Feel free to scout the HTML for more class names.
+
+## Customizing factory styles
+
+You don't have to use `!important` rules for everything you want to customize. Instead, here are several approaches you can take to override factory styles.
+
+### Specificity
+
+The easiest way is to add a level of [specificity](https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity) to your selectors as in `div.class`, and that will outweight the factory styles which are defined simply as `.class`.
+
+Example:
+```css
+div.color-input__box {
+  border-radius: 50%; 
+}
+div.color-input__popup {
+  background: pink;
+}
+```
+
+### Custom class
+
+You can also use a `class` prop to set a custom class name on _both_ the root element and the popup, to later use it in your selectors.
+
+Bear in mind though that the class is applied _only_ to the root elemnent and the popup root element, not to all nested elements. So it will be `.custom.color-input__box` and `.custom.color-input__popup` _but_ for all their nested elements it will be `.custom .color-input__box-inner` (note the space).
+
+Example:
+```xml
+<ColorInput :color="color" class="custom" />
+```
+```css
+.custom.color-input__box {
+  border-radius: 50%;
+}
+.custom.color-input__popup {
+  background: pink;
+}
+```
 
 ## Transitions
 
@@ -366,15 +388,15 @@ Instead of using `transition` property with a custom transition name, you can si
 This can be done in the same manner as with the other classes, e.g:
 
 ```css
-.picker-popup-enter-from {
+.color-input__popup--enter-from {
     transform: translateY(-100%) scale(.1);
 }
-.picker-popup-leave-to {
+.color-input__popup--leave-to {
     transform: scale(3);
 }
 /* and if you want to change the durations as well */
-.picker-popup-enter-active,
-.picker-popup-leave-active {
+.color-input__popup--enter-active,
+.color-input__popup--leave-active {
     transition: all .5s;
 }
 ```
@@ -387,57 +409,70 @@ When clicked on, the box gets what looks like an outline, but in reality its con
 
 Here's what the box element html looks like:
 ```xml
-<div class="box [active] [disabled]"> <!-- This has a background -->
-    <div class="inner transparent"> <!-- This scales down to reveal it -->
-        <div class="color"></div>
+<!-- This has a background -->
+<div class="color-input__box  [--active] [--disabled]">
+    <!-- This scales down to reveal it -->
+    <div class="color-input__box-inner [--active]">
+        <div class="color-input__box-color" />
     </div>
 </div>
 ```
-To customize this transition, you can use `.box.active` in combination with `.box.active .inner`.  
+To customize this transition, you can use `.color-input__box--active` in combination with `.color-input__box-inner--active`.  
 For example:
 ```css
-.color-input.user .box.active {
+div.color-input__box--active {
     /* "outline" color */
     background: #0f0f0f;
 }
-.color-input.user .box.active .inner {
+div.color-input__box-inner--active {
     /* different transition effect */
     transform: scale(.9) rotate(90deg);
+}
+```
+
+## Popup offset
+
+The popup gets a default offset from the box which is equal to `10px`. If you would like to use a different offset, you should set it with a `--popup-offset` css property defined on the popup.
+
+Example:
+```css
+div.color-input__popup {
+  --popup-offset: 20px;
 }
 ```
 
 ## Example CSS
 
 ```css
-.color-input.user .box {
+div.color-input__box {
     /* make clickable box a 100x100 circle */
     width: 100px;
     height: 100px;
     border-radius: 50px;
 }
-.picker-popup.user {
+div.color-input__popup {
     /* dark mode for popup window */
     background: #000;
     color: #fbfbfb;
     /* and make it wide */
     width: 400px;
 }
-.picker-popup .slider {
+div.color-input__slider {
     /* thin out the sliders and make them wider */
     height: 2px;
     width: 92%;
 }
-.picker-popup .saturation-area {
+div.color-input__saturation-area {
     /* bigger picking area */
     height: 150px;
 }
-.picker-popup .slider-pointer {
+div.color-input__slider-pointer {
     /* make slider pointers square-ish and 10x10 */
     border-radius: 4px;
     width: 10px;
     height: 10px;
 }
-.picker-popup .saturation-pointer {
+div.color-input__saturation-pointer {
     /* increase saturation pointer size */
     width: 40px;
     height: 40px;
@@ -446,50 +481,68 @@ For example:
 
 ## Styling guidelines
 
-### Root element is _not_ the `.box`
+### Use stylesheets, no need to set inline styles
 
-Here's the base structure of the component:
+Inline styles will only let you style the root element, when typically you will want to style more than that.
+
+### Use specificity or custom class to override default styles
+
+Read more about the both approaches [here](#customizing-factory-styles).
+
+### Don't expect the popup to be nested within the root
+
+As the popup is teleported to the body, the following nested css selectors won't work:
 ```xml
-<!-- When there is no appendTo set up -->
-<div class="color-input">
-    <div class="box [active] [disabled]"></div>
-    <div class="picker-popup"></div> <!-- position: absolute -->
-</div>
-
-<!-- When there is appendTo set up -->
-<div class="color-input">
-    <div class="box [active] [disabled]"></div>
-</div>
-<div id="appendToId">
-    <div class="picker-popup"></div> <!-- position: absolute -->
-</div>
+<ColorInput class="my-custom-class" />
 ```
-Root element wraps arond the clickable box, but if you want to change box styles, you should select it like this: `.color-input.user .box`.
+```css
+/* ❌ example of selector that won't work */
+.my-custom-class .color-input__popup {}
+```
+Instead, think of box and popup as two _separate roots_ that both get your custom class. And then both of those have some children that you can access with nested selectors:
+```css
+.my-custom-class.color-input__popup {}
+.my-custom-class.color-input__box {}
+.my-custom-class .color-input__slider {}
+.my-custom-class .color-input__box-inner {}
+```
+And likewise...
 
-Generally, you should attempt to style the root element only if you want to customize the flow: properties like `margin`, `position`, `display`.
+### Don't expect your custom class to point only to the box
 
-_Changing size of the root element independently from the box will mess with how the popup is positioned._
-
-### Use stylesheets, no need to pass inline styles
-
-Inline styles will only let you style the root element, which is typically not what you want to style very often.
-
-### Use `.user` to override default styles
-
-There is no need to use `!important`. Default styles are easily overridable by adding specificity to the selectors with `.color-input.user .box` or `.picker-popup.user`.
-
-And if you use scss that's even more natural with nesting:
-```scss
-.color-input.user {
-    .box {}
+As described above, _both the box and the popup_ will get your custom class, so don't try to use your custom class without the specifying selector, that will apply the styles to both the box and the popup:
+```css
+/* ❌ example of what not to do */
+.my-custom-class {
+  width: 50px;
+  height: 50px;
 }
-.picker-popup.user {}
+```
+Instead, use a specifying classname:
+```css
+.my-custom-class.color-input__box {}
+.my-custom-class.color-input__popup {}
 ```
 
-### Set margin on the root element
+### Use preprocesser nesting to reduce typing
 
-`margin` is one of the few properties that should belong to the `.color-input` itself.  
-Setting margin on the `.box` instead will increase the space around it _inside_ the root element, and that _will mess with how the popup is positioned._
+If you use a style preprocessor (like sass), you can use it's nesting to reduce the amount of typing and produce a cleaner and more readable code:
+```scss
+div.color-input {
+    &__box {
+        &--disabled {}
+        &--active {}
+    }
+    &__popup {}
+    &__slider {}
+}
+```
+
+### Don't use scoped styles
+
+With scoped styles you won't be able to reach component's inner elements, so you should use global styles.
+
+If, for some reason, you need to use several vue-color-input instances that should be styled differently, you can set different class names on them to provide instance-based scope.
 
 
 # Events
@@ -498,70 +551,67 @@ The instance provides hooks for custom event handling.
 
 Most events carry payload with current state of the corresponding color component.
 
-Notice that event data is always passed in __hsv__ format.
+Note that event data is always passed in __hsv__ format.
 
 ## Event names
 
-| event                    | description                                                                                                                                                                                   | payload                                                                         |
-|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------|
-| __pickEnd__              | color picking process is finished, popup will close now                                                                                                                                       |                                                                                 |
-| __mounted__              | lifecycle hook, emitted from root component's mounted()                                                                                                                                       |                                                                                 |
-| __beforeUnmount__        | lifecycle hook, emitted from root component's beforeUnmount()                                                                                                                                 |                                                                                 |
-| __pickStart__            | color picking process is initiated, popup is opening                                                                                                                                          |                                                                                 |
-| __saturationInputStart__ | saturation-brightness adjustment has begun.<br />This is only emitted when pointerdown inside saturation-brightness area is registered.<br />This will _not_ emit when text inputs are edited | current state of saturation & value (hsv)<br />`{ s: 0.5, v: 0.5 }`             |
-| __saturationInputEnd__   | saturation-brightness adjustment has ended.<br />This is only emitted when pointerup of the saturation-brightness area is registered.<br />This will _not_ emit when text inputs are edited   | current state of saturation & value (hsv)<br />`{ s: 0.5, v: 0.5 }`             |
-| __saturationInput__      | saturation-brightness is being adjusted.<br />This will emit every time saturation-brightness is changed, including text inputs                                                               | current state of saturation & value (hsv)<br />`{ s: 0.5, v: 0.5 }`             |
-| __hueInputStart__        | hue adjustment has begun.<br />This is only emitted when pointerdown over the hue slider is registered.<br />This will _not_ emit when hue is changed from text inputs                        | current state of hue<br />`{ h: 180 }`                                          |
-| __hueInputEnd__          | hue adjustment has ended.<br />This is only emitted when pointerup of the hue slider is registered.<br />This will _not_ emit when hue is changed from text inputs                            | current state of hue<br />`{ h: 180 }`                                          |
-| __hueInput__             | hue is being adjusted.<br />This will emit every time hue is changed, including text inputs                                                                                                   | current state of hue<br />`{ h: 180 }`                                          |
-| __alphaInputStart__      | alpha adjustment has begun.<br />This is only emitted when pointerdown over the alpha slider is registered.<br />This will _not_ emit when alpha is changed from text inputs                  | current state of alpha<br />`{ a: 0.5 }`                                        |
-| __alphaInputEnd__        | alpha adjustment has ended.<br />This is only emitted when pointerup of the alpha slider is registered.<br />This will _not_ emit when alpha is changed from text inputs                      | current state of alpha<br />`{ a: 0.5 }`                                        |
-| __alphaInput__           | alpha is being adjusted.<br />This will emit every time alpha is changed, including text inputs                                                                                               | current state of alpha<br />`{ a: 0.5 }`                                        |
-| __change__               | the color has changed by user interaction.<br />This will emit every time _any_ parameter is changed. <br />This _will_ emit when color is changed from text inputs as well, on blur          | current state of all color components<br />`{ h: 180, s: 0.5, v: 0.5, a: 0.5 }` |
+Generally you don't need to rely on events to retrieve color data from this component. Instead, you should use [v-model](#v-model) two-way binding.
+
+But if you want to setup some additional hooks, the component emits following events:
+
+| event | description | payload |
+|---|---|---|
+| __pickStart__ | color picking process is initiated, popup is opening |  |
+| __pickEnd__ | color picking process is finished, popup will close now |  |
+| __mounted__ | lifecycle hook, emitted from root component's mounted() |  |
+| __beforeUnmount__ | lifecycle hook, emitted from root component's beforeUnmount() |  |
+| __saturationInputStart__ | saturation-brightness adjustment has begun. This is only emitted when pointerdown inside saturation-brightness area is registered. This will _not_ emit when text inputs are edited | current state of saturation & value (hsv) `{ s: 0.5, v: 0.5 }` |
+| __saturationInputEnd__ | saturation-brightness adjustment has ended. This is only emitted when pointerup of the saturation-brightness area is registered. This will _not_ emit when text inputs are edited | current state of saturation & value (hsv) `{ s: 0.5, v: 0.5 }` |
+| __saturationInput__ | saturation-brightness is being adjusted. This will emit every time saturation-brightness is changed, including text inputs | current state of saturation & value (hsv) `{ s: 0.5, v: 0.5 }` |
+| __hueInputStart__ | hue adjustment has begun. This is only emitted when pointerdown over the hue slider is registered. This will _not_ emit when hue is changed from text inputs | current state of hue `{ h: 180 }` |
+| __hueInputEnd__ | hue adjustment has ended. This is only emitted when pointerup of the hue slider is registered. This will _not_ emit when hue is changed from text inputs | current state of hue `{ h: 180 }` |
+| __hueInput__ | hue is being adjusted. This will emit every time hue is changed, including text inputs | current state of hue `{ h: 180 }` |
+| __alphaInputStart__ | alpha adjustment has begun. This is only emitted when pointerdown over the alpha slider is registered. This will _not_ emit when alpha is changed from text inputs | current state of alpha `{ a: 0.5 }` |
+| __alphaInputEnd__ | alpha adjustment has ended. This is only emitted when pointerup of the alpha slider is registered. This will _not_ emit when alpha is changed from text inputs | current state of alpha `{ a: 0.5 }` |
+| __alphaInput__ | alpha is being adjusted. This will emit every time alpha is changed, including text inputs | current state of alpha `{ a: 0.5 }` |
+| __change__ | the color has changed by user interaction. This will emit every time _any_ parameter is changed.  This _will_ emit when color is changed from text inputs as well, on blur | current state of all color components `{ h: 180, s: 0.5, v: 0.5, a: 0.5 }` |
 
 ## Example
 
 ```xml
-<color-input v-model="color" @mounted="colorInputMountedHandler" @pickStart="colorPickerShowHandler" />
+<ColorInput
+    v-model="color"
+    @mounted="colorInputMountedHandler"
+    @pickStart="colorPickerShowHandler"
+/>
 ```
 
 
-# $refs & methods
+# Exposed methods and properties
 
-You shouldn't _need_ to manually access instance elements or methods, but if you feel like it, you can.  
+You shouldn't _need_ to manually access instance methods and properties, but if you feel like it, you can.  
 This can be done by specifying a `ref` property on the instance.
 
-The following section implies you have a vue-color-input instance with a `ref` property set to `"colorInput"`:
+The following section implies you have a vue-color-input instance with a `ref` variable named `colorInput` in a script setup context:
 ```xml
-<color-input v-model="color" ref="colorInput" />
+<ColorInput v-model="color" ref="colorInput" />
+```
+```javascript
+const colorInput = ref()
 ```
 
-## Instances
+## Exposed methods
 
 ```javascript
-const colorInput = this.$refs.colorInput // root instance
-const picker = colorInput.$refs.picker // popup color picker instance
+colorInput.value.pickStart() // begin color selection (show popup)
+colorInput.value.pickEnd() // end color selection (hide popup)
 ```
 
-## Elements
+## Exposed properties
 
 ```javascript
-colorInput.$refs.root // root element
-colorInput.$refs.box // box root element
-picker.$refs.rootPicker // color picker root element
-```
-
-## Methods
-
-```javascript
-colorInput.pickStart() // begin color selection (show popup)
-colorInput.pickEnd() // end color selection (hide popup)
-```
-
-## `color` property
-
-```javascript
-colorInput.color // tinycolor instance
+colorInput.value.color // tinycolor instance
+colorInput.value.active // boolean - is the picker currently active
 ```
 
 

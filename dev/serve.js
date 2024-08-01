@@ -1,7 +1,8 @@
 import { createApp } from 'vue';
 import Dev from './serve.vue';
+import DevSetup from './serve-setup.vue';
 
-const app = createApp(Dev);
+const app = createApp(DevSetup);
 app.config.unwrapInjectedRef = true;
 app.mount('#app');
 

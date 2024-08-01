@@ -1,20 +1,22 @@
 <template>
-  <div class="color-input user" ref="root" :style="cssVars">
     <div
-      :class="['box', { active, disabled }]"
+      :class="[$attrs.class, bem('box', { disabled, active })]"
       @click.stop="pickStart"
-      ref="box"
+      ref="root"
     >
-      <div class="inner transparent">
-        <div class="color" :style="boxColorStyles"></div>
+      <div
+	:class="bem('box-inner', { active })"
+	:style="transparentPatternBg"
+      >
+        <div :class="bem('box-color')" :style="boxColorStyles"></div>
       </div>
     </div>
 
-    <Teleport :to="parent" v-if="parent">
+    <Teleport to="body">
       <transition :name="transition">
         <color-picker
-          class="picker-popup user"
-          :color="this.color"
+	  :class="$attrs.class"
+          :color="color"
           :position="processedPosition"
           :disable-alpha="processedDisableAlpha"
           :boxRect="boxRect"
@@ -37,7 +39,6 @@
         />
       </transition>
     </Teleport>
-  </div>
 </template>
 
 <script>
@@ -45,6 +46,7 @@ import { defineComponent } from "vue";
 import ColorPicker from "./components/color-picker.vue";
 
 import tinycolor from "tinycolor2";
+import { bem } from './bem'
 
 import transparentPattern from "./assets/transparent-pattern.svg";
 
@@ -56,8 +58,9 @@ const isSameNodeRecursive = (elA, elB) => {
   return false;
 };
 
-export default /*#__PURE__*/ defineComponent({
+export default defineComponent({
   name: "ColorInput",
+  expose: ['pickStart', 'pickEnd', 'color', 'active'],
   props: {
     modelValue: [String, Object],
     position: {
@@ -66,7 +69,7 @@ export default /*#__PURE__*/ defineComponent({
     },
     transition: {
       type: String,
-      default: "picker-popup",
+      default: 'color-input__popup-',
     },
     disableAlpha: {
       type: Boolean,
@@ -81,7 +84,6 @@ export default /*#__PURE__*/ defineComponent({
       default: false,
     },
     format: String,
-    appendTo: [String, HTMLElement],
   },
   emits: [
     "mounted",
@@ -108,7 +110,6 @@ export default /*#__PURE__*/ defineComponent({
       active: false,
       ready: false,
       hidePicker: false,
-      parent: null,
       boxRect: {},
       innerBoxRect: {},
       textInputsFormat: "rgb",
@@ -117,6 +118,9 @@ export default /*#__PURE__*/ defineComponent({
     };
   },
   computed: {
+    transparentPatternBg() {
+	    return { backgroundImage: `url(${transparentPattern})` }
+    },
     boxColorStyles() {
       return {
         background: this.color.toRgbString(),
@@ -152,6 +156,13 @@ export default /*#__PURE__*/ defineComponent({
       position = position.split(" ");
       position[1] = position[1] || "center";
 
+      // reorder [Y, X]
+      if (
+        ['top','bottom'].includes(position[0]) ||
+        ['right', 'left'].includes(position[1])
+      )
+        return position; // already correct order
+      position.reverse();
       return position;
     },
     processedFormat() {
@@ -212,6 +223,7 @@ export default /*#__PURE__*/ defineComponent({
     },
   },
   methods: {
+    bem,
     pickStart(e) {
       if (this.active || this.disabled) return;
       this.getBoxRect();
@@ -222,7 +234,8 @@ export default /*#__PURE__*/ defineComponent({
       this.hidePicker = true;
       this.$refs.picker.init();
 
-      document.body.addEventListener("pointerdown", this.pickEnd);
+      document.addEventListener("pointerdown", this.pickEnd);
+      window.addEventListener('resize', this.getBoxRect);
       this.$emit("pickStart");
     },
     pickEnd(e) {
@@ -231,7 +244,8 @@ export default /*#__PURE__*/ defineComponent({
         (e && isSameNodeRecursive(e.target, this.$refs.picker.$refs.pickerRoot))
       )
         return;
-      document.body.removeEventListener("pointerdown", this.pickEnd);
+      document.removeEventListener("pointerdown", this.pickEnd);
+      window.removeEventListener('resize', this.getBoxRect)
       this.active = false;
       this.$emit("pickEnd");
     },
@@ -280,30 +294,14 @@ export default /*#__PURE__*/ defineComponent({
       }
       this.$emit("update:modelValue", this.output);
     },
-    getParent() {
-      let parent;
-      if (this.appendTo) {
-        if (typeof this.appendTo === "string") {
-          parent = document.querySelector(this.appendTo);
-        } else {
-          parent = this.appendTo;
-        }
-      }
-
-      this.parent = parent || this.$refs.root;
-    },
     getBoxRect() {
-      this.boxRect = this.parent.getBoundingClientRect();
+      this.boxRect = this.$refs.root.getBoundingClientRect();
     },
   },
   created() {
     this.init();
-    this.cssVars = {
-      "--transparent-pattern": "url(" + transparentPattern + ")",
-    };
   },
   mounted() {
-    this.getParent();
     this.$emit("mounted");
   },
   beforeUnmount() {
@@ -363,58 +361,35 @@ export default /*#__PURE__*/ defineComponent({
   position: relative;
   display: inline-block;
 
-  .box {
+  &__box {
     width: 40px;
     height: 40px;
     cursor: pointer;
     border-radius: 20%;
     overflow: hidden;
-    transition: all 0.2s, background-color 0.05s 0.15s;
-    .inner {
+    transition: background-color 0.05s 0.15s;
+    &-inner {
       border-radius: inherit;
       overflow: hidden;
-      transition: inherit;
-    }
-    .transparent {
+      transition: transform .2s;
       @extend %fill-100;
-      background-image: var(--transparent-pattern);
       background-color: #fff;
       background-size: 100%;
-    }
-    .color {
-      @extend %fill-100;
-    }
-    &.active {
-      background: #fbfbfb;
-      transition: all 0.2s, background-color 0.05s;
-      .inner {
+      &--active {
         transform: scale(0.9);
       }
     }
-    &.disabled {
+    &-color {
+      @extend %fill-100;
+    }
+    &--active {
+      background: #fbfbfb;
+      transition: all 0.2s, background-color 0.05s;
+    }
+    &--disabled {
       cursor: not-allowed;
     }
   }
 }
-.picker-popup {
-  position: absolute;
-  z-index: 9999;
-  width: auto;
-  min-width: 280px;
-  background-color: #fbfbfb;
-  box-shadow: 0px 5px 10px rgba(15, 15, 15, 0.4);
-  margin: 10px;
-  user-select: none;
-  color: #0f0f0f;
-}
 
-.picker-popup-enter-from,
-.picker-popup-leave-to {
-  transform: translateY(-10px);
-  opacity: 0;
-}
-.picker-popup-enter-active,
-.picker-popup-leave-active {
-  transition: transform 0.3s, opacity 0.3s;
-}
 </style>
