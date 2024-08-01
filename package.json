@@ -1,7 +1,7 @@
 {
   "name": "vue-color-input",
   "type": "module",
-  "version": "1.0.9",
+  "version": "2.0.0",
   "description": "Slick and perfomant vue 3 color picker component whose goal is to replace <input type=color>",
   "keywords": [
     "vue",
@@ -21,11 +21,11 @@
   "sideEffects": [
     "**/*.css"
   ],
-  "main": "./dist/color-input.umd.js",
-  "module": "./dist/color-input.mjs",
+  "main": "./dist/color-input.umd.cjs",
+  "module": "./dist/color-input.js",
   "exports": {
     ".": {
-      "import": "./dist/color-input.mjs",
+      "import": "./dist/color-input.js",
       "require": "./dist/color-input.umd.cjs"
     }
   },
