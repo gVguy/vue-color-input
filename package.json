@@ -34,8 +34,7 @@
     "build": "vite build",
     "build:demo": "vite build --config vite.config-demo.js",
     "publish:demo": "gh-pages -d demo",
-    "prepublishOnly": "npm run build",
-    "prepublish:demo": "npm run build:demo"
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "tinycolor2": "^1.4.2"
